@@ -1,0 +1,852 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#14161c">
+<title>英文拔河 Tug of War</title>
+<style>
+:root{
+  --bg:#14161c; --panel:#1e2129; --panel2:#272b35; --line:#353a47;
+  --text:#f3f4f7; --muted:#9aa1b2;
+  --red:#ef3b3b; --red-d:#a81e1e; --red-l:#ff8a8a;
+  --blue:#2f7cf6; --blue-d:#1747a8; --blue-l:#8ab6ff;
+  --gold:#ffc83d; --green:#2fcf7a; --rope:#c9954f; --rope-d:#8a6230;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif}
+button{font:inherit;color:inherit;border:0;cursor:pointer}
+input,select,textarea{font:inherit}
+.hidden{display:none!important}
+.screen{min-height:100%;display:flex;flex-direction:column}
+
+/* ---------- Landing ---------- */
+#landing{align-items:center;justify-content:center;padding:24px;gap:28px;text-align:center}
+.logo{font-size:clamp(40px,9vw,84px);font-weight:900;letter-spacing:-.02em;line-height:1}
+.logo .r{color:var(--red)} .logo .b{color:var(--blue)}
+.sub{color:var(--muted);font-size:18px}
+.bigbtns{display:flex;flex-direction:column;gap:14px;width:min(420px,100%)}
+.btn{padding:18px 22px;border-radius:16px;font-size:20px;font-weight:800;background:var(--panel2)}
+.btn.primary{background:var(--gold);color:#241a00}
+.btn.red{background:var(--red);color:#fff}
+.btn.blue{background:var(--blue);color:#fff}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:default}
+.field{width:100%;padding:16px 18px;border-radius:14px;border:2px solid var(--line);background:var(--panel);color:var(--text);font-size:22px;text-align:center}
+.field:focus{outline:none;border-color:var(--gold)}
+
+/* ---------- HOST ---------- */
+#host{height:100vh;overflow:hidden}
+.hbar{display:flex;align-items:center;gap:20px;padding:14px 28px;border-bottom:1px solid var(--line);background:#101217}
+.hbar .t{font-weight:900;font-size:24px}
+.hbar .code{margin-left:auto;font-size:20px;color:var(--muted)}
+.hbar .code b{color:var(--gold);font-size:30px;letter-spacing:.12em;margin-left:6px}
+.hbar .net{font-size:14px;color:var(--muted)}
+.hbar .net.off{color:var(--red-l)}
+
+/* lobby */
+#lobby{flex:1;display:grid;grid-template-columns:1fr minmax(340px,400px) 1fr;gap:18px;padding:16px 24px;min-height:0}
+.team{border-radius:22px;padding:18px;display:flex;flex-direction:column;min-height:0}
+.team.red{background:linear-gradient(180deg,rgba(239,59,59,.22),rgba(239,59,59,.06));border:2px solid rgba(239,59,59,.5)}
+.team.blue{background:linear-gradient(180deg,rgba(47,124,246,.22),rgba(47,124,246,.06));border:2px solid rgba(47,124,246,.5)}
+.team h2{margin:0 0 12px;font-size:30px;display:flex;align-items:baseline;gap:10px}
+.team h2 .n{font-size:20px;color:var(--muted);font-weight:600}
+.names{display:flex;flex-wrap:wrap;gap:10px;align-content:flex-start;overflow:auto}
+.chip{padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.1);font-size:20px;font-weight:700;display:flex;align-items:center;gap:8px;animation:pop .35s}
+.chip.off{opacity:.45}
+.chip .sw{font-size:13px;padding:3px 8px;border-radius:99px;background:rgba(0,0,0,.35);color:var(--muted)}
+.chip .x{font-size:13px;padding:3px 7px;border-radius:99px;background:rgba(0,0,0,.35);color:var(--muted)}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:none;opacity:1}}
+.center{display:flex;flex-direction:column;gap:10px;min-height:0;overflow:auto}
+.card{background:var(--panel);border-radius:20px;padding:14px;border:1px solid var(--line)}
+.join{text-align:center}
+.join .qr{background:#fff;border-radius:14px;padding:10px;display:inline-block;line-height:0}
+.join .qr img,.join .qr canvas{width:min(220px,25vh);height:min(220px,25vh);image-rendering:pixelated;display:block}
+.join .url{font-size:15px;color:var(--muted);margin-top:2px;word-break:break-all}
+.join .big{font-size:20px;margin-top:4px}
+.join .big b{font-size:38px;color:var(--gold);letter-spacing:.15em}
+.set{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;font-size:16px}
+.set label{color:var(--muted)}
+.set select{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-size:16px}
+.linkbtn{background:none;color:var(--blue-l);font-size:14px;padding:0;text-decoration:underline}
+.startbtn{font-size:26px;padding:16px;flex:none}
+.hint{font-size:14px;color:var(--muted);text-align:center}
+
+/* arena */
+#arena{flex:1;display:flex;flex-direction:column;min-height:0;position:relative}
+.scorebar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:18px 36px 0}
+.tside{display:flex;align-items:baseline;gap:14px}
+.tside.r{justify-content:flex-start} .tside.b{justify-content:flex-end}
+.tside .nm{font-size:34px;font-weight:900}
+.tside.r .nm{color:var(--red)} .tside.b .nm{color:var(--blue)}
+.tside .pw{font-size:20px;color:var(--muted)}
+.tside .pw b{font-size:38px;color:var(--text)}
+.timer{font-size:72px;font-weight:900;font-variant-numeric:tabular-nums;min-width:200px;text-align:center}
+.timer.warn{color:var(--gold);animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.08)}}
+.field-wrap{flex:1;position:relative;min-height:0;overflow:hidden}
+.ground{position:absolute;inset:0;background:
+  linear-gradient(90deg,rgba(239,59,59,.18),transparent 30%,transparent 70%,rgba(47,124,246,.18)),
+  repeating-linear-gradient(90deg,transparent 0 79px,rgba(255,255,255,.03) 79px 80px)}
+.zone{position:absolute;top:8%;bottom:8%;width:6px;border-radius:3px}
+.zone.l{left:calc(50% - var(--win) )} .zone.r{left:calc(50% + var(--win) - 6px)}
+.zone.l{background:var(--red)} .zone.r{background:var(--blue)}
+.zone span{position:absolute;top:-28px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:14px;font-weight:800;color:var(--muted)}
+.midline{position:absolute;left:50%;top:4%;bottom:4%;width:4px;margin-left:-2px;background:repeating-linear-gradient(180deg,#fff 0 14px,transparent 14px 26px);opacity:.5}
+.ropeLayer{position:absolute;left:0;right:0;top:50%;height:0;transition:transform .35s cubic-bezier(.3,1.4,.5,1)}
+.rope{position:absolute;left:4%;right:4%;top:-9px;height:18px;border-radius:9px;
+  background:repeating-linear-gradient(135deg,var(--rope) 0 10px,var(--rope-d) 10px 14px);box-shadow:0 4px 0 rgba(0,0,0,.35)}
+.flag{position:absolute;left:50%;top:-9px;transform:translateX(-50%);width:0;height:0}
+.flag:before{content:"";position:absolute;left:-3px;top:-70px;width:6px;height:88px;background:#ddd;border-radius:3px}
+.flag:after{content:"";position:absolute;left:3px;top:-70px;width:0;height:0;border-top:22px solid transparent;border-bottom:22px solid transparent;border-left:44px solid var(--gold)}
+.crew{position:absolute;top:-80px;display:flex;gap:4px}
+.crew.r{left:12%} .crew.b{right:12%;flex-direction:row-reverse}
+.guy{width:46px;height:110px;position:relative}
+.guy svg{width:100%;height:100%;overflow:visible}
+.crew.r .guy svg{transform:rotate(-14deg);transform-origin:50% 100%}
+.crew.b .guy svg{transform:scaleX(-1) rotate(-14deg);transform-origin:50% 100%}
+.ropeLayer.tug .guy svg{animation:heave .3s}
+@keyframes heave{50%{translate:0 4px}}
+.feed{position:absolute;top:6px;bottom:56%;width:34%;pointer-events:none;overflow:hidden}
+.feed.r{left:24px} .feed.b{right:24px}
+.fx{position:absolute;bottom:20px;font-size:26px;font-weight:900;padding:6px 14px;border-radius:999px;animation:rise 1.8s ease-out forwards;white-space:nowrap}
+.feed.r .fx{left:0;background:rgba(239,59,59,.9)} .feed.b .fx{right:0;background:rgba(47,124,246,.9)}
+@keyframes rise{0%{transform:translateY(0) scale(.6);opacity:0}12%{transform:translateY(-14px) scale(1.05);opacity:1}100%{transform:translateY(-180px) scale(1);opacity:0}}
+.countdown{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:260px;font-weight:900;background:rgba(10,11,14,.7);z-index:5}
+.countdown span{animation:cd 1s}
+@keyframes cd{0%{transform:scale(2);opacity:0}30%{transform:scale(1);opacity:1}}
+.hfoot{display:flex;justify-content:center;gap:12px;padding:12px}
+.hfoot .btn{font-size:16px;padding:10px 18px}
+
+/* result */
+#result{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;background:rgba(10,11,14,.82)}
+.rbox{text-align:center;padding:30px 40px;max-width:1100px;width:92%}
+.rbox .win{font-size:96px;font-weight:900;line-height:1.05;animation:pop .5s}
+.rbox .win.r{color:var(--red)} .rbox .win.b{color:var(--blue)} .rbox .win.t{color:var(--gold)}
+.rbox .why{color:var(--muted);font-size:22px;margin:8px 0 26px}
+.mvps{display:grid;grid-template-columns:1fr 1fr;gap:24px;text-align:left}
+.mvps .card h3{margin:0 0 10px;font-size:24px}
+.mvps ol{margin:0;padding-left:28px;font-size:24px;line-height:1.6}
+.mvps li b{float:right;color:var(--gold)}
+.rbtns{display:flex;justify-content:center;gap:14px;margin-top:26px}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
+.modal .card{width:min(640px,100%);display:flex;flex-direction:column;gap:12px}
+.modal textarea{width:100%;height:300px;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:16px;line-height:1.5}
+.modal .row{display:flex;gap:10px;justify-content:flex-end}
+.modal .btn{font-size:16px;padding:12px 18px}
+
+/* ---------- PLAYER ---------- */
+#player{min-height:100%;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+#player.red{--tc:var(--red);--tcd:var(--red-d);--tcl:var(--red-l)}
+#player.blue{--tc:var(--blue);--tcd:var(--blue-d);--tcl:var(--blue-l)}
+.pbar{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--tc,var(--panel2));font-weight:800;font-size:18px}
+.pbar .me{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pbar .sc{background:rgba(0,0,0,.25);padding:4px 12px;border-radius:99px}
+.pbody{flex:1;display:flex;flex-direction:column;padding:16px;gap:14px}
+.pjoin{gap:14px;justify-content:center;max-width:460px;margin:0 auto;width:100%}
+.pjoin h1{margin:0;text-align:center;font-size:32px}
+.teampick{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.teampick .btn{padding:26px 10px;font-size:24px;border:4px solid transparent;opacity:.55}
+.teampick .btn.sel{opacity:1;border-color:#fff}
+.err{color:var(--red-l);text-align:center;min-height:1.2em}
+.wait{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px}
+.wait .big{font-size:30px;font-weight:900}
+.wait .tbadge{font-size:64px;font-weight:900;color:var(--tc)}
+.mini{height:18px;border-radius:9px;background:linear-gradient(90deg,var(--red) 50%,var(--blue) 50%);position:relative;opacity:.9}
+.mini .k{position:absolute;top:-5px;width:8px;height:28px;margin-left:-4px;border-radius:4px;background:var(--gold);left:50%;transition:left .3s;box-shadow:0 0 0 2px #000}
+.ptimer{display:flex;justify-content:space-between;color:var(--muted);font-size:15px}
+.ptimer b{color:var(--text);font-variant-numeric:tabular-nums}
+.qcard{background:var(--panel);border-radius:20px;padding:22px 16px;text-align:center;border:2px solid var(--line);position:relative;min-height:150px;display:flex;flex-direction:column;justify-content:center;gap:6px}
+.qcard .ask{font-size:15px;color:var(--muted)}
+.qcard .q{font-size:clamp(30px,10vw,48px);font-weight:900;line-height:1.15;word-break:break-word}
+.qcard .q.zh{font-size:clamp(28px,9vw,42px)}
+.say{position:absolute;right:10px;top:10px;width:46px;height:46px;border-radius:50%;background:var(--panel2);font-size:22px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1;max-height:340px}
+.opt{border-radius:18px;background:var(--panel2);font-size:clamp(18px,5.6vw,26px);font-weight:800;padding:12px 8px;min-height:84px;border-bottom:5px solid rgba(0,0,0,.4);word-break:break-word;line-height:1.2}
+.opt:active{transform:translateY(3px);border-bottom-width:2px}
+.opt.ok{background:var(--green);color:#002812}
+.opt.no{background:#5a2a2a;color:#ffb3b3;animation:shake .35s}
+.opt.ans{outline:4px solid var(--green)}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.flash{position:fixed;inset:0;pointer-events:none;z-index:9;opacity:0}
+.flash.ok{animation:fl .4s;background:radial-gradient(circle,rgba(47,207,122,.0),rgba(47,207,122,.45))}
+@keyframes fl{0%{opacity:1}100%{opacity:0}}
+.lock{position:absolute;inset:0;border-radius:18px;background:rgba(20,22,28,.6);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--red-l)}
+.qwrap{position:relative;display:flex;flex-direction:column;gap:12px;flex:1}
+.pcount{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:160px;font-weight:900;background:var(--bg);z-index:8}
+.pend .tbadge{font-size:44px}
+@media (max-width:900px){
+  #lobby{grid-template-columns:1fr;overflow:auto}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ LANDING ============ -->
+<section id="landing" class="screen hidden">
+  <div class="logo"><span class="r">TUG</span> of <span class="b">WAR</span></div>
+  <div class="sub">英文單字拔河大賽</div>
+  <div class="bigbtns">
+    <input id="lCode" class="field" inputmode="numeric" maxlength="4" placeholder="輸入 4 位數房號">
+    <button class="btn primary" id="lJoin">我是學生，加入比賽</button>
+    <button class="btn" id="lHost">我是老師，開新房間</button>
+  </div>
+</section>
+
+<!-- ============ HOST ============ -->
+<section id="host" class="screen hidden">
+  <div class="hbar">
+    <div class="t">🏆 英文拔河</div>
+    <div class="net" id="hNet">連線中…</div>
+    <div class="code">房號<b id="hCode">----</b></div>
+  </div>
+
+  <div id="lobby">
+    <div class="team red"><h2>紅隊 <span class="n" id="rN">0 人</span></h2><div class="names" id="rNames"></div></div>
+    <div class="center">
+      <div class="card join">
+        <div class="qr" id="qr"></div>
+        <div class="big">房號 <b id="hCode2">----</b></div>
+        <div class="url" id="joinUrl"></div>
+      </div>
+      <div class="card set">
+        <label>單字</label>
+        <div><select id="sSet"></select> <button class="linkbtn" id="editWords">自訂單字</button></div>
+        <label>題型</label>
+        <select id="sMode"><option value="mix">英中混合</option><option value="en2zh">看英文選中文</option><option value="zh2en">看中文選英文</option></select>
+        <label>時間</label>
+        <select id="sTime"><option value="60">60 秒</option><option value="90" selected>90 秒</option><option value="120">2 分鐘</option><option value="180">3 分鐘</option></select>
+        <label>繩子長度</label>
+        <select id="sMargin"><option value="4">短（很快分勝負）</option><option value="6" selected>標準</option><option value="9">長（拉鋸戰）</option></select>
+      </div>
+      <button class="btn primary startbtn" id="startBtn" disabled>開始比賽！</button>
+      <div class="hint" id="startHint">兩隊都至少要有 1 人才能開始。點名字旁的「換隊」可以調整隊伍。</div>
+    </div>
+    <div class="team blue"><h2>藍隊 <span class="n" id="bN">0 人</span></h2><div class="names" id="bNames"></div></div>
+  </div>
+
+  <div id="arena" class="hidden">
+    <div class="scorebar">
+      <div class="tside r"><span class="nm">紅隊</span><span class="pw"><b id="rTot">0</b> 題 · <span id="rCnt">0</span> 人</span></div>
+      <div class="timer" id="timer">0:00</div>
+      <div class="tside b"><span class="pw"><span id="bCnt">0</span> 人 · <b id="bTot">0</b> 題</span><span class="nm">藍隊</span></div>
+    </div>
+    <div class="field-wrap" id="fieldWrap">
+      <div class="ground"></div>
+      <div class="midline"></div>
+      <div class="zone l"><span>紅隊勝利線</span></div>
+      <div class="zone r"><span>藍隊勝利線</span></div>
+      <div class="ropeLayer" id="ropeLayer">
+        <div class="rope"></div>
+        <div class="crew r" id="crewR"></div>
+        <div class="crew b" id="crewB"></div>
+        <div class="flag"></div>
+      </div>
+      <div class="feed r" id="feedR"></div>
+      <div class="feed b" id="feedB"></div>
+      <div class="countdown hidden" id="hCount"><span>3</span></div>
+    </div>
+    <div class="hfoot"><button class="btn" id="stopBtn">提前結束</button></div>
+    <div id="result" class="hidden">
+      <div class="rbox">
+        <div class="win" id="winTxt">紅隊獲勝！</div>
+        <div class="why" id="whyTxt"></div>
+        <div class="mvps">
+          <div class="card"><h3 style="color:var(--red)">紅隊 MVP</h3><ol id="mvpR"></ol></div>
+          <div class="card"><h3 style="color:var(--blue)">藍隊 MVP</h3><ol id="mvpB"></ol></div>
+        </div>
+        <div class="rbtns">
+          <button class="btn primary" id="againBtn">再來一局（同樣隊伍）</button>
+          <button class="btn" id="lobbyBtn">回到大廳換隊</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="wordModal">
+    <div class="card">
+      <h3 style="margin:0">自訂單字</h3>
+      <div class="hint" style="text-align:left">每行一個：英文 + 中文，例如 <code>coach 教練</code>。至少 4 個字。會存在這台電腦，下次還在。</div>
+      <textarea id="wordText" placeholder="coach 教練&#10;referee 裁判&#10;warm up 暖身"></textarea>
+      <div class="err" id="wordErr"></div>
+      <div class="row"><button class="btn" id="wordCancel">取消</button><button class="btn primary" id="wordSave">儲存並使用</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PLAYER ============ -->
+<section id="player" class="screen hidden">
+  <div class="pbar"><span class="me" id="pMe">英文拔河</span><span class="sc hidden" id="pSc"></span></div>
+
+  <div class="pbody pjoin" id="pJoin">
+    <h1>加入比賽</h1>
+    <div style="text-align:center;color:var(--muted)">房號 <b id="pCodeLbl" style="color:var(--gold);font-size:22px"></b></div>
+    <input id="pName" class="field" maxlength="8" placeholder="你的名字（最多 8 字）" autocomplete="off">
+    <div class="teampick">
+      <button class="btn red" data-team="red">紅隊</button>
+      <button class="btn blue" data-team="blue">藍隊</button>
+    </div>
+    <button class="btn primary" id="pGo" disabled>加入！</button>
+    <div class="err" id="pErr"></div>
+  </div>
+
+  <div class="pbody hidden" id="pWait">
+    <div class="wait">
+      <div>你在</div>
+      <div class="tbadge" id="pTeamBig">紅隊</div>
+      <div class="big">等老師按開始…</div>
+      <div style="color:var(--muted)">手機不要關螢幕喔！</div>
+    </div>
+  </div>
+
+  <div class="pbody hidden" id="pPlay">
+    <div class="mini"><div class="k" id="pKnot"></div></div>
+    <div class="ptimer"><span>剩下 <b id="pTime">--</b> 秒</span><span>答對就幫隊伍拉一下！</span></div>
+    <div class="qwrap">
+      <div class="qcard">
+        <div class="ask" id="pAsk">選出正確的意思</div>
+        <div class="q" id="pQ">—</div>
+        <button class="say hidden" id="pSay" aria-label="發音">🔊</button>
+      </div>
+      <div class="opts" id="pOpts"></div>
+      <div class="lock hidden" id="pLock">再想一下…</div>
+    </div>
+  </div>
+
+  <div class="pbody hidden pend" id="pEnd">
+    <div class="wait">
+      <div class="tbadge" id="pWin">紅隊獲勝！</div>
+      <div class="big">你答對 <span id="pMine" style="color:var(--gold)">0</span> 題</div>
+      <div style="color:var(--muted)">等老師開下一局…</div>
+    </div>
+  </div>
+
+  <div class="pcount hidden" id="pCount">3</div>
+  <div class="flash" id="pFlash"></div>
+</section>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+"use strict";
+/* ================== CONFIG ================== */
+firebase.initializeApp({
+  projectId: "fun-english-abd9b",
+  databaseURL: "https://fun-english-abd9b-default-rtdb.asia-southeast1.firebasedatabase.app"
+});
+const db = firebase.database();
+let serverOffset = 0;
+db.ref(".info/serverTimeOffset").on("value", s => { serverOffset = s.val() || 0; });
+const now = () => Date.now() + serverOffset;
+
+/* ================== WORD SETS ================== */
+const SETS = {
+  sports: { name: "運動單字", words: `coach 教練
+referee 裁判
+athlete 運動員
+team 隊伍
+player 選手
+captain 隊長
+teammate 隊友
+opponent 對手
+fan 球迷
+champion 冠軍
+medal 獎牌
+trophy 獎盃
+score 得分
+win 贏
+lose 輸
+match 比賽
+race 賽跑
+tournament 錦標賽
+practice 練習
+train 訓練
+warm up 暖身
+stretch 伸展
+sprint 衝刺
+jump 跳
+throw 丟；投擲
+catch 接住
+kick 踢
+swim 游泳
+injury 受傷
+muscle 肌肉
+sweat 汗水
+stamina 耐力
+strength 力量
+speed 速度
+whistle 哨子
+goal 球門；目標
+foul 犯規
+defense 防守
+gym 體育館
+stadium 體育場
+record 紀錄
+tie 平手` },
+  school: { name: "校園生活", words: `teacher 老師
+classmate 同學
+classroom 教室
+homework 回家作業
+exam 考試
+grade 成績
+notebook 筆記本
+eraser 橡皮擦
+ruler 尺
+desk 書桌
+library 圖書館
+lunch 午餐
+break 下課休息
+uniform 制服
+bag 書包
+question 問題
+answer 答案
+listen 聽
+speak 說
+read 閱讀
+write 寫
+remember 記得
+forget 忘記
+late 遲到的
+early 早的
+tired 累的
+hungry 餓的
+happy 開心的
+nervous 緊張的
+proud 驕傲的
+friend 朋友
+weekend 週末
+holiday 假日
+schedule 時間表
+subject 科目
+history 歷史
+science 科學
+math 數學` }
+};
+function parseWords(text){
+  const out=[]; const seenEn=new Set(), seenZh=new Set();
+  for (let line of String(text||"").split(/\r?\n/)){
+    line=line.trim(); if(!line) continue;
+    let en, zh;
+    let m = line.match(/^(.+?)\s*[\t,，=:：]\s*(.+)$/);
+    if (m && /[A-Za-z]/.test(m[1]) && !/[A-Za-z]/.test(m[2].replace(/[；;（）()]/g,""))) { en=m[1]; zh=m[2]; }
+    else { m = line.match(/^([A-Za-z][A-Za-z\s'’.\-\/]*?)\s*([^A-Za-z].*)$/); if(m){ en=m[1]; zh=m[2]; } }
+    if(!en||!zh) continue;
+    en=en.trim().replace(/\s+/g," "); zh=zh.trim().replace(/^[\-–—:：,，\s]+/,"");
+    if(!en||!zh) continue;
+    const k=en.toLowerCase(); if(seenEn.has(k)||seenZh.has(zh)) continue;
+    seenEn.add(k); seenZh.add(zh); out.push([en,zh]);
+  }
+  return out;
+}
+
+/* ================== UTILS ================== */
+const $ = id => document.getElementById(id);
+const show = (el,on=true) => el.classList.toggle("hidden",!on);
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+};
+const rand = n => Math.floor(Math.random()*n);
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=rand(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+let actx=null;
+function beep(freq=660,dur=.12,type="sine",vol=.2,when=0){
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    const t=actx.currentTime+when, o=actx.createOscillator(), g=actx.createGain();
+    o.type=type; o.frequency.setValueAtTime(freq,t);
+    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.001,t+dur);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t+dur+.02);
+  }catch(e){}
+}
+function fanfare(){ [523,659,784,1047].forEach((f,i)=>beep(f,.3,"triangle",.25,i*.14)); beep(1047,.7,"triangle",.25,.6); }
+function speak(text){
+  try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang="en-US"; u.rate=.85; speechSynthesis.speak(u);}catch(e){}
+}
+const params = new URLSearchParams(location.search);
+const baseUrl = location.origin + location.pathname;
+
+/* ================== ROUTER ================== */
+function boot(){
+  const r = (params.get("r")||"").replace(/\D/g,"");
+  if (params.has("host")) return Host.start(params.get("host"));
+  if (r.length===4) return Player.start(r);
+  show($("landing"));
+  $("lCode").addEventListener("input",e=>{ e.target.value=e.target.value.replace(/\D/g,"").slice(0,4); });
+  $("lJoin").onclick=()=>{ const c=$("lCode").value; if(c.length===4) location.href=baseUrl+"?r="+c; else $("lCode").focus(); };
+  $("lHost").onclick=()=>{ location.href=baseUrl+"?host"; };
+}
+
+/* ================== HOST ================== */
+const Host = {
+  code:null, ref:null, meta:{}, players:{}, lastScores:{}, raf:0, lastPosWrite:0, lastPos:null, ended:false, tickSec:-1,
+
+  async start(existing){
+    show($("host"));
+    db.ref(".info/connected").on("value",s=>{ const on=!!s.val(); $("hNet").textContent=on?"● 已連線":"● 連線中斷，重新連線中…"; $("hNet").classList.toggle("off",!on); });
+    this.fillSets();
+    let code = (existing||"").replace(/\D/g,"");
+    if (code.length===4){
+      const snap = await db.ref("rooms/"+code+"/meta").get();
+      if (!snap.exists()) code="";
+    } else code="";
+    if (!code) code = await this.newCode();
+    this.code=code; this.ref=db.ref("rooms/"+code);
+    history.replaceState(null,"",baseUrl+"?host="+code);
+    $("hCode").textContent=code; $("hCode2").textContent=code;
+    const joinUrl = baseUrl+"?r="+code;
+    $("joinUrl").textContent = joinUrl.replace(/^https?:\/\//,"");
+    this.drawQR(joinUrl);
+    this.bindUI();
+    this.ref.child("meta").on("value",s=>{ this.meta=s.val()||{}; this.render(); });
+    this.ref.child("players").on("value",s=>{ this.onPlayers(s.val()||{}); });
+  },
+
+  async newCode(){
+    for (let i=0;i<20;i++){
+      const c = String(1000+rand(9000));
+      const s = await db.ref("rooms/"+c+"/meta").get();
+      const m = s.val();
+      if (!m || (Date.now()-(m.created||0)) > 6*3600e3){
+        await db.ref("rooms/"+c).set({ meta:{ state:"lobby", round:0, created:firebase.database.ServerValue.TIMESTAMP } });
+        return c;
+      }
+    }
+    throw new Error("no code");
+  },
+
+  drawQR(url){
+    const s=document.createElement("script");
+    s.src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js";
+    s.onload=()=>{ const q=qrcode(0,"M"); q.addData(url); q.make(); $("qr").innerHTML=q.createImgTag(8,0); };
+    s.onerror=()=>{ $("qr").innerHTML='<div style="color:#333;padding:20px;line-height:1.4">QR code 載入失敗<br>請學生輸入網址</div>'; };
+    document.head.appendChild(s);
+  },
+
+  fillSets(){
+    const sel=$("sSet"); sel.innerHTML="";
+    for (const k in SETS){ const o=document.createElement("option"); o.value=k; o.textContent=SETS[k].name+"（"+parseWords(SETS[k].words).length+" 字）"; sel.appendChild(o); }
+    const custom=parseWords(store.get("tug.custom")||"");
+    if (custom.length>=4){ const o=document.createElement("option"); o.value="custom"; o.textContent="自訂單字（"+custom.length+" 字）"; sel.appendChild(o); }
+    const saved=store.get("tug.set"); if (saved && [...sel.options].some(o=>o.value===saved)) sel.value=saved;
+    ["sMode","sTime","sMargin"].forEach(id=>{ const v=store.get("tug."+id); if(v && [...$(id).options].some(o=>o.value===v)) $(id).value=v; });
+  },
+
+  bindUI(){
+    $("sSet").onchange=()=>store.set("tug.set",$("sSet").value);
+    ["sMode","sTime","sMargin"].forEach(id=>$(id).onchange=()=>store.set("tug."+id,$(id).value));
+    $("editWords").onclick=()=>{ $("wordText").value=store.get("tug.custom")||""; $("wordErr").textContent=""; show($("wordModal")); $("wordText").focus(); };
+    $("wordCancel").onclick=()=>show($("wordModal"),false);
+    $("wordSave").onclick=()=>{
+      const list=parseWords($("wordText").value);
+      if (list.length<4){ $("wordErr").textContent="讀到 "+list.length+" 個字，至少要 4 個。格式：英文 空格 中文"; return; }
+      store.set("tug.custom",$("wordText").value); store.set("tug.set","custom");
+      this.fillSets(); $("sSet").value="custom"; show($("wordModal"),false);
+    };
+    $("startBtn").onclick=()=>this.startRound();
+    $("stopBtn").onclick=()=>this.finish("time");
+    $("againBtn").onclick=()=>this.startRound();
+    $("lobbyBtn").onclick=()=>this.toLobby();
+    document.addEventListener("click",()=>{ try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); actx.resume(); }catch(e){} },{once:true});
+  },
+
+  onPlayers(p){
+    const prev=this.players; this.players=p;
+    if (this.meta.state==="play" && now()>=this.meta.startAt){
+      for (const id in p){
+        const a=(p[id].score||0), b=(prev[id]&&prev[id].score)||0;
+        if (a>b) this.popFeed(p[id], a-b);
+      }
+    }
+    this.renderTeams();
+  },
+
+  teams(){
+    const r=[], b=[];
+    for (const id in this.players){ const pl={id,...this.players[id]}; if(!pl.name) continue; (pl.team==="blue"?b:r).push(pl); }
+    const byJoin=(x,y)=>(x.joined||0)-(y.joined||0);
+    r.sort(byJoin); b.sort(byJoin); return {r,b};
+  },
+
+  renderTeams(){
+    const {r,b}=this.teams();
+    const chips = list => list.map(p=>`<span class="chip${p.online===false?" off":""}">${esc(p.name)}<button class="sw" data-sw="${p.id}">換隊</button><button class="x" data-x="${p.id}">✕</button></span>`).join("");
+    $("rNames").innerHTML=chips(r); $("bNames").innerHTML=chips(b);
+    $("rN").textContent=r.length+" 人"; $("bN").textContent=b.length+" 人";
+    $("startBtn").disabled = !(r.length&&b.length);
+    for (const el of document.querySelectorAll("[data-sw]")) el.onclick=()=>{ const p=this.players[el.dataset.sw]; if(p) this.ref.child("players/"+el.dataset.sw+"/team").set(p.team==="blue"?"red":"blue"); };
+    for (const el of document.querySelectorAll("[data-x]")) el.onclick=()=>{ this.ref.child("players/"+el.dataset.x).remove(); };
+    this.updateScores();
+  },
+
+  calc(){
+    const {r,b}=this.teams();
+    const sum=l=>l.reduce((s,p)=>s+(p.score||0),0);
+    const rT=sum(r), bT=sum(b);
+    const rA=r.length?rT/r.length:0, bA=b.length?bT/b.length:0;
+    const margin=this.meta.margin||6;
+    const pos=Math.max(-1,Math.min(1,(rA-bA)/margin));   // +1 = red wins
+    return {r,b,rT,bT,pos};
+  },
+
+  updateScores(){
+    if (this.meta.state!=="play" && this.meta.state!=="end") return;
+    const c=this.calc();
+    $("rTot").textContent=c.rT; $("bTot").textContent=c.bT;
+    $("rCnt").textContent=c.r.length; $("bCnt").textContent=c.b.length;
+    if (this.meta.state==="play") this.setRope(c.pos);
+  },
+
+  setRope(pos){
+    const w=$("fieldWrap").clientWidth;
+    const winPx=Math.min(w*0.3, 420);
+    $("fieldWrap").style.setProperty("--win",winPx+"px");
+    if (this.lastPos!==null && pos!==this.lastPos){ const L=$("ropeLayer"); L.classList.remove("tug"); void L.offsetWidth; L.classList.add("tug"); }
+    $("ropeLayer").style.transform=`translateX(${-pos*winPx}px)`;
+    this.lastPos=pos;
+    if (this.meta.state==="play" && !this.ended){
+      const t=Date.now();
+      const rp=Math.round(pos*100)/100;
+      if (t-this.lastPosWrite>350 && rp!==this.lastPosSent){ this.lastPosWrite=t; this.lastPosSent=rp; this.ref.child("meta/pos").set(rp); }
+      if (Math.abs(pos)>=1) this.finish("rope");
+    }
+  },
+
+  crew(){
+    const guy=c=>`<div class="guy"><svg viewBox="0 0 40 100"><circle cx="20" cy="14" r="10" fill="${c}"/><path d="M20 24 L20 62 M20 34 L40 46 M20 62 L8 98 M20 62 L32 98" stroke="${c}" stroke-width="8" stroke-linecap="round" fill="none"/></svg></div>`;
+    $("crewR").innerHTML=guy("#ff6b6b").repeat(4); $("crewB").innerHTML=guy("#6aa6ff").repeat(4);
+  },
+
+  popFeed(p,n){
+    const box = p.team==="blue"?$("feedB"):$("feedR");
+    const d=document.createElement("div"); d.className="fx"; d.textContent=p.name+" +"+n;
+    d.style.bottom=(4+rand(40))+"px"; box.appendChild(d);
+    setTimeout(()=>d.remove(),1900);
+    while (box.children.length>14) box.firstChild.remove();
+    beep(p.team==="blue"?520:440,.06,"square",.05);
+  },
+
+  async startRound(){
+    const setKey=$("sSet").value;
+    const words = setKey==="custom" ? parseWords(store.get("tug.custom")||"") : parseWords(SETS[setKey].words);
+    if (words.length<4) return alert("單字至少要 4 個");
+    const dur=+$("sTime").value, margin=+$("sMargin").value;
+    const startAt=now()+4200;
+    const upd={};
+    for (const id in this.players) upd["players/"+id+"/score"]=0;
+    Object.assign(upd,{
+      "meta/state":"play", "meta/round":(this.meta.round||0)+1, "meta/startAt":startAt, "meta/endAt":startAt+dur*1000,
+      "meta/words":words, "meta/mode":$("sMode").value, "meta/margin":margin, "meta/pos":0, "meta/winner":null, "meta/why":null
+    });
+    this.ended=false; this.lastPos=null; this.lastPosSent=0; this.tickSec=-1;
+    await this.ref.update(upd);
+  },
+
+  toLobby(){ this.ref.child("meta").update({state:"lobby",pos:0,winner:null}); },
+
+  finish(why){
+    if (this.ended || this.meta.state!=="play") return;
+    this.ended=true;
+    const c=this.calc();
+    const winner = c.pos>0.0001?"red":c.pos<-0.0001?"blue":"tie";
+    this.ref.child("meta").update({state:"end", winner, why, pos:Math.round(c.pos*100)/100, rT:c.rT, bT:c.bT});
+  },
+
+  render(){
+    const m=this.meta, st=m.state||"lobby";
+    show($("lobby"), st==="lobby"); show($("arena"), st!=="lobby");
+    cancelAnimationFrame(this.raf);
+    if (st==="lobby"){ show($("result"),false); this.renderTeams(); return; }
+    if (!$("crewR").children.length) this.crew();
+    if (st==="play"){
+      show($("result"),false); show($("stopBtn"),true);
+      const loop=()=>{
+        const t=now();
+        if (t<m.startAt){
+          const n=Math.ceil((m.startAt-t)/1000);
+          show($("hCount"),true);
+          const lab = n>3 ? "準備" : String(n);
+          if ($("hCount").firstElementChild.textContent!==lab){ $("hCount").innerHTML="<span>"+lab+"</span>"; if(n<=3) beep(n===1?880:660,.15,"triangle",.25); }
+          $("timer").textContent=fmt(m.endAt-m.startAt);
+          this.setRope(0);
+        } else {
+          if (!$("hCount").classList.contains("hidden")){ show($("hCount"),false); beep(1175,.35,"triangle",.3); }
+          const left=Math.max(0,m.endAt-t);
+          $("timer").textContent=fmt(left);
+          const sec=Math.ceil(left/1000);
+          $("timer").classList.toggle("warn",sec<=10);
+          if (sec<=10 && sec!==this.tickSec && sec>0){ this.tickSec=sec; beep(1000,.05,"square",.08); }
+          this.updateScores();
+          if (left<=0){ this.finish("time"); return; }
+        }
+        this.raf=requestAnimationFrame(loop);
+      };
+      loop();
+    }
+    if (st==="end"){
+      show($("hCount"),false); show($("stopBtn"),false);
+      this.setRope(m.pos||0); this.updateScores();
+      $("timer").classList.remove("warn");
+      const w=m.winner;
+      $("winTxt").className="win "+(w==="red"?"r":w==="blue"?"b":"t");
+      $("winTxt").textContent= w==="red"?"🎉 紅隊獲勝！": w==="blue"?"🎉 藍隊獲勝！":"平手！";
+      const {r,b}=this.calc();
+      const why = m.why==="rope" ? "把繩子拉過勝利線！" : "時間到，繩子比較靠近"+(w==="red"?"紅隊":w==="blue"?"藍隊":"中間")+"。";
+      const c2=this.calc(); $("whyTxt").textContent = why+"　紅隊共答對 "+c2.rT+" 題，藍隊共答對 "+c2.bT+" 題";
+      const top=l=>l.slice().sort((x,y)=>(y.score||0)-(x.score||0)).slice(0,3).map(p=>`<li>${esc(p.name)} <b>${p.score||0}</b></li>`).join("")||"<li>—</li>";
+      $("mvpR").innerHTML=top(r); $("mvpB").innerHTML=top(b);
+      show($("result"),true);
+      if (!this._celebrated || this._celebrated!==m.round){ this._celebrated=m.round; fanfare(); }
+    }
+  }
+};
+function fmt(ms){ const s=Math.ceil(Math.max(0,ms)/1000); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
+
+/* ================== PLAYER ================== */
+const Player = {
+  code:null, ref:null, pid:null, team:null, name:"", meta:{}, score:0, round:-1, q:null, locked:false, recent:[], timerInt:0,
+
+  start(code){
+    this.code=code; this.ref=db.ref("rooms/"+code);
+    show($("player")); $("pCodeLbl").textContent=code;
+    this.pid = store.get("tug.pid") || ("p"+Date.now().toString(36)+rand(1e6).toString(36));
+    store.set("tug.pid",this.pid);
+    this.name = store.get("tug.name")||"";
+    $("pName").value=this.name;
+    const lastTeam=store.get("tug.team");
+    // already in this room?
+    this.ref.child("players/"+this.pid).get().then(s=>{
+      const v=s.val();
+      if (v && v.name){ this.name=v.name; this.team=v.team; this.enter(); }
+    }).catch(()=>{});
+    this.ref.child("meta/state").get().then(s=>{ if(!s.exists()){ $("pErr").textContent="找不到房號 "+code+"，請確認老師螢幕上的號碼。"; } }).catch(()=>{});
+    const pick=t=>{ this.team=t; document.querySelectorAll(".teampick .btn").forEach(b=>b.classList.toggle("sel",b.dataset.team===t)); check(); };
+    const check=()=>{ $("pGo").disabled=!($("pName").value.trim() && this.team); };
+    document.querySelectorAll(".teampick .btn").forEach(b=>b.onclick=()=>pick(b.dataset.team));
+    if (lastTeam) pick(lastTeam);
+    $("pName").oninput=check; check();
+    $("pGo").onclick=async()=>{
+      const name=$("pName").value.trim().slice(0,8);
+      if(!name||!this.team) return;
+      $("pGo").disabled=true; $("pErr").textContent="";
+      try{
+        const s=await this.ref.child("meta/state").get();
+        if(!s.exists()){ $("pErr").textContent="找不到這個房號，請確認老師螢幕上的號碼。"; $("pGo").disabled=false; return; }
+        this.name=name; store.set("tug.name",name); store.set("tug.team",this.team);
+        await this.ref.child("players/"+this.pid).update({name, team:this.team, score:0, online:true, joined:firebase.database.ServerValue.TIMESTAMP});
+        this.enter();
+      }catch(e){ $("pErr").textContent="連線失敗，請檢查網路後再試一次"; $("pGo").disabled=false; }
+    };
+    $("pSay").onclick=()=>{ if(this.q) speak(this.q.en); };
+    document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible" && this.ref && this.joined) this.ref.child("players/"+this.pid+"/online").set(true); });
+  },
+
+  enter(){
+    if (this.joined) return; this.joined=true;
+    const me=this.ref.child("players/"+this.pid);
+    me.child("online").onDisconnect().set(false);
+    me.child("online").set(true);
+    if (!this.connHooked){ this.connHooked=true;
+      db.ref(".info/connected").on("value",s=>{ if(s.val() && this.joined){ const m2=this.ref.child("players/"+this.pid); m2.child("online").onDisconnect().set(false); m2.child("online").set(true);} });
+    }
+    me.on("value",s=>{
+      const v=s.val();
+      if (!v || !v.name){ // removed by teacher
+        if (!this.joined) return;
+        this.joined=false; me.off(); this.ref.child("meta").off(); this.ref.child("meta/pos").off();
+        me.child("online").onDisconnect().cancel(); if (v) me.remove(); show($("pWait"),false); show($("pPlay"),false); show($("pEnd"),false); show($("pJoin"),true);
+        $("pErr").textContent="老師把你移出房間了，可以重新加入。"; $("pGo").disabled=false; this.setBar(); return;
+      }
+      this.team=v.team; this.name=v.name;
+      if (typeof v.score==="number" && v.score<this.score) this.score=v.score; // reset by host
+      this.setBar();
+    });
+    this.ref.child("meta").on("value",s=>{ this.meta=s.val()||{}; this.render(); });
+    this.ref.child("meta/pos").on("value",s=>{ const p=s.val()||0; $("pKnot").style.left=(50-p*50)+"%"; });
+  },
+
+  setBar(){
+    const P=$("player"); P.classList.toggle("red",this.team==="red"); P.classList.toggle("blue",this.team==="blue");
+    $("pMe").textContent=(this.team==="blue"?"藍隊":"紅隊")+" · "+(this.name||"");
+    $("pSc").textContent="答對 "+this.score; show($("pSc"),!!this.joined);
+    $("pTeamBig").textContent=this.team==="blue"?"藍隊":"紅隊";
+  },
+
+  render(){
+    const m=this.meta, st=m.state||"lobby";
+    if (!this.joined) return;
+    show($("pJoin"),false);
+    clearInterval(this.timerInt);
+    if (st==="lobby"){ show($("pWait"),true); show($("pPlay"),false); show($("pEnd"),false); show($("pCount"),false); this.score=0; this.setBar(); return; }
+    if (st==="play"){
+      if (m.round!==this.round){ this.round=m.round; this.score=0; this.recent=[]; this.setBar(); this.nextQ(); }
+      show($("pWait"),false); show($("pEnd"),false); show($("pPlay"),true);
+      const tick=()=>{
+        const t=now();
+        if (t<m.startAt){ show($("pCount"),true); const n=Math.ceil((m.startAt-t)/1000); $("pCount").textContent=n>3?"準備":n; }
+        else { show($("pCount"),false); }
+        const left=Math.max(0,Math.ceil((m.endAt-Math.max(t,m.startAt))/1000));
+        $("pTime").textContent=left;
+      };
+      tick(); this.timerInt=setInterval(tick,200);
+      return;
+    }
+    if (st==="end"){
+      show($("pCount"),false); show($("pPlay"),false); show($("pWait"),false); show($("pEnd"),true);
+      const w=m.winner;
+      $("pWin").textContent= w==="tie"?"平手！": (w==="red"?"紅隊":"藍隊")+"獲勝！";
+      $("pWin").style.color= w==="red"?"var(--red)":w==="blue"?"var(--blue)":"var(--gold)";
+      $("pMine").textContent=this.score;
+      try{ navigator.vibrate && navigator.vibrate(w===this.team?[80,60,80,60,200]:200); }catch(e){}
+    }
+  },
+
+  nextQ(){
+    const W=this.meta.words||[]; if(W.length<4) return;
+    let i, guard=0;
+    do { i=rand(W.length); } while (this.recent.includes(i) && guard++<50);
+    this.recent.push(i); if (this.recent.length>Math.min(8,W.length-1)) this.recent.shift();
+    const mode=this.meta.mode||"mix";
+    const dir = mode==="mix" ? (Math.random()<.5?"en2zh":"zh2en") : mode;
+    const pool=shuffle(W.map((_,k)=>k).filter(k=>k!==i)).slice(0,3);
+    const idx=shuffle([i,...pool]);
+    const [en,zh]=W[i];
+    this.q={en,zh,dir,answer:i};
+    const isEn = dir==="en2zh";
+    $("pAsk").textContent = isEn ? "這個英文是什麼意思？" : "哪一個英文是這個意思？";
+    $("pQ").textContent = isEn ? en : zh;
+    $("pQ").classList.toggle("zh",!isEn);
+    show($("pSay"), isEn);
+    $("pOpts").innerHTML = idx.map(k=>`<button class="opt" data-k="${k}">${esc(isEn?W[k][1]:W[k][0])}</button>`).join("");
+    for (const b of $("pOpts").children) b.onclick=()=>this.answer(+b.dataset.k,b);
+  },
+
+  answer(k,btn){
+    if (this.locked || this.meta.state!=="play" || now()<this.meta.startAt) return;
+    if (k===this.q.answer){
+      this.locked=true;
+      btn.classList.add("ok");
+      this.score++; this.setBar();
+      this.ref.child("players/"+this.pid+"/score").set(this.score);
+      const f=$("pFlash"); f.className="flash"; void f.offsetWidth; f.className="flash ok";
+      beep(880,.08,"triangle",.15); beep(1320,.12,"triangle",.12,.07);
+      setTimeout(()=>{ this.locked=false; this.nextQ(); },350);
+    } else {
+      this.locked=true;
+      btn.classList.add("no");
+      for (const b of $("pOpts").children) if(+b.dataset.k===this.q.answer) b.classList.add("ans");
+      beep(160,.25,"sawtooth",.12);
+      try{ navigator.vibrate && navigator.vibrate(150); }catch(e){}
+      show($("pLock"),true);
+      setTimeout(()=>{ show($("pLock"),false); this.locked=false; this.nextQ(); },1300);
+    }
+  }
+};
+
+boot();
+</script>
+</body>
+</html>
