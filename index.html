@@ -18,7 +18,7 @@
   --font:"Fredoka","PingFang TC","Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;color:var(--ink);font-family:var(--font);background:var(--sky1)}
+html{background:var(--sky1)} html,body{margin:0;height:100%;color:var(--ink);font-family:var(--font)} body{background:transparent}
 button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
 input,select,textarea{font:inherit;color:var(--ink)}
 .hidden{display:none!important}
@@ -239,7 +239,11 @@ input,select,textarea{font:inherit;color:var(--ink)}
     <input id="lCode" class="field" inputmode="numeric" maxlength="4" placeholder="Room number">
     <button class="btn y" id="lJoin">🙋 Join the game</button>
     <div class="or">— or —</div>
-    <button class="btn w sm" id="lHost">🧑‍🏫 I'm the teacher</button>
+    <div class="or">🧑‍🏫 Teacher: start a game</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button class="btn w sm" id="lHost">🪢 Tug of War</button>
+      <button class="btn w sm" id="lHoops">🏀 Hoops</button>
+    </div>
   </div>
 </section>
 
@@ -549,6 +553,7 @@ function confetti(canvas){
 }
 const params = new URLSearchParams(location.search);
 const baseUrl = location.origin + location.pathname;
+const dirUrl = baseUrl.replace(/[^\/]*$/,"");
 
 /* ================== ROUTER ================== */
 function boot(){
@@ -560,6 +565,7 @@ function boot(){
   $("lCode").addEventListener("input",e=>{ e.target.value=e.target.value.replace(/\D/g,"").slice(0,4); });
   $("lJoin").onclick=()=>{ const c=$("lCode").value; if(c.length===4) location.href=baseUrl+"?r="+c; else { $("lCode").focus(); $("lCode").animate([{transform:"translateX(-8px)"},{transform:"translateX(8px)"},{transform:"none"}],{duration:300}); } };
   $("lHost").onclick=()=>{ location.href=baseUrl+"?host"; };
+  $("lHoops").onclick=()=>{ location.href=dirUrl+"hoops.html?host"; };
 }
 
 /* ================== HOST ================== */
@@ -573,7 +579,7 @@ const Host = {
     let code = (existing||"").replace(/\D/g,"");
     if (code.length===4){
       const snap = await db.ref("rooms/"+code+"/meta").get();
-      if (!snap.exists()) code="";
+      if (!snap.exists() || (snap.val().game||"tug")!=="tug") code="";
     } else code="";
     if (!code) code = await this.newCode();
     this.code=code; this.ref=db.ref("rooms/"+code);
@@ -594,7 +600,7 @@ const Host = {
       const s = await db.ref("rooms/"+c+"/meta").get();
       const m = s.val();
       if (!m || (Date.now()-(m.created||0)) > 6*3600e3){
-        await db.ref("rooms/"+c).set({ meta:{ state:"lobby", round:0, created:firebase.database.ServerValue.TIMESTAMP } });
+        await db.ref("rooms/"+c).set({ meta:{ game:"tug", state:"lobby", round:0, created:firebase.database.ServerValue.TIMESTAMP } });
         return c;
       }
     }
@@ -817,8 +823,9 @@ function fmt(ms){ const s=Math.ceil(Math.max(0,ms)/1000); return Math.floor(s/60
 const Player = {
   code:null, ref:null, pid:null, team:null, name:"", av:"🐯", meta:{}, score:0, combo:0, best:0, round:-1, q:null, locked:false, recent:[], timerInt:0,
 
-  start(code){
+  async start(code){
     this.code=code; this.ref=db.ref("rooms/"+code);
+    try{ const g=(await this.ref.child("meta/game").get()).val(); if (g && g!=="tug"){ location.replace(dirUrl+g+".html?r="+code); return; } }catch(e){}
     show($("player")); $("pCodeLbl").textContent=code;
     this.pid = store.get("tug.pid") || ("p"+Date.now().toString(36)+rand(1e6).toString(36));
     store.set("tug.pid",this.pid);
