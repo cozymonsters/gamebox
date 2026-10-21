@@ -248,14 +248,13 @@ math 數學` }
       P.av = store.get("tug.av"); if (!AVATARS.includes(P.av)) P.av = pick(AVATARS);
       $("pCodeLbl").textContent=opts.code;
       if (!$("pName").value) $("pName").value=P.name; P.showAv();
-      const grid=$("pAvGrid");
-      const setAv=a=>{ P.av=a; store.set("tug.av",a); P.showAv(); beep(700,.06,"triangle",.12);
-        if (grid) for (const b of grid.children) b.classList.toggle("sel",b.dataset.av===a); };
-      if (grid){
-        grid.innerHTML=AVATARS.map(a=>`<button data-av="${a}" class="${a===P.av?"sel":""}" aria-label="Monster ${a}">${ART.avatar(a,"",true)}</button>`).join("");
-        for (const b of grid.children) b.onclick=()=>setAv(b.dataset.av);
-      }
-      $("pAvBtn").onclick=()=>setAv(AVATARS[(AVATARS.indexOf(P.av)+1)%AVATARS.length]);
+      // monsters are dealt at random (no picking): keep this phone's last monster unless someone in the room already has it
+      const deal=used=>{
+        if (!AVATARS.includes(P.av) || used.has(P.av)){ const free=AVATARS.filter(a=>!used.has(a)); P.av=pick(free.length?free:AVATARS); }
+        store.set("tug.av",P.av); P.showAv();
+      };
+      deal(new Set());
+      opts.ref.child("players").get().then(s=>{ const all=s.val()||{}; deal(new Set(Object.keys(all).filter(id=>id!==P.pid && all[id] && all[id].av).map(id=>all[id].av))); }).catch(()=>{});
       const check=()=>{ $("pGo").disabled=!($("pName").value.trim() && P.team); };
       const pickTeam=t=>{ P.team=t; document.querySelectorAll(".tbtn").forEach(b=>b.classList.toggle("sel",b.dataset.team===t)); check(); };
       document.querySelectorAll(".tbtn").forEach(b=>b.onclick=()=>pickTeam(b.dataset.team));
