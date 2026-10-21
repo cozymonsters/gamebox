@@ -247,7 +247,7 @@ math 數學` }
       P.name = store.get("tug.name")||"";
       P.av = store.get("tug.av") || pick(AVATARS);
       $("pCodeLbl").textContent=opts.code;
-      $("pName").value=P.name; P.showAv();
+      if (!$("pName").value) $("pName").value=P.name; P.showAv();
       $("pAvBtn").onclick=()=>{ let a; do{ a=pick(AVATARS); }while(a===P.av); P.av=a; store.set("tug.av",a); P.showAv(); beep(700,.06,"triangle",.12); };
       const check=()=>{ $("pGo").disabled=!($("pName").value.trim() && P.team); };
       const pickTeam=t=>{ P.team=t; document.querySelectorAll(".tbtn").forEach(b=>b.classList.toggle("sel",b.dataset.team===t)); check(); };
