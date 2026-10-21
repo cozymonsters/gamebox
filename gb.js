@@ -22,10 +22,10 @@ const GB = (() => {
   const baseUrl = location.origin + location.pathname;
   const dirUrl = baseUrl.replace(/[^\/]*$/, "");
 
-  const AVATARS = ["🐯","🦁","🐻","🐼","🦊","🐸","🐵","🐨","🐷","🐮","🐔","🐧","🦄","🐲","🐙","🦖","🐶","🐱","🐰","🦉","🐺","🦈","🐢","🦝"];
+  const AVATARS = ART.AVATARS;
 
   const SETS = {
-    sports: { name: "⚽ Sports", words: `coach 教練
+    sports: { name: "Sports", words: `coach 教練
 referee 裁判
 athlete 運動員
 team 隊伍
@@ -67,7 +67,7 @@ gym 體育館
 stadium 體育場
 record 紀錄
 tie 平手` },
-    school: { name: "🏫 School Life", words: `teacher 老師
+    school: { name: "School Life", words: `teacher 老師
 classmate 同學
 classroom 教室
 homework 回家作業
@@ -152,7 +152,7 @@ math 數學` }
 
   /* ---- host helpers ---- */
   const host = {
-    netStatus(el){ db.ref(".info/connected").on("value",s=>{ const on=!!s.val(); el.textContent=on?"● Online":"● Reconnecting…"; el.classList.toggle("off",!on); }); },
+    netStatus(el){ db.ref(".info/connected").on("value",s=>{ const on=!!s.val(); el.textContent=on?"Online":"Reconnecting…"; el.classList.toggle("off",!on); }); },
 
     // reuse ?host=CODE if it belongs to this game, else make a new room
     async openRoom(game, existing){
@@ -190,7 +190,7 @@ math 數學` }
         sel.innerHTML="";
         for (const k in SETS){ const o=document.createElement("option"); o.value=k; o.textContent=SETS[k].name+" ("+parseWords(SETS[k].words).length+" words)"; sel.appendChild(o); }
         const custom=parseWords(store.get("tug.custom")||"");
-        if (custom.length>=4){ const o=document.createElement("option"); o.value="custom"; o.textContent="✏️ My Words ("+custom.length+" words)"; sel.appendChild(o); }
+        if (custom.length>=4){ const o=document.createElement("option"); o.value="custom"; o.textContent="My Words ("+custom.length+" words)"; sel.appendChild(o); }
         const saved=store.get("tug.set"); if (saved && [...sel.options].some(o=>o.value===saved)) sel.value=saved;
       };
       fill();
@@ -221,7 +221,7 @@ math 數學` }
     // lobby team columns: #rNames #bNames #rN #bN, chips with switch/remove
     renderLobby(players, ref){
       const {r,b}=host.teams(players);
-      const chips = list => list.length ? list.map(p=>`<span class="pchip${p.online===false?" off":""}"><span class="av">${esc(p.av||"🙂")}</span>${esc(p.name)}<button data-sw="${p.id}" title="Switch team">⇄</button><button data-x="${p.id}" title="Remove">✕</button></span>`).join("")
+      const chips = list => list.length ? list.map(p=>`<span class="pchip${p.online===false?" off":""}"><span class="av">${ART.avatar(p.av)}</span>${esc(p.name)}<button data-sw="${p.id}" title="Switch team">${ART.icon("swap")}</button><button data-x="${p.id}" title="Remove">${ART.icon("x")}</button></span>`).join("")
         : `<div class="waiting">Waiting for players…<br><span class="dots"><i></i><i></i><i></i></span></div>`;
       $("rNames").innerHTML=chips(r); $("bNames").innerHTML=chips(b);
       $("rN").textContent=r.length; $("bN").textContent=b.length;
@@ -245,7 +245,7 @@ math 數學` }
       P.pid = store.get("tug.pid") || ("p"+Date.now().toString(36)+rand(1e6).toString(36));
       store.set("tug.pid",P.pid);
       P.name = store.get("tug.name")||"";
-      P.av = store.get("tug.av") || pick(AVATARS);
+      P.av = store.get("tug.av"); if (!AVATARS.includes(P.av)) P.av = pick(AVATARS);
       $("pCodeLbl").textContent=opts.code;
       if (!$("pName").value) $("pName").value=P.name; P.showAv();
       $("pAvBtn").onclick=()=>{ let a; do{ a=pick(AVATARS); }while(a===P.av); P.av=a; store.set("tug.av",a); P.showAv(); beep(700,.06,"triangle",.12); };
