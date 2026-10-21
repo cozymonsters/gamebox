@@ -267,7 +267,7 @@ const Host = {
     this.ref = GB.db.ref("rooms/"+this.code);
     $("hCode").textContent=this.code; $("hCode2").textContent=this.code;
     GB.host.drawQR(GB.baseUrl+"?r="+this.code, $("qr"));
-    ART.preload(["bg-hoops","hoop","ball","trophy","team-red","team-blue",...ART.AVATARS.map(a=>"m/"+a)]);
+    ART.preload(["bg-hoops","hoop","ball","trophy","team-red","team-blue"]);
     if (existing && String(existing).replace(/\D/g,"")===this.code) this.view="lobby";
     $("toLobby").onclick=()=>{ this.view="lobby"; this.render(); };
     $("toSetup").onclick=()=>{ this.view="setup"; this.render(); };
@@ -317,7 +317,7 @@ const Host = {
 
   renderLead(c){
     const all=[...c.r,...c.b].filter(p=>(p.pts||0)>0).sort((x,y)=>(y.pts||0)-(x.pts||0)).slice(0,6);
-    $("leadRows").innerHTML = all.length ? all.map((p,i)=>`<div class="lrow ${p.team==="blue"?"b":"r"}"><span class="rk">${ART.medal(i)}</span><span class="lav">${ART.avatar(p.av)}</span><span class="nm">${esc(p.name)}</span>${(p.combo||0)>=3?`<span class="fire">${ART.icon("flame")}</span>`:""}<span class="p">${p.pts||0}</span></div>`).join("")
+    $("leadRows").innerHTML = all.length ? all.map((p,i)=>`<div class="lrow ${p.team==="blue"?"b":"r"}"><span class="rk">${ART.medal(i)}</span><span class="lav">${ART.avatar(p.av,"",true)}</span><span class="nm">${esc(p.name)}</span>${(p.combo||0)>=3?`<span class="fire">${ART.icon("flame")}</span>`:""}<span class="p">${p.pts||0}</span></div>`).join("")
       : `<div class="empty">First basket wins a spot!</div>`;
   },
 
@@ -334,7 +334,7 @@ const Host = {
     const sy = H - 30 - rand(50);
     const peak = Math.min(ty, sy) - (three?110:70) - rand(30);
     const ball=document.createElement("div"); ball.className="ball"+(three?" three":"");
-    ball.innerHTML=`<img class="bb" src="img/ball.webp" alt=""><span class="tag"><span class="tav">${ART.avatar(p.av)}</span>${esc(p.name)}</span>`;
+    ball.innerHTML=`<img class="bb" src="img/ball.webp" alt=""><span class="tag"><span class="tav">${ART.avatar(p.av,"",true)}</span>${esc(p.name)}</span>`;
     area.appendChild(ball); this.balls++;
     const N=16, frames=[];
     for(let i=0;i<=N;i++){ const u=i/N, x=sx+(tx-sx)*u; const y=(1-u)*(1-u)*sy + 2*(1-u)*u*(2*peak-(sy+ty)/2) + u*u*ty; frames.push({transform:`translate(${x}px,${y}px)`}); }
@@ -422,15 +422,15 @@ const Host = {
       $("winMascot").innerHTML = w==="tie" ? "" : ART.mascot(w,"wm");
       $("winTxt").textContent= w==="red"?"Red wins!": w==="blue"?"Blue wins!":"It's a tie!";
       $("finalTxt").textContent = "Final score: Red "+c.rP+" – "+c.bP+" Blue"+(c.balanced?"   (balanced for team size)":"");
-      const top=l=>l.slice().sort((x,y)=>(y.pts||0)-(x.pts||0)).slice(0,3).map((p,i)=>`<div class="row">${ART.medal(i)} <span class="av">${ART.avatar(p.av)}</span> ${esc(p.name)} <span class="s">${p.pts||0}</span></div>`).join("")||"<div class='row'>—</div>";
+      const top=l=>l.slice().sort((x,y)=>(y.pts||0)-(x.pts||0)).slice(0,3).map((p,i)=>`<div class="row">${ART.medal(i)} <span class="av">${ART.avatar(p.av,"",true)}</span> ${esc(p.name)} <span class="s">${p.pts||0}</span></div>`).join("")||"<div class='row'>—</div>";
       $("mvpR").innerHTML=top(c.r); $("mvpB").innerHTML=top(c.b);
       const all=[...c.r,...c.b];
       const best=key=>all.slice().sort((x,y)=>(y[key]||0)-(x[key]||0))[0];
       const bs=best("score"), bc=best("best"), b3=best("threes");
       $("awards").innerHTML =
-        (bs&&bs.score?`<div class="row">${ART.icon("target")} <span class="av">${ART.avatar(bs.av)}</span> ${esc(bs.name)}<span class="s">${bs.score}</span></div><div class="cap">Most correct</div>`:"")+
-        (bc&&bc.best?`<div class="row">${ART.icon("flame")} <span class="av">${ART.avatar(bc.av)}</span> ${esc(bc.name)}<span class="s">x${bc.best}</span></div><div class="cap">Longest streak</div>`:"")+
-        (b3&&b3.threes?`<div class="row">${ART.three()} <span class="av">${ART.avatar(b3.av)}</span> ${esc(b3.name)}<span class="s">${b3.threes}</span></div><div class="cap">Most 3-pointers</div>`:"") || "<div class='row'>—</div>";
+        (bs&&bs.score?`<div class="row">${ART.icon("target")} <span class="av">${ART.avatar(bs.av,"",true)}</span> ${esc(bs.name)}<span class="s">${bs.score}</span></div><div class="cap">Most correct</div>`:"")+
+        (bc&&bc.best?`<div class="row">${ART.icon("flame")} <span class="av">${ART.avatar(bc.av,"",true)}</span> ${esc(bc.name)}<span class="s">x${bc.best}</span></div><div class="cap">Longest streak</div>`:"")+
+        (b3&&b3.threes?`<div class="row">${ART.three()} <span class="av">${ART.avatar(b3.av,"",true)}</span> ${esc(b3.name)}<span class="s">${b3.threes}</span></div><div class="cap">Most 3-pointers</div>`:"") || "<div class='row'>—</div>";
       show($("result"),true);
       if (this._celebrated!==m.round){ this._celebrated=m.round; GB.fanfare(.9); GB.confetti($("confetti")); }
     }

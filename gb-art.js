@@ -40,8 +40,8 @@ const ART = (() => {
   const gamepad = (cls = "") =>
     `<svg class="${cls}" viewBox="0 0 48 48" aria-hidden="true"><path d="M14 15h20c6 0 10 5 10 12v3c0 4-3 6-6 6-2 0-3.4-1-4.6-2.6L31 30H17l-2.4 3.4C13.4 35 12 36 10 36c-3 0-6-2-6-6v-3c0-7 4-12 10-12z" fill="#1a0b5e"/><path d="M14 21v8M10 25h8" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="22.5" r="2.4" fill="#ef4560"/><circle cx="36.5" cy="27" r="2.4" fill="#2d8cf0"/><circle cx="27.5" cy="27" r="2.4" fill="#2e9d48"/></svg>`;
 
-  /* ---------- character avatars: 16 hand-drawn monsters (img/m/a0–a15.webp) ---------- */
-  const N = 16;
+  /* ---------- character avatars: 48 hand-drawn monsters (img/m/a0–a47.webp, thumbnails in img/m/s) ---------- */
+  const N = 48;
   const AVATARS = Array.from({ length: N }, (_, i) => "a" + i);
   const idx = id => {
     const m = /^a(\d+)$/.exec(String(id || ""));
@@ -51,7 +51,8 @@ const ART = (() => {
   };
   const INK = "#1d1d1f";
   const img = (src, cls = "") => `<img class="${cls}" src="img/${src}.webp" alt="" draggable="false">`;
-  const avatar = (id, cls = "") => img("m/a" + idx(id), "avsvg " + cls);
+  // small = 96px thumbnail (phone picker, tiny chips); default = 256px
+  const avatar = (id, cls = "", small = false) => img((small ? "m/s/a" : "m/a") + idx(id), "avsvg " + cls);
   const mascot = (team, cls = "") => img(team === "blue" ? "team-blue" : "team-red", "mascot " + cls);
   // warm the cache so avatars appear instantly on slow 4G
   function preload(list){ for (const s of list){ const i = new Image(); i.src = "img/" + s + ".webp"; } }

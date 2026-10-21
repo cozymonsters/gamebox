@@ -255,7 +255,7 @@ const Host = {
     this.ref = GB.db.ref("rooms/"+this.code);
     $("hCode").textContent=this.code; $("hCode2").textContent=this.code;
     GB.host.drawQR(GB.baseUrl+"?r="+this.code, $("qr"));
-    ART.preload(["bg-tug","trophy","team-red","team-blue",...ART.AVATARS.map(a=>"m/"+a)]);
+    ART.preload(["bg-tug","trophy","team-red","team-blue"]);
     if (existing && String(existing).replace(/\D/g,"")===this.code) this.view="lobby";
     $("toLobby").onclick=()=>{ this.view="lobby"; this.render(); };
     $("toSetup").onclick=()=>{ this.view="setup"; this.render(); };
@@ -335,7 +335,7 @@ const Host = {
 
   popFeed(p,n){
     const box = p.team==="blue"?$("feedB"):$("feedR");
-    const d=document.createElement("div"); d.className="fx"; d.innerHTML=`<span class="fxav">${ART.avatar(p.av)}</span>${esc(p.name)} <b>+${n}</b>`;
+    const d=document.createElement("div"); d.className="fx"; d.innerHTML=`<span class="fxav">${ART.avatar(p.av,"",true)}</span>${esc(p.name)} <b>+${n}</b>`;
     d.style.bottom=rand(110)+"px"; d.style[p.team==="blue"?"right":"left"]=rand(140)+"px";
     box.appendChild(d); setTimeout(()=>d.remove(),2000);
     while (box.children.length>12) box.firstChild.remove();
@@ -409,7 +409,7 @@ const Host = {
       const c=this.calc();
       const why = m.why==="rope" ? "They pulled the flag over the line!" : "Time's up!";
       $("whyTxt").textContent = why+"   Red "+c.rT+" correct  ·  Blue "+c.bT+" correct";
-      const top=l=>l.slice().sort((x,y)=>(y.score||0)-(x.score||0)).slice(0,3).map((p,i)=>`<div class="row">${ART.medal(i)} <span class="av">${ART.avatar(p.av)}</span> ${esc(p.name)} <span class="s">${p.score||0}</span></div>`).join("")||"<div class='row'>—</div>";
+      const top=l=>l.slice().sort((x,y)=>(y.score||0)-(x.score||0)).slice(0,3).map((p,i)=>`<div class="row">${ART.medal(i)} <span class="av">${ART.avatar(p.av,"",true)}</span> ${esc(p.name)} <span class="s">${p.score||0}</span></div>`).join("")||"<div class='row'>—</div>";
       $("mvpR").innerHTML=top(c.r); $("mvpB").innerHTML=top(c.b);
       show($("result"),true);
       if (this._celebrated!==m.round){ this._celebrated=m.round; GB.fanfare(); GB.confetti($("confetti")); }

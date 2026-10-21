@@ -221,7 +221,7 @@ math 數學` }
     // lobby team columns: #rNames #bNames #rN #bN, chips with switch/remove
     renderLobby(players, ref){
       const {r,b}=host.teams(players);
-      const chips = list => list.length ? list.map(p=>`<span class="pchip${p.online===false?" off":""}"><span class="av">${ART.avatar(p.av)}</span>${esc(p.name)}<button data-sw="${p.id}" title="Switch team">${ART.icon("swap")}</button><button data-x="${p.id}" title="Remove">${ART.icon("x")}</button></span>`).join("")
+      const chips = list => list.length ? list.map(p=>`<span class="pchip${p.online===false?" off":""}"><span class="av">${ART.avatar(p.av,"",true)}</span>${esc(p.name)}<button data-sw="${p.id}" title="Switch team">${ART.icon("swap")}</button><button data-x="${p.id}" title="Remove">${ART.icon("x")}</button></span>`).join("")
         : `<div class="waiting">Waiting for players…<br><span class="dots"><i></i><i></i><i></i></span></div>`;
       $("rNames").innerHTML=chips(r); $("bNames").innerHTML=chips(b);
       $("rN").textContent=r.length; $("bN").textContent=b.length;
@@ -252,7 +252,7 @@ math 數學` }
       const setAv=a=>{ P.av=a; store.set("tug.av",a); P.showAv(); beep(700,.06,"triangle",.12);
         if (grid) for (const b of grid.children) b.classList.toggle("sel",b.dataset.av===a); };
       if (grid){
-        grid.innerHTML=AVATARS.map(a=>`<button data-av="${a}" class="${a===P.av?"sel":""}" aria-label="Monster ${a}">${ART.avatar(a)}</button>`).join("");
+        grid.innerHTML=AVATARS.map(a=>`<button data-av="${a}" class="${a===P.av?"sel":""}" aria-label="Monster ${a}">${ART.avatar(a,"",true)}</button>`).join("");
         for (const b of grid.children) b.onclick=()=>setAv(b.dataset.av);
       }
       $("pAvBtn").onclick=()=>setAv(AVATARS[(AVATARS.indexOf(P.av)+1)%AVATARS.length]);
