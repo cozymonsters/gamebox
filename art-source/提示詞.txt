@@ -88,3 +88,8 @@ Game sprites in the same flat style on a plain cream background, three separate 
 (2) the same bomb panicking: eyes wide, eyebrows up, mouth open in an "O", a few small sweat drops, the spark bigger and brighter;
 (3) a flat cartoon "pop" burst shaped like a puffy cloud with spiky edges, in mustard yellow, burnt orange and cream, with a few small stars flying out. Friendly cartoon style, not violent, no fire, no smoke.
 No outlines, no text, no letters, no numbers, no watermark.
+
+==================== 2d. 搶地盤封面（cover-grab.png）2026-10-21 ====================
+（先貼共同風格，並附上 character-sheet.png 當風格參考）
+Wide game cover, 1600x900 px, for a strategy party game called Color Grab. A big flat game board seen slightly from above, tilted a little: a grid of 8 columns by 5 rows of rounded square tiles on a white board with soft rounded corners. The left part of the board is painted burnt orange-red, the right part is painted cobalt blue, the middle tiles are still empty cream, and two or three empty tiles are mustard gold with a simple star on them. Monsters from the attached character sheet stand on their team's tiles: on the left, a red-and-orange team happily painting a new tile with a big flat paint roller; on the right, a blue-and-teal team sneaking onto a red tile to steal it, one monster splashing blue paint, one pointing at a gold star tile. A few small flat paint drips and splashes in the same colors. Simple cream background with a few soft flat shapes. Funny and competitive, not messy. Keep the bottom quarter simple because a title will be placed there. No text, no letters, no numbers, no watermark.
+（怪獸太小時追加：make the monsters bigger, fewer tiles visible, closer view）
