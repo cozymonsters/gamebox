@@ -57,7 +57,14 @@
 .lrow .rk{width:26px;text-align:center}
 .lrow .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lrow .p{background:var(--yellow);border-radius:6px;padding:0 8px;font-size:18px;font-weight:900}
-.lrow .fire{font-size:16px}
+.lrow .fire{color:var(--o1);display:flex} .lrow .fire .gi{width:18px;height:18px}
+.lrow .lav{width:26px;height:26px;display:inline-block;flex:none} .lrow .rk .medal{width:24px;height:24px}
+.ball .tag{display:flex;align-items:center;gap:4px} .tav{width:20px;height:20px;display:inline-block}
+.dbl .gi,.dblbar .gi{width:.9em;height:.9em}
+.meter .gi{width:16px;height:16px;color:var(--o1)} .meter.hot .gi{color:var(--red)}
+.flyball svg{width:100%;height:100%}
+.lead h3 .gi{width:20px;height:20px;vertical-align:-3px;color:var(--o1)}
+.bal .gi{width:15px;height:15px}
 .lead .empty{text-align:center;color:var(--sub);font-weight:700;padding:8px}
 .dbl{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);background:var(--yellow);color:var(--ink);border-radius:10px;padding:6px 20px;font-family:var(--display);font-size:28px;text-transform:uppercase;box-shadow:0 5px 0 rgba(0,0,0,.3);animation:gb-wiggle .6s infinite;z-index:5;white-space:nowrap}
 .courtArea .shout{top:52%}
@@ -69,7 +76,7 @@
 .meter i.on{background:var(--o1)}
 .meter.hot{background:var(--yellow);color:var(--ink);animation:gb-wiggle .6s infinite}
 .dblbar{text-align:center;background:var(--yellow);color:var(--ink);border-radius:8px;font-family:var(--display);font-size:18px;text-transform:uppercase;padding:5px;animation:gb-wiggle .6s infinite}
-.flyball{position:fixed;width:56px;height:56px;margin:-28px 0 0 -28px;font-size:52px;line-height:56px;text-align:center;z-index:8;pointer-events:none}
+.flyball{position:fixed;width:48px;height:48px;margin:-24px 0 0 -24px;z-index:8;pointer-events:none}
 .qwrap{display:flex;flex-direction:column;gap:12px;flex:1}
 </style>
 </head>
@@ -79,7 +86,7 @@
 <!-- ============ HOST (teacher computer) ============ -->
 <section id="host" class="screen hidden">
   <header class="gb-top">
-    <a class="brand" href="./"><span class="ic">🎮</span>GAMEBOX</a>
+    <a class="brand" href="./"><span class="ic" data-art="gamepad"></span>GAMEBOX</a>
     <span class="game">· Hoops</span>
     <div class="sp"></div>
     <span class="net" id="hNet">Connecting…</span>
@@ -90,28 +97,28 @@
   <div class="setup-wrap" id="setup">
     <div class="panel">
       <div class="hero">
-        <div class="bgart">🏀</div>
+        <div class="bgart" data-i="ball"></div>
         <div class="info">
           <div class="eyebrow">Game settings</div>
           <h1>Hoops</h1>
           <div class="tagline">Shoot your shot! Score the most points.</div>
           <div class="chips">
-            <div class="chip"><span class="i">⏱️</span><div><small>Duration</small><b>1–3 min</b></div></div>
-            <div class="chip"><span class="i">👥</span><div><small>Teams</small><b>Red vs Blue</b></div></div>
-            <div class="chip"><span class="i">🏆</span><div><small>Style</small><b>Leaderboard</b></div></div>
+            <div class="chip"><span class="i" data-i="clock"></span><div><small>Duration</small><b>1–3 min</b></div></div>
+            <div class="chip"><span class="i" data-i="users"></span><div><small>Teams</small><b>Red vs Blue</b></div></div>
+            <div class="chip"><span class="i" data-i="trophy"></span><div><small>Style</small><b>Leaderboard</b></div></div>
           </div>
         </div>
-        <div class="act"><button class="go" id="toLobby">Continue ▶</button></div>
+        <div class="act"><button class="go" id="toLobby">Continue <i data-i="play"></i></button></div>
       </div>
       <div class="panel-body">
         <div class="setbox">
-          <div class="setrow"><span class="emo">📚</span><div class="txt"><h4>Word List</h4><p>Which words will students practice?</p></div>
-            <div class="ctl"><select class="sel" id="sSet"></select><button class="btn-soft" id="editWords">✏️ My Words</button></div></div>
-          <div class="setrow"><span class="emo">❓</span><div class="txt"><h4>Question Type</h4><p>Show English and pick 中文, or the other way</p></div>
+          <div class="setrow"><span class="emo" data-i="book"></span><div class="txt"><h4>Word List</h4><p>Which words will students practice?</p></div>
+            <div class="ctl"><select class="sel" id="sSet"></select><button class="btn-soft" id="editWords"><i data-i="pencil"></i> My Words</button></div></div>
+          <div class="setrow"><span class="emo" data-i="help"></span><div class="txt"><h4>Question Type</h4><p>Show English and pick 中文, or the other way</p></div>
             <div class="ctl"><select class="sel" id="sMode"><option value="mix">Mixed</option><option value="en2zh">English → 中文</option><option value="zh2en">中文 → English</option></select></div></div>
-          <div class="setrow"><span class="emo">⏱️</span><div class="txt"><h4>Time Limit</h4><p>The team with more points at the buzzer wins</p></div>
+          <div class="setrow"><span class="emo" data-i="timer"></span><div class="txt"><h4>Time Limit</h4><p>The team with more points at the buzzer wins</p></div>
             <div class="ctl"><select class="sel" id="sTime"><option value="60">60 seconds</option><option value="90" selected>90 seconds</option><option value="120">2 minutes</option><option value="180">3 minutes</option></select></div></div>
-          <div class="setrow"><span class="emo">🏀</span><div class="txt"><h4>Scoring</h4><p>Right answer = <b>2 pts</b> · 3 in a row = <b>3-pointer</b> · Last 10 seconds = <b>double points</b></p></div></div>
+          <div class="setrow"><span class="emo" data-i="ball"></span><div class="txt"><h4>Scoring</h4><p>Right answer = <b>2 pts</b> · 3 in a row = <b>3-pointer</b> · Last 10 seconds = <b>double points</b></p></div></div>
           <div class="setnote">Students can already join with the code at the top right.</div>
         </div>
       </div>
@@ -123,14 +130,14 @@
     <div class="lob-top">
       <div class="lob-qr" id="qr"></div>
       <div class="lob-join">
-        <div class="l1">Scan the QR code, or go to <b id="joinHost"></b></div>
+        <div class="l1">Scan the QR code to join</div>
         <div class="l2"><span class="rc">Room code</span><span class="bigcode" id="hCode2">----</span></div>
       </div>
-      <div class="lob-act"><button class="go" id="startBtn" disabled>Tip off ▶</button><button class="pill ghost" id="toSetup">⚙️ Settings</button></div>
+      <div class="lob-act"><button class="go" id="startBtn" disabled>Tip off <i data-i="play"></i></button><button class="pill ghost" id="toSetup"><i data-i="sliders"></i> Settings</button></div>
     </div>
     <div class="lob-teams">
-      <div class="tcol red"><div class="th">🔥 Red Team <span class="n" id="rN">0</span></div><div class="names" id="rNames"></div></div>
-      <div class="tcol blue"><div class="th">⚡ Blue Team <span class="n" id="bN">0</span></div><div class="names" id="bNames"></div></div>
+      <div class="tcol red"><div class="th"><i data-i="flame"></i> Red Team <span class="n" id="rN">0</span></div><div class="names" id="rNames"></div></div>
+      <div class="tcol blue"><div class="th"><i data-i="bolt"></i> Blue Team <span class="n" id="bN">0</span></div><div class="names" id="bNames"></div></div>
     </div>
     <div class="lob-hint" id="startHint">Need at least 1 player on each team.</div>
   </div>
@@ -146,28 +153,28 @@
       <div class="beam b1"></div><div class="beam b2"></div><div class="floor"></div>
       <div class="hoop r" id="hoopR"><div class="board" id="boardR"><div class="lbl">Red</div></div><div class="rim"></div><div class="netw" id="netR"><svg viewBox="0 0 94 74"><path d="M0 0 L16 72 L78 72 L94 0 M16 0 L28 72 M32 0 L40 72 M47 0 L47 72 M62 0 L54 72 M78 0 L66 72 M4 18 L90 18 M8 36 L86 36 M12 54 L82 54" stroke="#fff" stroke-width="3" fill="none"/></svg></div></div>
       <div class="hoop b" id="hoopB"><div class="board" id="boardB"><div class="lbl">Blue</div></div><div class="rim"></div><div class="netw" id="netB"><svg viewBox="0 0 94 74"><path d="M0 0 L16 72 L78 72 L94 0 M16 0 L28 72 M32 0 L40 72 M47 0 L47 72 M62 0 L54 72 M78 0 L66 72 M4 18 L90 18 M8 36 L86 36 M12 54 L82 54" stroke="#fff" stroke-width="3" fill="none"/></svg></div></div>
-      <div class="lead"><h3>🔥 Hot Shooters</h3><div class="rows" id="leadRows"></div></div>
-      <div class="dbl hidden" id="dblBanner">⚡ Double points! ⚡</div>
+      <div class="lead"><h3><i data-i="flame"></i> Hot Shooters</h3><div class="rows" id="leadRows"></div></div>
+      <div class="dbl hidden" id="dblBanner"><i data-i="bolt"></i> Double points! <i data-i="bolt"></i></div>
       <div class="countdown hidden" id="hCount"><span>3</span></div>
     </div>
-    <div class="hfoot"><span class="bal hidden" id="balNote">⚖️ Scores balanced for team size</span><button class="pill ghost" id="stopBtn">⏹ End now</button></div>
+    <div class="hfoot"><span class="bal hidden" id="balNote"><i data-i="scale"></i> Scores balanced for team size</span><button class="pill ghost" id="stopBtn"><i data-i="stop"></i> End now</button></div>
     <div class="result hidden" id="result">
       <canvas class="confetti" id="confetti"></canvas>
       <div class="rcard">
         <div class="rhead"><div class="win" id="winTxt">Red wins!</div><div class="why" id="finalTxt"></div></div>
         <div class="rbody"><div class="mvps">
-          <div class="mvp r"><h3>🔥 Red MVPs</h3><div class="rows" id="mvpR"></div></div>
-          <div class="mvp y"><h3>🏅 Awards</h3><div class="rows" id="awards"></div></div>
-          <div class="mvp b"><h3>⚡ Blue MVPs</h3><div class="rows" id="mvpB"></div></div>
+          <div class="mvp r"><h3><i data-i="flame"></i> Red MVPs</h3><div class="rows" id="mvpR"></div></div>
+          <div class="mvp y"><h3><i data-i="star"></i> Awards</h3><div class="rows" id="awards"></div></div>
+          <div class="mvp b"><h3><i data-i="bolt"></i> Blue MVPs</h3><div class="rows" id="mvpB"></div></div>
         </div></div>
-        <div class="rbtns"><button class="go" id="againBtn">🔁 Play again</button><button class="pill ghost" id="lobbyBtn">👥 Back to lobby</button></div>
+        <div class="rbtns"><button class="go" id="againBtn"><i data-i="refresh"></i> Play again</button><button class="pill ghost" id="lobbyBtn"><i data-i="users"></i> Back to lobby</button></div>
       </div>
     </div>
   </div>
 
   <div class="modal hidden" id="wordModal">
     <div class="mcard">
-      <div class="mh">✏️ My Words</div>
+      <div class="mh"><i data-i="pencil"></i> My Words</div>
       <div class="mb">
         <div class="hint">One word per line: English + 中文. Example: <b>coach 教練</b>. At least 4 words. Saved on this computer and shared by all GameBox games.</div>
         <textarea id="wordText" placeholder="coach 教練&#10;referee 裁判&#10;warm up 暖身"></textarea>
@@ -180,19 +187,19 @@
 
 <!-- ============ PLAYER (student phone) ============ -->
 <section id="player" class="screen hidden">
-  <div class="p-top"><span class="av" id="pAvSm">🎮</span><span class="me" id="pMe">GameBox</span><span class="sc hidden" id="pSc"></span></div>
+  <div class="p-top"><span class="av" id="pAvSm"></span><span class="me" id="pMe">GameBox</span><span class="sc hidden" id="pSc"></span></div>
 
   <div class="p-body" id="pJoin">
     <div class="joincard">
       <h1>Join the game</h1>
-      <div class="room">🏀 Hoops · Room <b id="pCodeLbl"></b></div>
-      <div class="avpick"><button class="big" id="pAvBtn" aria-label="Change avatar">🐯</button><div class="t">Tap to change<br>your buddy!</div></div>
+      <div class="room">Hoops · Room <b id="pCodeLbl"></b></div>
+      <div class="avpick"><button class="big" id="pAvBtn" aria-label="Change avatar"></button><div class="t">Tap to change<br>your buddy!</div></div>
       <div class="lbl">Your name</div>
       <input id="pName" class="field" maxlength="8" placeholder="Name" autocomplete="off">
       <div class="lbl">Pick your team</div>
       <div class="teampick">
-        <button class="tbtn red" data-team="red"><span class="e">🔥</span>Red</button>
-        <button class="tbtn blue" data-team="blue"><span class="e">⚡</span>Blue</button>
+        <button class="tbtn red" data-team="red"><span class="e" data-i="flame"></span>Red</button>
+        <button class="tbtn blue" data-team="blue"><span class="e" data-i="bolt"></span>Blue</button>
       </div>
       <button class="btn-ink" id="pGo" disabled>Join</button>
       <div class="err" id="pErr"></div>
@@ -201,22 +208,22 @@
 
   <div class="p-body hidden" id="pWait">
     <div class="wait">
-      <div class="bigav" id="pAvBig">🐯</div>
+      <div class="bigav" id="pAvBig"></div>
       <h2>You're in!</h2>
-      <div class="tbadge" id="pTeamBig">🔥 Red Team</div>
-      <div class="msg" style="margin-top:14px">Warm up… 🏀</div>
-      <div class="sub">Waiting for the teacher. Keep your screen on! 📱</div>
+      <div class="tbadge" id="pTeamBig">Red Team</div>
+      <div class="msg" style="margin-top:14px">Warm up…</div>
+      <div class="sub">Waiting for the teacher. Keep your screen on!</div>
     </div>
   </div>
 
   <div class="p-body hidden" id="pPlay">
-    <div class="pinfo"><span class="t" id="pTimeBox">⏱️ <span id="pTime">--</span></span><span class="meter" id="pMeter"></span></div>
-    <div class="dblbar hidden" id="pDbl">⚡ Double points! ⚡</div>
+    <div class="pinfo"><span class="t" id="pTimeBox"><i data-i="timer"></i> <span id="pTime">--</span></span><span class="meter" id="pMeter"></span></div>
+    <div class="dblbar hidden" id="pDbl"><i data-i="bolt"></i> Double points! <i data-i="bolt"></i></div>
     <div class="qwrap">
       <div class="qcard">
         <div class="ask" id="pAsk">What does it mean?</div>
         <div class="q" id="pQ">—</div>
-        <button class="say hidden" id="pSay" aria-label="Listen">🔊</button>
+        <button class="say hidden" id="pSay" aria-label="Listen" data-i="volume"></button>
       </div>
       <div class="opts" id="pOpts"></div>
     </div>
@@ -224,7 +231,7 @@
 
   <div class="p-body hidden" id="pEnd">
     <div class="wait">
-      <div class="bigav" id="pEndAv">🏆</div>
+      <div class="bigav" id="pEndAv"></div>
       <div class="res" id="pWin">Red wins!</div>
       <div class="msg" id="pWinSub"></div>
       <div class="stats">
@@ -242,6 +249,7 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="gb-art.js"></script>
 <script src="gb.js"></script>
 <script>
 "use strict";
@@ -249,9 +257,9 @@ const GAME="hoops";
 const { $, show, esc, store, rand, pick, fmt, beep } = GB;
 const now = GB.now;
 const DOUBLE_MS = 10000;
-const CHEERS_2 = ["Swish! 🏀","Nice shot! 💪","Bucket! 🔥","Score! ⭐","Nothing but net! ✨"];
-const CHEERS_NO = ["Airball! 😅","Missed! 🙈","Almost! 🤏","Rebound! 💪"];
-const SHOUTS = ["Defense! 🛡️","Shoot! Shoot! 🏀","What a game! 🤩","Keep scoring! 🔥"];
+const CHEERS_2 = ["Swish!","Nice shot!","Bucket!","Score!","Nothing but net!"];
+const CHEERS_NO = ["Airball!","Missed!","Almost!","Rebound!"];
+const SHOUTS = ["Defense!","Shoot! Shoot!","What a game!","Keep scoring!"];
 
 function boot(){
   const r=(GB.params.get("r")||"").replace(/\D/g,"");
@@ -270,7 +278,6 @@ const Host = {
     this.code = await GB.host.openRoom(GAME, existing);
     this.ref = GB.db.ref("rooms/"+this.code);
     $("hCode").textContent=this.code; $("hCode2").textContent=this.code;
-    $("joinHost").textContent=GB.dirUrl.replace(/^https?:\/\//,"").replace(/\/$/,"");
     GB.host.drawQR(GB.baseUrl+"?r="+this.code, $("qr"));
     if (existing && String(existing).replace(/\D/g,"")===this.code) this.view="lobby";
     $("toLobby").onclick=()=>{ this.view="lobby"; this.render(); };
@@ -295,7 +302,7 @@ const Host = {
     if ((this.meta.state||"lobby")==="lobby"){
       const {r,b}=GB.host.renderLobby(this.players, this.ref);
       $("startBtn").disabled = !(r.length&&b.length);
-      $("startHint").textContent = (r.length&&b.length) ? "Tap ⇄ to move a player to the other team, ✕ to remove." : "Need at least 1 player on each team.";
+      $("startHint").textContent = (r.length&&b.length) ? "Use the arrows to move a player to the other team, or X to remove." : "Need at least 1 player on each team.";
     }
     this.updateScores();
   },
@@ -314,16 +321,15 @@ const Host = {
     const c=this.calc();
     const setPts=(el,v)=>{ if(el.textContent!==String(v)){ el.textContent=v; el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); } };
     setPts($("rPts"),c.rP); setPts($("bPts"),c.bP);
-    $("rCnt").textContent="👥 "+c.r.length; $("bCnt").textContent="👥 "+c.b.length;
+    $("rCnt").innerHTML=ART.icon("users")+" "+c.r.length; $("bCnt").innerHTML=ART.icon("users")+" "+c.b.length;
     show($("balNote"),c.balanced);
     const t=Date.now(); if (t-this.leadT>300){ this.leadT=t; this.renderLead(c); }
   },
 
   renderLead(c){
     const all=[...c.r,...c.b].filter(p=>(p.pts||0)>0).sort((x,y)=>(y.pts||0)-(x.pts||0)).slice(0,6);
-    const medal=["🥇","🥈","🥉","4","5","6"];
-    $("leadRows").innerHTML = all.length ? all.map((p,i)=>`<div class="lrow ${p.team==="blue"?"b":"r"}"><span class="rk">${medal[i]}</span><span>${esc(p.av||"")}</span><span class="nm">${esc(p.name)}</span>${(p.combo||0)>=3?'<span class="fire">🔥</span>':""}<span class="p">${p.pts||0}</span></div>`).join("")
-      : `<div class="empty">First basket wins a spot! 🏀</div>`;
+    $("leadRows").innerHTML = all.length ? all.map((p,i)=>`<div class="lrow ${p.team==="blue"?"b":"r"}"><span class="rk">${ART.medal(i)}</span><span class="lav">${ART.avatar(p.av)}</span><span class="nm">${esc(p.name)}</span>${(p.combo||0)>=3?`<span class="fire">${ART.icon("flame")}</span>`:""}<span class="p">${p.pts||0}</span></div>`).join("")
+      : `<div class="empty">First basket wins a spot!</div>`;
   },
 
   shoot(p,amount){
@@ -338,7 +344,7 @@ const Host = {
     const sy = H - 30 - rand(50);
     const peak = Math.min(ty, sy) - (three?110:70) - rand(30);
     const ball=document.createElement("div"); ball.className="ball"+(three?" three":"");
-    ball.innerHTML=`<div class="bb"></div><span class="tag">${esc(p.av||"")} ${esc(p.name)}</span>`;
+    ball.innerHTML=`<div class="bb"></div><span class="tag"><span class="tav">${ART.avatar(p.av)}</span>${esc(p.name)}</span>`;
     area.appendChild(ball); this.balls++;
     const N=16, frames=[];
     for(let i=0;i<=N;i++){ const u=i/N, x=sx+(tx-sx)*u; const y=(1-u)*(1-u)*sy + 2*(1-u)*u*(2*peak-(sy+ty)/2) + u*u*ty; frames.push({transform:`translate(${x}px,${y}px)`}); }
@@ -350,8 +356,8 @@ const Host = {
     setTimeout(()=>{
       const net=blue?$("netB"):$("netR"); net.classList.remove("swish"); void net.offsetWidth; net.classList.add("swish");
       if (three){ const bd=blue?$("boardB"):$("boardR"); bd.classList.remove("flash"); void bd.offsetWidth; bd.classList.add("flash"); }
-      const d=document.createElement("div"); d.className="plus "+(blue?"b":"r")+(amount>=4?" big":"");
-      d.textContent=(three?"3️⃣ ":"")+"+"+amount; d.style.left=tx+"px"; d.style.top=(ty-40)+"px";
+      const d=document.createElement("div"); d.className="plus "+(blue?"b":"r")+(three||amount>=4?" big":"");
+      d.textContent="+"+amount; d.style.left=tx+"px"; d.style.top=(ty-40)+"px";
       area.appendChild(d); setTimeout(()=>d.remove(),1450);
       beep(three?1320:990,.12,"triangle",.12); if(three) beep(1760,.15,"triangle",.1,.08);
     }, dur*N/(N+2));
@@ -401,14 +407,14 @@ const Host = {
           show($("dblBanner"),false);
           this.updateScores();
         } else {
-          if (!$("hCount").classList.contains("hidden")){ show($("hCount"),false); GB.buzzer(); this.shout("Tip off! 🏀"); }
+          if (!$("hCount").classList.contains("hidden")){ show($("hCount"),false); GB.buzzer(); this.shout("Tip off!"); }
           const left=Math.max(0,m.endAt-t);
           $("timer").textContent=fmt(left);
           const sec=Math.ceil(left/1000);
           $("timer").classList.toggle("warn",sec<=10);
           const dbl = left<=DOUBLE_MS && left>0;
           show($("dblBanner"),dbl);
-          if (dbl && !this.dblShown){ this.dblShown=true; this.shout("⚡ Double points! ⚡"); }
+          if (dbl && !this.dblShown){ this.dblShown=true; this.shout("Double points!"); }
           if (sec<=10 && sec!==this.tickSec && sec>0){ this.tickSec=sec; beep(1000,.05,"square",.08); }
           if (Date.now()-this.lastShout>15000 && sec>12){ this.lastShout=Date.now(); this.shout(pick(SHOUTS)); }
           this.updateScores();
@@ -424,18 +430,17 @@ const Host = {
       const c=this.calc(); this.leadT=0; this.updateScores();
       const w=m.winner;
       $("winTxt").className="win "+(w==="red"?"r":w==="blue"?"b":"t");
-      $("winTxt").textContent= w==="red"?"🏆 Red wins!": w==="blue"?"🏆 Blue wins!":"🤝 It's a tie!";
-      $("finalTxt").textContent = "Final score: Red "+c.rP+" – "+c.bP+" Blue"+(c.balanced?"   ⚖️ balanced for team size":"");
-      const medals=["🥇","🥈","🥉"];
-      const top=l=>l.slice().sort((x,y)=>(y.pts||0)-(x.pts||0)).slice(0,3).map((p,i)=>`<div class="row">${medals[i]} ${esc(p.av||"")} ${esc(p.name)} <span class="s">${p.pts||0}</span></div>`).join("")||"<div class='row'>—</div>";
+      $("winTxt").textContent= w==="red"?"Red wins!": w==="blue"?"Blue wins!":"It's a tie!";
+      $("finalTxt").textContent = "Final score: Red "+c.rP+" – "+c.bP+" Blue"+(c.balanced?"   (balanced for team size)":"");
+      const top=l=>l.slice().sort((x,y)=>(y.pts||0)-(x.pts||0)).slice(0,3).map((p,i)=>`<div class="row">${ART.medal(i)} <span class="av">${ART.avatar(p.av)}</span> ${esc(p.name)} <span class="s">${p.pts||0}</span></div>`).join("")||"<div class='row'>—</div>";
       $("mvpR").innerHTML=top(c.r); $("mvpB").innerHTML=top(c.b);
       const all=[...c.r,...c.b];
       const best=key=>all.slice().sort((x,y)=>(y[key]||0)-(x[key]||0))[0];
       const bs=best("score"), bc=best("best"), b3=best("threes");
       $("awards").innerHTML =
-        (bs&&bs.score?`<div class="row">🎯 ${esc(bs.av||"")} ${esc(bs.name)}<span class="s">${bs.score} ✓</span></div><div class="cap">Most correct</div>`:"")+
-        (bc&&bc.best?`<div class="row">🔥 ${esc(bc.av||"")} ${esc(bc.name)}<span class="s">x${bc.best}</span></div><div class="cap">Longest streak</div>`:"")+
-        (b3&&b3.threes?`<div class="row">3️⃣ ${esc(b3.av||"")} ${esc(b3.name)}<span class="s">${b3.threes}</span></div><div class="cap">Most 3-pointers</div>`:"") || "<div class='row'>—</div>";
+        (bs&&bs.score?`<div class="row">${ART.icon("target")} <span class="av">${ART.avatar(bs.av)}</span> ${esc(bs.name)}<span class="s">${bs.score}</span></div><div class="cap">Most correct</div>`:"")+
+        (bc&&bc.best?`<div class="row">${ART.icon("flame")} <span class="av">${ART.avatar(bc.av)}</span> ${esc(bc.name)}<span class="s">x${bc.best}</span></div><div class="cap">Longest streak</div>`:"")+
+        (b3&&b3.threes?`<div class="row">${ART.three()} <span class="av">${ART.avatar(b3.av)}</span> ${esc(b3.name)}<span class="s">${b3.threes}</span></div><div class="cap">Most 3-pointers</div>`:"") || "<div class='row'>—</div>";
       show($("result"),true);
       if (this._celebrated!==m.round){ this._celebrated=m.round; GB.fanfare(.9); GB.confetti($("confetti")); }
     }
@@ -444,7 +449,7 @@ const Host = {
 
 /* ================== PLAYER ================== */
 const Player = {
-  code:null, ref:null, pid:null, team:null, name:"", av:"🐯", meta:{}, score:0, pts:0, threes:0, combo:0, best:0, round:-1, q:null, locked:false, recent:[], timerInt:0, joined:false,
+  code:null, ref:null, pid:null, team:null, name:"", av:"a0", meta:{}, score:0, pts:0, threes:0, combo:0, best:0, round:-1, q:null, locked:false, recent:[], timerInt:0, joined:false,
 
   async start(code){
     this.code=code; this.ref=GB.db.ref("rooms/"+code);
@@ -455,7 +460,7 @@ const Player = {
     $("pSay").onclick=()=>{ if(this.q) GB.speak(this.q.en); };
   },
 
-  showAv(){ $("pAvBtn").textContent=this.av; $("pAvSm").textContent=this.joined?this.av:"🎮"; $("pAvBig").textContent=this.av; },
+  showAv(){ $("pAvBtn").innerHTML=ART.avatar(this.av); $("pAvSm").innerHTML=this.joined?ART.avatar(this.av):ART.gamepad("padsm"); $("pAvBig").innerHTML=ART.avatar(this.av); },
 
   enter(){
     if (this.joined) return; this.joined=true;
@@ -473,15 +478,15 @@ const Player = {
   setBar(){
     const P=$("player"); P.classList.toggle("red",this.team==="red"&&this.joined); P.classList.toggle("blue",this.team==="blue"&&this.joined);
     $("pMe").textContent=this.joined ? this.name : "GameBox";
-    $("pSc").textContent="🏀 "+this.pts; show($("pSc"),this.joined);
-    $("pTeamBig").textContent=this.team==="blue"?"⚡ Blue Team":"🔥 Red Team";
+    $("pSc").textContent=this.pts+" pts"; show($("pSc"),this.joined);
+    $("pTeamBig").innerHTML=this.team==="blue"?ART.icon("bolt")+" Blue Team":ART.icon("flame")+" Red Team";
     this.showAv();
   },
 
   renderMeter(){
     const n=Math.min(this.combo,2), hot=this.combo>=2;
     $("pMeter").className="meter"+(hot?" hot":"");
-    $("pMeter").innerHTML = hot ? "🔥 Next: <b>3-pointer!</b>" : `Next: <b>2 pts</b> <i class="${n>=1?"on":""}"></i><i class="${n>=2?"on":""}"></i><i></i>`;
+    $("pMeter").innerHTML = hot ? ART.icon("flame")+" Next: <b>3-pointer!</b>" : `Next: <b>2 pts</b> <i class="${n>=1?"on":""}"></i><i class="${n>=2?"on":""}"></i><i></i>`;
   },
 
   render(){
@@ -498,8 +503,8 @@ const Player = {
         const t=now();
         if (t<m.startAt){
           show($("pCount"),true); const n=Math.ceil((m.startAt-t)/1000);
-          const lab = n>3 ? "🏀" : String(n);
-          if (lab!==lastN){ lastN=lab; $("pCountN").textContent=lab; $("pCountN").style.animation="none"; void $("pCountN").offsetWidth; $("pCountN").style.animation=""; }
+          const lab = n>3 ? "go" : String(n);
+          if (lab!==lastN){ lastN=lab; $("pCountN").innerHTML= n>3 ? ART.icon("ball") : lab; $("pCountN").style.animation="none"; void $("pCountN").offsetWidth; $("pCountN").style.animation=""; }
           $("pCountT").textContent = n>3 ? "Get ready!" : "Ready…";
         } else show($("pCount"),false);
         const leftMs=Math.max(0,m.endAt-Math.max(t,m.startAt)), left=Math.ceil(leftMs/1000);
@@ -513,10 +518,10 @@ const Player = {
     if (st==="end"){
       show($("pCount"),false); show($("pPlay"),false); show($("pWait"),false); show($("pEnd"),true);
       const w=m.winner, mine=w===this.team;
-      $("pWin").textContent= w==="tie"?"It's a tie! 🤝": mine ? "You win! 🎉" : (w==="red"?"Red":"Blue")+" wins!";
+      $("pWin").textContent= w==="tie"?"It's a tie!": mine ? "You win!" : (w==="red"?"Red":"Blue")+" wins!";
       $("pWin").style.color= w==="red"?"var(--red)":w==="blue"?"var(--blue)":"var(--yellow)";
-      $("pWinSub").textContent= (m.rP!=null? "Red "+m.rP+" – "+m.bP+" Blue · " : "") + (w==="tie"?"What a game!": mine ? "Great teamwork! 💪" : "So close! 💪");
-      $("pEndAv").textContent= mine ? "🏆" : w==="tie" ? "🤝" : this.av;
+      $("pWinSub").textContent= (m.rP!=null? "Red "+m.rP+" – "+m.bP+" Blue · " : "") + (w==="tie"?"What a game!": mine ? "Great teamwork!" : "So close!");
+      $("pEndAv").innerHTML= mine ? ART.icon("trophy") : ART.avatar(this.av);
       $("pPts").textContent=this.pts; $("pMine").textContent=this.score; $("pThrees").textContent=this.threes; $("pBest").textContent=this.best;
       try{ navigator.vibrate && navigator.vibrate(mine?[80,60,80,60,200]:200); }catch(e){}
     }
@@ -539,7 +544,7 @@ const Player = {
 
   flyBall(btn){
     const r=btn.getBoundingClientRect();
-    const b=document.createElement("div"); b.className="flyball"; b.textContent="🏀"; document.body.appendChild(b);
+    const b=document.createElement("div"); b.className="flyball"; b.innerHTML=ART.ball(); document.body.appendChild(b);
     const sx=r.left+r.width/2, sy=r.top+r.height/2, tx=window.innerWidth/2, ty=60;
     b.animate([{transform:`translate(${sx}px,${sy}px) scale(1)`},{transform:`translate(${(sx+tx)/2}px,${Math.min(sy,ty)-60}px) scale(.8) rotate(200deg)`},{transform:`translate(${tx}px,${ty}px) scale(.4) rotate(400deg)`,opacity:.2}],{duration:550,easing:"ease-out"}).onfinish=()=>b.remove();
   },
@@ -558,7 +563,7 @@ const Player = {
       this.setBar(); this.renderMeter();
       this.ref.child("players/"+this.pid).update({score:this.score, pts:this.pts, threes:this.threes, best:this.best, combo:this.combo});
       this.flyBall(btn);
-      if (three) this.toast((dbl?"⚡ ":"")+"3-pointer!<br>+"+v,"var(--yellow)");
+      if (three) this.toast((dbl?"Double! ":"")+"3-pointer!<br>+"+v,"var(--yellow)");
       else this.toast(esc(pick(CHEERS_2))+"<br>+"+v);
       beep(500,.15,"sine",.08,0,900); beep(990,.1,"triangle",.14,.15); if(three) beep(1480,.15,"triangle",.12,.25);
       setTimeout(()=>{ this.locked=false; this.nextQ(); },500);
