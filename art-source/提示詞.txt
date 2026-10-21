@@ -77,3 +77,14 @@ Using exactly the same style as the attached character sheet (flat shapes, no ou
 16. eggplant-shaped monster holding a stopwatch, looking focused
 
 Use each palette colour at least twice; vary expressions (cheeky, determined, proud, surprised, laughing, focused). Props must be simple, flat and in the same muted palette. No text, no letters, no numbers, no watermark.
+
+==================== 2c. 傳炸彈封面（cover-potato.png）2026-10-21 ====================
+（先貼共同風格，並附上 character-sheet.png 當風格參考）
+Wide game cover, 1600x900 px, for a party game called Hot Potato. In the middle, a big round dark navy bomb (#2b2440) is flying through the air in a high arc. The bomb is a cute character too: big googly eyes looking panicked, small pink cheeks, a short mustard-yellow fuse on top with a bright sparkling star-shaped spark. Below it, monsters from the attached character sheet react in a funny way: on the left, a red-and-orange team has just thrown it, arms up and relieved; on the right, a blue-and-teal team panics, one monster covering its eyes, one stretching out its thin arms to catch it, one trying to run away on thin legs. Add a dotted arc showing the bomb's path and a few small motion lines. Simple flat grass field with a cream sky, a few simple clouds and low rounded trees on the horizon. Funny and tense, not scary, no fire, no smoke, no explosion. Keep the bottom quarter simple because a title will be placed there. No text, no letters, no numbers, no watermark.
+
+==================== 4b. 炸彈角色（bomb.png）2026-10-21 ====================
+Game sprites in the same flat style on a plain cream background, three separate items in a row with plenty of space between them, 2048x1024 px:
+(1) a round dark navy bomb character (#2b2440) with a short mustard-yellow fuse and a small star-shaped spark, big googly eyes, small pink cheeks and a calm, cheeky smile;
+(2) the same bomb panicking: eyes wide, eyebrows up, mouth open in an "O", a few small sweat drops, the spark bigger and brighter;
+(3) a flat cartoon "pop" burst shaped like a puffy cloud with spiky edges, in mustard yellow, burnt orange and cream, with a few small stars flying out. Friendly cartoon style, not violent, no fire, no smoke.
+No outlines, no text, no letters, no numbers, no watermark.
