@@ -160,10 +160,15 @@ canvas.confetti{position:absolute;inset:0;pointer-events:none;z-index:9}
 .avpick .big{font-size:52px;line-height:1;width:78px;height:78px;display:flex;align-items:center;justify-content:center;background:#eef0fb;border-radius:50%;border:3px solid #d6daf3;animation:gb-bob 2s infinite}
 .avpick .t{font-weight:800;color:var(--sub);font-size:15px}
 .teampick{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.tbtn{padding:16px 6px;border-radius:6px;font-family:var(--display);font-size:24px;color:#fff;text-transform:uppercase;opacity:.5;transition:opacity .1s,transform .1s}
-.tbtn .e{display:block;font-size:30px;font-family:var(--body)}
+
+
+.tbtn{-webkit-appearance:none;appearance:none;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:104px;padding:14px 6px;border-radius:10px;font-family:var(--display);font-size:24px;line-height:1;color:#fff;text-transform:uppercase;opacity:.55;transform:scale(.96);transition:opacity .15s,transform .15s}
+.tbtn .e{display:flex;align-items:center;justify-content:center;width:34px;height:34px} .tbtn .e .gi{width:30px;height:30px}
 .tbtn.red{background:var(--red);box-shadow:0 5px 0 var(--red-d)} .tbtn.blue{background:var(--blue);box-shadow:0 5px 0 var(--blue-d)}
-.tbtn.sel{opacity:1;outline:4px solid var(--yellow);outline-offset:2px;animation:gb-pop .3s}
+.tbtn.sel{opacity:1;transform:none}
+.tbtn.red.sel{box-shadow:0 5px 0 var(--red-d),0 0 0 4px #fff,0 0 0 8px var(--yellow)}
+.tbtn.blue.sel{box-shadow:0 5px 0 var(--blue-d),0 0 0 4px #fff,0 0 0 8px var(--yellow)}
+
 .wait{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px}
 .bigav{font-size:100px;line-height:1;animation:gb-bob 1.6s infinite}
 .wait h2{margin:0;font-family:var(--display);font-weight:400;font-size:40px;text-transform:uppercase;text-shadow:2px 2px 2px rgba(0,0,0,.6)}
@@ -231,7 +236,7 @@ i[data-i]{font-style:normal;display:inline-flex;align-items:center}
 .avpick .big{padding:6px} .avpick .big svg{width:100%;height:100%}
 .bigav{width:130px;height:130px;font-size:0}
 .bigav .gi{width:100%;height:100%;color:var(--yellow);stroke-width:1.6}
-.tbtn .e{display:flex;justify-content:center;margin-bottom:4px} .tbtn .e .gi{width:30px;height:30px}
+
 .tbadge .gi{width:28px;height:28px;vertical-align:-4px}
 .pinfo .t .gi{width:17px;height:17px}
 .say{display:flex;align-items:center;justify-content:center;color:var(--indigo)} .say .gi{width:24px;height:24px}
