@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#faf6ec">
+<title>Hot Potato · GameBox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="gb.css?v=37485ccd">
+<style>
+.hidden{display:none!important}  /* works even before gb.css arrives */
+/* ---- Hot Potato scene ---- */
+.setup-wrap{flex:1;padding:6px 24px 28px;overflow:auto}
+.setrow:nth-child(5) .emo{background:var(--pink)}
+#host{height:100vh;overflow:hidden}
+#arena{flex:1;display:flex;flex-direction:column;min-height:0;position:relative;padding:12px 24px 18px;gap:14px}
+.lives{display:flex;gap:4px;margin-left:4px}
+.lives svg{width:30px;height:30px;transition:transform .3s,opacity .3s}
+.lives svg.gone{opacity:.28;transform:scale(.8)}
+.lives svg.pop{animation:heartPop .7s}
+@keyframes heartPop{30%{transform:scale(1.6)}100%{transform:scale(.8)}}
+.tscore.b .lives{margin:0 4px 0 0}
+.field-wrap{flex:1;position:relative;min-height:0;overflow:hidden;border-radius:26px;border:2px solid var(--line);background:#f8f3e6 url(img/bg-tug.webp) center 42%/cover}
+.side{position:absolute;bottom:6%;width:44%;display:flex;justify-content:center;align-items:flex-end;flex-wrap:wrap-reverse;gap:0 4px;transition:filter .4s}
+.side.r{left:2%} .side.b{right:2%}
+.side .guy{width:var(--gh,96px);height:var(--gh,96px);margin:0 calc(var(--gh,96px) * -.1);animation:gb-bob 1.6s infinite}
+.side .guy:nth-child(2n){animation-delay:.4s} .side .guy:nth-child(3n){animation-delay:.8s}
+.side.hold .guy{animation:panic .35s infinite}
+@keyframes panic{25%{transform:translateY(-6px) rotate(-5deg)}75%{transform:translateY(-2px) rotate(5deg)}}
+.side.blown .guy{animation:blown 1.2s ease-out}
+@keyframes blown{20%{transform:translateY(-40px) rotate(-20deg) scale(1.1);filter:brightness(.5)}60%{transform:translateY(-10px) rotate(12deg)}}
+.sidelbl{position:absolute;top:14px;font-family:var(--display);font-weight:600;font-size:20px;color:#fff;border-radius:12px;padding:2px 14px}
+.sidelbl.r{left:16px;background:var(--red)} .sidelbl.b{right:16px;background:var(--blue)}
+.bomb{position:absolute;left:50%;top:6%;width:min(260px,21vw);aspect-ratio:1;margin-left:calc(min(260px,21vw) / -2);z-index:4;transition:filter .3s}
+.bomb svg{width:100%;height:100%;overflow:visible;animation:wob 1s ease-in-out infinite}
+.bomb.hot svg{animation:wob .22s ease-in-out infinite;filter:drop-shadow(0 0 22px rgba(224,83,61,.9))}
+@keyframes wob{25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
+.bomb .spark{transform-origin:center;transform-box:fill-box;animation:spark .25s steps(2) infinite}
+@keyframes spark{50%{transform:scale(1.4) rotate(30deg)}}
+.need{position:absolute;left:50%;top:calc(100% + 6px);transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;white-space:nowrap}
+.need .dots{display:flex;gap:8px;background:#fff;border-radius:100px;padding:7px 12px;box-shadow:0 3px 0 rgba(0,0,0,.08)}
+.need .dots i{width:24px;height:24px;border-radius:50%;background:var(--line);display:block;transition:background .2s,transform .2s}
+.need .dots i.on{transform:scale(1.15)}
+.need.r .dots i.on{background:var(--red)} .need.b .dots i.on{background:var(--blue)}
+.need .dots i.extra{background:var(--mustard)}
+.need b{font-family:var(--display);font-weight:600;font-size:26px;color:#fff;border-radius:12px;padding:1px 14px}
+.need.r b{background:var(--red)} .need.b b{background:var(--blue)}
+.boomfx{position:absolute;inset:0;pointer-events:none;z-index:7;background:radial-gradient(circle at var(--bx,50%) 40%,#fff 0,#ffd36b 18%,rgba(226,104,58,.85) 35%,transparent 65%);animation:boom 1.1s ease-out forwards}
+@keyframes boom{0%{opacity:0;transform:scale(.3)}12%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.3)}}
+.field-wrap.shake{animation:fshake .5s}
+@keyframes fshake{20%{transform:translate(-10px,6px)}40%{transform:translate(9px,-7px)}60%{transform:translate(-6px,4px)}80%{transform:translate(4px,-2px)}}
+.feed{position:absolute;top:58px;width:30%;height:36%;pointer-events:none;z-index:5}
+.feed.r{left:16px} .feed.b{right:16px}
+.fx{position:absolute;display:flex;align-items:center;gap:6px;font-size:20px;font-weight:900;padding:2px 12px 2px 3px;border-radius:100px;background:#fff;color:var(--ink);white-space:nowrap;animation:rise 1.9s ease-out forwards;border:3px solid}
+.fx b{font-family:var(--display);font-weight:600} .fxav{width:32px;height:32px;display:inline-block}
+.feed.r .fx{border-color:var(--red)} .feed.r .fx b{color:var(--red)} .feed.b .fx{border-color:var(--blue)} .feed.b .fx b{color:var(--blue)}
+@keyframes rise{0%{transform:translateY(0) scale(.4);opacity:0}15%{transform:translateY(-10px) scale(1.1);opacity:1}100%{transform:translateY(-120px) scale(1);opacity:0}}
+.sudden{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:var(--red);color:#fff;border:3px solid #fff;border-radius:16px;padding:6px 22px;font-family:var(--display);font-weight:700;font-size:28px;animation:gb-wiggle .6s infinite;z-index:5;white-space:nowrap}
+.sudden .gi{width:.9em;height:.9em}
+.hfoot{position:absolute;right:34px;bottom:30px;z-index:6}
+/* ---- phone ---- */
+.pstatus{display:flex;align-items:center;gap:12px;border-radius:20px;padding:10px 14px 10px 10px;background:var(--paper);border:3px solid var(--line);transition:background .2s}
+.pstatus .pb{flex:none;width:64px;height:64px}
+.pstatus .pb svg{width:100%;height:100%;overflow:visible;animation:wob 1s ease-in-out infinite}
+.pstatus b{display:block;font-family:var(--display);font-weight:700;font-size:21px;line-height:1.1}
+.pstatus small{display:block;font-size:14px;font-weight:800;color:var(--sub);margin-top:2px}
+.pstatus.mine{background:var(--tc);border-color:var(--tc);color:#fff;animation:alarm 1s infinite}
+.pstatus.mine small{color:#fff;opacity:.9}
+.pstatus.mine .pb svg{animation:wob .25s ease-in-out infinite}
+@keyframes alarm{50%{box-shadow:0 0 0 6px rgba(224,83,61,.25)}}
+.pstatus.boom{background:var(--ink);border-color:var(--ink);color:#fff}
+.pstatus.safe{background:#e3f1e8;border-color:#bfe0cb}
+.plives{display:flex;align-items:center;gap:10px;font-weight:900;font-size:15px}
+.plives span{display:flex;align-items:center;gap:2px}
+.plives svg{width:18px;height:18px}
+.qwrap{display:flex;flex-direction:column;gap:12px;flex:1}
+</style>
+</head>
+<body>
+<div class="doodles"></div>
+
+<!-- ============ HOST (teacher computer) ============ -->
+<section id="host" class="screen hidden">
+  <header class="gb-top">
+    <a class="brand" href="./"><span class="ic" data-art="logo"></span>GameBox</a>
+    <span class="game">· Hot Potato</span>
+    <div class="sp"></div>
+    <span class="net" id="hNet">Connecting…</span>
+    <span class="codetag">CODE<b id="hCode">----</b></span>
+  </header>
+
+  <!-- step 1: settings -->
+  <div class="setup-wrap" id="setup">
+    <div class="panel">
+      <div class="hero">
+        <div class="cover"><img src="img/cover-potato.webp" alt=""></div>
+        <div class="info">
+          <div class="eyebrow">Game settings</div>
+          <h1>Hot Potato</h1>
+          <div class="tagline">Don't get caught holding the bomb!</div>
+          <div class="chips">
+            <div class="chip"><span class="i" data-i="clock"></span><div><small>Duration</small><b>2–4 min</b></div></div>
+            <div class="chip"><span class="i" data-i="users"></span><div><small>Teams</small><b>Red vs Blue</b></div></div>
+            <div class="chip"><span class="i" data-i="heart"></span><div><small>Lives</small><b>Last team standing</b></div></div>
+          </div>
+          <div class="act"><button class="go" id="toLobby">Continue <i data-i="play"></i></button></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="setbox">
+          <div class="setrow"><span class="emo" data-i="book"></span><div class="txt"><h4>Word List</h4><p>Which words will students practice?</p></div>
+            <div class="ctl"><select class="sel" id="sSet"></select><button class="btn-soft" id="editWords"><i data-i="pencil"></i> My Words</button></div></div>
+          <div class="setrow"><span class="emo" data-i="help"></span><div class="txt"><h4>Question Type</h4><p>Show English and pick 中文, or the other way</p></div>
+            <div class="ctl"><select class="sel" id="sMode"><option value="mix">Mixed</option><option value="en2zh">English → 中文</option><option value="zh2en">中文 → English</option></select></div></div>
+          <div class="setrow"><span class="emo" data-i="heart"></span><div class="txt"><h4>Lives</h4><p>Lose a life when the bomb blows up in your hands</p></div>
+            <div class="ctl"><select class="sel" id="sLives"><option value="2">2 lives · short</option><option value="3" selected>3 lives</option><option value="5">5 lives · long</option></select></div></div>
+          <div class="setrow"><span class="emo" data-i="timer"></span><div class="txt"><h4>Time Limit</h4><p>When time runs out, the team with more lives wins</p></div>
+            <div class="ctl"><select class="sel" id="sTime"><option value="120">2 minutes</option><option value="180" selected>3 minutes</option><option value="240">4 minutes</option></select></div></div>
+          <div class="setrow"><span class="emo" data-i="bomb"></span><div class="txt"><h4>How it works</h4><p>Team with the bomb: answer <b>3–6</b> right to throw it. Other team: every right answer makes them need <b>+1</b> more. The fuse is secret!</p></div></div>
+          <div class="setnote">Students can already join with the code at the top right.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- step 2: lobby -->
+  <div class="lobby hidden" id="lobby">
+    <div class="lob-top">
+      <div class="lob-qr" id="qr"></div>
+      <div class="lob-join">
+        <div class="l1">Scan the QR code to join</div>
+        <div class="l2"><span class="rc">Room code</span><span class="bigcode" id="hCode2">----</span></div>
+      </div>
+      <div class="lob-peek"><img src="img/m/a14.webp" alt=""><img src="img/m/a52.webp" alt=""><img src="img/m/a26.webp" alt=""></div>
+      <div class="lob-act"><button class="go" id="startBtn" disabled>Light it <i data-i="play"></i></button><button class="pill ghost" id="toSetup"><i data-i="sliders"></i> Settings</button></div>
+    </div>
+    <div class="lob-teams">
+      <div class="tcol red"><div class="th"><span data-art="red"></span>Red Team <span class="n" id="rN">0</span></div><div class="names" id="rNames"></div></div>
+      <div class="tcol blue"><div class="th"><span data-art="blue"></span>Blue Team <span class="n" id="bN">0</span></div><div class="names" id="bNames"></div></div>
+    </div>
+    <div class="lob-hint" id="startHint">Need at least 1 player on each team.</div>
+  </div>
+
+  <!-- step 3: game -->
+  <div id="arena" class="hidden">
+    <div class="scorebar">
+      <div class="tscore r"><span data-art="red"></span><span class="nm">Red</span><span class="lives" id="rLives"></span><span class="ppl" id="rCnt"></span></div>
+      <div class="timer" id="timer">0:00</div>
+      <div class="tscore b"><span class="ppl" id="bCnt"></span><span class="lives" id="bLives"></span><span class="nm">Blue</span><span data-art="blue"></span></div>
+    </div>
+    <div class="field-wrap" id="fieldWrap">
+      <span class="sidelbl r">Red</span><span class="sidelbl b">Blue</span>
+      <div class="side r" id="sideR"></div>
+      <div class="side b" id="sideB"></div>
+      <div class="bomb" id="bomb"><div class="need" id="need"><span class="dots" id="needDots"></span><b id="needTxt"></b></div></div>
+      <div class="feed r" id="feedR"></div>
+      <div class="feed b" id="feedB"></div>
+      <div class="sudden hidden" id="suddenBanner"><i data-i="flame"></i> Sudden death! <i data-i="flame"></i></div>
+      <div class="countdown hidden" id="hCount"><span>3</span></div>
+    </div>
+    <div class="hfoot"><button class="pill ghost" id="stopBtn"><i data-i="stop"></i> End now</button></div>
+    <div class="result hidden" id="result">
+      <canvas class="confetti" id="confetti"></canvas>
+      <div class="rcard">
+        <div class="rhead"><img class="tro" src="img/trophy.webp" alt=""><div class="wtxt"><div class="win" id="winTxt">Red wins!</div><div class="why" id="whyTxt"></div></div><span id="winMascot"></span></div>
+        <div class="rbody"><div class="mvps">
+          <div class="mvp r"><h3><i data-i="flame"></i> Red MVPs</h3><div class="rows" id="mvpR"></div></div>
+          <div class="mvp y"><h3><i data-i="star"></i> Awards</h3><div class="rows" id="awards"></div></div>
+          <div class="mvp b"><h3><i data-i="bolt"></i> Blue MVPs</h3><div class="rows" id="mvpB"></div></div>
+        </div></div>
+        <div class="rbtns"><button class="go" id="againBtn"><i data-i="refresh"></i> Play again</button><button class="pill ghost" id="lobbyBtn"><i data-i="users"></i> Back to lobby</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="wordModal">
+    <div class="mcard">
+      <div class="mh"><i data-i="pencil"></i> My Words</div>
+      <div class="mb">
+        <div class="hint">One word per line: English + 中文. Example: <b>coach 教練</b>. At least 4 words. Saved on this computer and shared by all GameBox games.</div>
+        <textarea id="wordText" placeholder="coach 教練&#10;referee 裁判&#10;warm up 暖身"></textarea>
+        <div class="err" id="wordErr"></div>
+        <div class="row"><button class="btn-soft" id="wordCancel">Cancel</button><button class="btn-ink" style="width:auto;padding:10px 22px;font-size:17px" id="wordSave">Save &amp; use</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PLAYER (student phone) ============ -->
+<section id="player" class="screen hidden">
+  <div class="p-top"><span class="av" id="pAvSm"></span><span class="me" id="pMe">GameBox</span><span class="sc hidden" id="pSc"></span></div>
+
+  <div class="p-body" id="pJoin">
+    <div class="joincard">
+      <h1>Join the game</h1>
+      <div class="room">Hot Potato · Room <b id="pCodeLbl"></b></div>
+      <div class="avpick"><div class="big" id="pAvBtn"></div><div class="t"><b>Meet your monster!</b>It plays for you today</div></div>
+      <div class="lbl">Your name</div>
+      <input id="pName" class="field" maxlength="8" placeholder="Name" autocomplete="off">
+      <div class="lbl">Pick your team</div>
+      <div class="teampick">
+        <button class="tbtn red" data-team="red"><span class="e" data-art="red"></span>Red</button>
+        <button class="tbtn blue" data-team="blue"><span class="e" data-art="blue"></span>Blue</button>
+      </div>
+      <button class="btn-ink" id="pGo" disabled>Join</button>
+      <div class="err" id="pErr"></div>
+    </div>
+  </div>
+
+  <div class="p-body hidden" id="pWait">
+    <div class="wait">
+      <div class="bigav" id="pAvBig"></div>
+      <h2>You're in!</h2>
+      <div class="tbadge" id="pTeamBig">Red Team</div>
+      <div class="msg" style="margin-top:14px">Don't hold the bomb!</div>
+      <div class="sub">Waiting for the teacher. Keep your screen on!</div>
+    </div>
+  </div>
+
+  <div class="p-body hidden" id="pPlay">
+    <div class="pinfo"><span class="t" id="pTimeBox"><i data-i="timer"></i> <span id="pTime">--</span></span><span class="plives" id="pLives"></span></div>
+    <div class="pstatus" id="pStatus"></div>
+    <div class="qwrap">
+      <div class="qcard">
+        <div class="ask" id="pAsk">What does it mean?</div>
+        <div class="q" id="pQ">—</div>
+        <button class="say hidden" id="pSay" aria-label="Listen" data-i="volume"></button>
+      </div>
+      <div class="opts" id="pOpts"></div>
+    </div>
+  </div>
+
+  <div class="p-body hidden" id="pEnd">
+    <div class="wait">
+      <div class="bigav" id="pEndAv"></div>
+      <div class="res" id="pWin">Red wins!</div>
+      <div class="msg" id="pWinSub"></div>
+      <div class="stats">
+        <div class="stat"><b id="pMine">0</b><span>Correct</span></div>
+        <div class="stat"><b id="pBest">0</b><span>Best combo</span></div>
+      </div>
+      <div class="sub" style="margin-top:8px">Wait for the next round…</div>
+    </div>
+  </div>
+
+  <div class="pcount hidden" id="pCount"><b id="pCountN">3</b><span id="pCountT">Get ready!</span></div>
+</section>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="gb-art.js?v=058fd250"></script>
+<script src="gb.js?v=aad6e4b7"></script>
+<script>
+"use strict";
+const GAME="potato";
+const { $, show, esc, store, rand, pick, fmt, beep } = GB;
+const now = GB.now;
+const CHEERS_OK = ["Nice!","Great!","Yes!","Quick!","Super!","Cool!"];
+const CHEERS_NO = ["Oops!","Almost!","Try again!","Not quite!"];
+const EXTRA_MAX = 3;                         // the other team can add up to +3 answers
+const BOOM_PAUSE = 3800;                     // ms between a blast and the next bomb
+const fuseMs = sudden => sudden ? 10000 + rand(8000) : 18000 + rand(14000);
+const other = t => t === "red" ? "blue" : "red";
+const T = t => t === "red" ? "Red" : "Blue";
+const HEART = c => `<svg viewBox="0 0 24 24"><path fill="${c}" d="M12 21s-8.5-5.2-8.5-11.4A4.8 4.8 0 0 1 12 6.9a4.8 4.8 0 0 1 8.5 2.7C20.5 15.8 12 21 12 21z"/></svg>`;
+// cute monster bomb (flat, no outlines, googly eyes) — eyes worry more when the fuse is short
+const BOMB = (hot) => `<svg viewBox="0 0 120 120">
+  <path d="M74 30 C82 18 92 14 100 18" fill="none" stroke="#c9972a" stroke-width="5" stroke-linecap="round"/>
+  <g class="spark" transform="translate(100 17)"><path d="M0-11 3-3 11 0 3 3 0 11-3 3-11 0-3-3z" fill="#f2c14e"/><circle r="3.5" fill="#fff"/></g>
+  <rect x="58" y="27" width="20" height="14" rx="4" fill="#3a3550" transform="rotate(35 68 34)"/>
+  <circle cx="56" cy="70" r="40" fill="#2b2440"/>
+  <path d="M30 56 q6-14 22-18" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="44" cy="66" r="11" fill="#fff"/><circle cx="68" cy="66" r="11" fill="#fff"/>
+  <circle cx="${hot?42:46}" cy="${hot?64:68}" r="5" fill="#1d1d1f"/><circle cx="${hot?70:66}" cy="${hot?64:68}" r="5" fill="#1d1d1f"/>
+  ${hot ? '<ellipse cx="56" cy="88" rx="7" ry="8" fill="#1d1d1f"/><path d="M28 50l10 6M84 50l-10 6" stroke="#fff" stroke-width="3" stroke-linecap="round"/>'
+        : '<path d="M47 86 q9 7 18 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>'}
+  <circle cx="34" cy="80" r="5" fill="#e98bb0" opacity=".55"/><circle cx="78" cy="80" r="5" fill="#e98bb0" opacity=".55"/>
+</svg>`;
+
+function boot(){
+  const r=(GB.params.get("r")||"").replace(/\D/g,"");
+  if (GB.params.has("host")) return Host.start(GB.params.get("host"));
+  if (r.length===4) return Player.start(r);
+  location.replace(GB.dirUrl);
+}
+
+/* ================== HOST (the referee) ================== */
+const Host = {
+  code:null, ref:null, meta:{}, players:{}, bomb:{}, raf:0, view:"setup", ended:false, tickSec:-1, lastTick:0, _hot:null, _side:null, _bombNo:-1,
+
+  async start(existing){
+    show($("host")); GB.unlockAudio(); GB.host.netStatus($("hNet"));
+    GB.host.initSettings(["sMode","sTime","sLives"]);
+    this.code = await GB.host.openRoom(GAME, existing);
+    this.ref = GB.db.ref("rooms/"+this.code);
+    $("hCode").textContent=this.code; $("hCode2").textContent=this.code;
+    GB.host.drawQR(GB.baseUrl+"?r="+this.code, $("qr"));
+    ART.preload(["bg-tug","trophy","team-red","team-blue"]);
+    if (existing && String(existing).replace(/\D/g,"")===this.code) this.view="lobby";
+    $("toLobby").onclick=()=>{ this.view="lobby"; this.render(); };
+    $("toSetup").onclick=()=>{ this.view="setup"; this.render(); };
+    $("startBtn").onclick=()=>this.startRound();
+    $("stopBtn").onclick=()=>this.finish("time");
+    $("againBtn").onclick=()=>this.startRound();
+    $("lobbyBtn").onclick=()=>{ this.view="lobby"; this.ref.child("meta").update({state:"lobby",winner:null}); };
+    this.ref.child("meta").on("value",s=>{ this.meta=s.val()||{}; this.render(); });
+    this.ref.child("bomb").on("value",s=>{ this.bomb=s.val()||{}; this.drawBomb(); this.drawLives(); });
+    this.ref.child("players").on("value",s=>{ this.onPlayers(s.val()||{}); });
+  },
+
+  base(team){ const n=GB.host.teams(this.players)[team==="red"?"r":"b"].length; return Math.max(3, Math.min(6, Math.ceil(n*0.6))); },
+
+  onPlayers(p){
+    const prev=this.players; this.players=p;
+    const B=this.bomb, live=this.meta.state==="play" && now()>=this.meta.startAt && B.phase==="live" && !this.ended;
+    if (live){
+      let {holder, need, prog, extra=0}=B, changed=false;
+      for (const id in p){
+        const d=(p[id].score||0)-((prev[id]&&prev[id].score)||0); if (d<=0) continue;
+        if (p[id].team===holder){ prog+=d; this.popFeed(p[id], "+"+d); }
+        else if (extra<EXTRA_MAX){ const add=Math.min(d,EXTRA_MAX-extra); extra+=add; need+=add; this.popFeed(p[id], "+"+add+" for "+T(holder)); }
+        else this.popFeed(p[id], "Nice!");
+        changed=true;
+      }
+      if (changed){
+        if (prog>=need){ const to=other(holder); this.ref.child("bomb").update({holder:to, prog:0, need:this.base(to), extra:0, passes:(B.passes||0)+1}); this.throwFx(holder,to); }
+        else this.ref.child("bomb").update({prog, need, extra});
+      }
+    }
+    this.renderTeams();
+    if (this.meta.state==="play") this.crews();
+  },
+
+  renderTeams(){
+    if ((this.meta.state||"lobby")==="lobby"){
+      const {r,b}=GB.host.renderLobby(this.players, this.ref);
+      $("startBtn").disabled = !(r.length&&b.length);
+      $("startHint").textContent = (r.length&&b.length) ? "Use the arrows to move a player to the other team, or X to remove." : "Need at least 1 player on each team.";
+    } else {
+      const {r,b}=GB.host.teams(this.players);
+      $("rCnt").innerHTML=ART.icon("users")+" "+r.length; $("bCnt").innerHTML=ART.icon("users")+" "+b.length;
+    }
+  },
+
+  crews(){
+    const {r,b}=GB.host.teams(this.players), H=$("fieldWrap").clientHeight||500;
+    const make=(el,list)=>{ const shown=list.slice(0,10); const gh=Math.round(Math.min(H*.26, shown.length>6?92:shown.length>3?112:132));
+      el.style.setProperty("--gh",gh+"px"); el.innerHTML=shown.map(p=>`<div class="guy">${ART.avatar(p.av)}</div>`).join(""); };
+    const key=JSON.stringify([r.map(p=>p.av),b.map(p=>p.av),H]);
+    if (key===this._crewKey) return; this._crewKey=key;
+    make($("sideR"),r); make($("sideB"),b);
+  },
+
+  drawLives(){
+    const L=this.bomb.lives||{}, max=this.meta.lives||3;
+    for (const [t,id] of [["red","rLives"],["blue","bLives"]]){
+      const have=L[t]==null?max:L[t], el=$(id);
+      if (el.children.length!==max) el.innerHTML=Array.from({length:max},()=>HEART("#fff")).join("");
+      [...el.children].forEach((h,i)=>{ const gone=i>=have; if (gone && !h.classList.contains("gone")){ h.classList.add("gone","pop"); } h.classList.toggle("gone",gone); });
+    }
+    show($("suddenBanner"), this.meta.state==="play" && !!this.bomb.sudden && this.bomb.phase==="live");
+  },
+
+  bombX(t){ return t==="red" ? "25%" : "75%"; },
+
+  drawBomb(){
+    const B=this.bomb, el=$("bomb");
+    if (!B.holder || this.meta.state!=="play"){ show(el,false); return; }
+    show(el, B.phase==="live" || now()<this.meta.startAt);
+    if (this._side!==B.holder || this._bombNo!==B.no){ el.style.left=this.bombX(B.holder); this._side=B.holder; this._bombNo=B.no; }
+    $("sideR").classList.toggle("hold",B.holder==="red" && B.phase==="live"); $("sideB").classList.toggle("hold",B.holder==="blue" && B.phase==="live");
+    const n=$("need"); n.className="need "+(B.holder==="blue"?"b":"r");
+    const need=B.need||3, prog=Math.min(B.prog||0,need), base=need-(B.extra||0);
+    $("needDots").innerHTML=Array.from({length:need},(_,i)=>`<i class="${i<prog?"on":""}${i>=base?" extra":""}"></i>`).join("");
+    $("needTxt").textContent=T(B.holder)+" needs "+(need-prog)+" more";
+    this.setHot(this._hot);
+  },
+  setHot(hot){ this._hot=!!hot; const el=$("bomb"); el.classList.toggle("hot",this._hot); const svg=BOMB(this._hot);
+    if (el.dataset.h!==String(this._hot)){ el.dataset.h=this._hot; const old=el.querySelector("svg"); if(old) old.remove(); el.insertAdjacentHTML("afterbegin",svg); } },
+
+  throwFx(from,to){
+    const el=$("bomb"), W=$("fieldWrap").clientWidth, dx=(to==="red"?-1:1)*W*.5;
+    el.style.left=this.bombX(to); this._side=to;
+    el.animate([{transform:`translateX(${-dx}px) translateY(0) rotate(0)`},{transform:`translateX(${-dx/2}px) translateY(-140px) rotate(${to==="red"?-200:200}deg)`},{transform:"translateX(0) translateY(0) rotate(360deg)"}],{duration:650,easing:"ease-out"});
+    beep(300,.35,"sine",.12,0,900); this.shout(T(from)+" threw it!");
+  },
+
+  popFeed(p,txt){
+    const box=p.team==="blue"?$("feedB"):$("feedR");
+    const d=document.createElement("div"); d.className="fx"; d.innerHTML=`<span class="fxav">${ART.avatar(p.av,"",true)}</span>${esc(p.name)} <b>${esc(txt)}</b>`;
+    d.style.bottom=rand(80)+"px"; d.style[p.team==="blue"?"right":"left"]=rand(120)+"px";
+    box.appendChild(d); setTimeout(()=>d.remove(),2000); while(box.children.length>10) box.firstChild.remove();
+    beep(p.team==="blue"?520:440,.05,"square",.04);
+  },
+
+  shout(txt){ const d=document.createElement("div"); d.className="shout"; d.textContent=txt; $("fieldWrap").appendChild(d); setTimeout(()=>d.remove(),1500); },
+
+  explode(){
+    const B=this.bomb, lives=Object.assign({},B.lives), t=B.holder;
+    lives[t]=Math.max(0,(lives[t]||0)-1);
+    this.ref.child("bomb").update({phase:"boom", lives, boomTeam:t, nextAt:now()+BOOM_PAUSE});
+    const f=document.createElement("div"); f.className="boomfx"; f.style.setProperty("--bx",t==="red"?"25%":"75%"); $("fieldWrap").appendChild(f); setTimeout(()=>f.remove(),1200);
+    const W=$("fieldWrap"); W.classList.remove("shake"); void W.offsetWidth; W.classList.add("shake");
+    const side=t==="red"?$("sideR"):$("sideB"); side.classList.remove("blown"); void side.offsetWidth; side.classList.add("blown"); setTimeout(()=>side.classList.remove("blown"),1300);
+    beep(90,.9,"sawtooth",.3); beep(60,1.2,"square",.2,.05); beep(40,1.4,"sine",.35,.1);
+    setTimeout(()=>this.shout(lives[t]===0 ? T(t)+" is out!" : "BOOM! "+T(t)+" loses a life"),150);
+  },
+
+  nextBomb(){
+    const B=this.bomb, L=B.lives||{};
+    if ((L.red||0)<=0 || (L.blue||0)<=0) return this.finish("lives");
+    const holder=other(B.boomTeam||"red"), sudden=L.red===1 && L.blue===1;
+    this.ref.child("bomb").update({phase:"live", holder, need:this.base(holder), prog:0, extra:0, sudden, fuseEnd:now()+fuseMs(sudden), no:(B.no||1)+1, boomTeam:null, nextAt:null});
+    this.shout(sudden?"Sudden death!":"New bomb → "+T(holder));
+  },
+
+  async startRound(){
+    const words=GB.host.words();
+    if (words.length<4) return alert("Need at least 4 words.");
+    const dur=+$("sTime").value, L=+$("sLives").value, startAt=now()+4200;
+    const holder=Math.random()<.5?"red":"blue";
+    const upd={};
+    for (const id in this.players) upd["players/"+id+"/score"]=0;
+    Object.assign(upd,{ "meta/game":GAME, "meta/state":"play", "meta/round":(this.meta.round||0)+1, "meta/startAt":startAt, "meta/endAt":startAt+dur*1000,
+      "meta/words":words, "meta/mode":$("sMode").value, "meta/lives":L, "meta/winner":null, "meta/why":null,
+      "bomb":{ phase:"live", holder, need:this.base(holder), prog:0, extra:0, passes:0, no:1, sudden:false, fuseEnd:startAt+fuseMs(false), lives:{red:L,blue:L} } });
+    this.ended=false; this.tickSec=-1; this._side=null; this._bombNo=-1; this._crewKey=null; this.view="lobby";
+    await this.ref.update(upd);
+  },
+
+  finish(why){
+    if (this.ended || this.meta.state!=="play") return;
+    this.ended=true;
+    const L=this.bomb.lives||{}, {r,b}=GB.host.teams(this.players), sum=l=>l.reduce((s,p)=>s+(p.score||0),0);
+    const rs=sum(r), bs=sum(b);
+    let winner = (L.red||0)>(L.blue||0) ? "red" : (L.blue||0)>(L.red||0) ? "blue" : rs>bs ? "red" : bs>rs ? "blue" : "tie";
+    this.ref.child("meta").update({state:"end", winner, why, rC:rs, bC:bs});
+  },
+
+  render(){
+    const m=this.meta, st=m.state||"lobby";
+    show($("setup"), st==="lobby" && this.view==="setup");
+    show($("lobby"), st==="lobby" && this.view==="lobby");
+    show($("arena"), st!=="lobby");
+    cancelAnimationFrame(this.raf);
+    if (st==="lobby"){ show($("result"),false); this.renderTeams(); return; }
+    this.crews(); this.renderTeams(); this.drawLives(); this.drawBomb();
+    if (st==="play"){
+      show($("result"),false); show($("stopBtn"),true);
+      const loop=()=>{
+        const t=now(), B=this.bomb;
+        if (t<m.startAt){
+          const n=Math.ceil((m.startAt-t)/1000);
+          show($("hCount"),true);
+          const lab = n>3 ? "Ready?" : String(n);
+          if ($("hCount").firstElementChild.textContent!==lab){ $("hCount").innerHTML="<span>"+lab+"</span>"; if(n<=3) beep(n===1?880:660,.15,"triangle",.25); }
+          $("hCount").firstElementChild.style.fontSize = n>3 ? "130px" : "";
+          $("timer").textContent=fmt(m.endAt-m.startAt);
+        } else {
+          if (!$("hCount").classList.contains("hidden")){ show($("hCount"),false); beep(1175,.35,"triangle",.3); this.shout("Pass it on!"); }
+          const left=Math.max(0,m.endAt-t);
+          $("timer").textContent=fmt(left);
+          $("timer").classList.toggle("warn",left<=10000);
+          if (B.phase==="live" && !this.ended){
+            const fl=B.fuseEnd-t;
+            this.setHot(fl<5000);
+            const gap = fl<2500 ? 160 : fl<5000 ? 320 : 700;
+            if (Date.now()-this.lastTick>gap){ this.lastTick=Date.now(); beep(fl<5000?1400:1000,.03,"square",.05); }
+            if (fl<=0) this.explode();
+          }
+          if (B.phase==="boom" && B.nextAt && t>=B.nextAt && !this.ended) this.nextBomb();
+          if (left<=0 && !this.ended) this.finish("time");
+        }
+        this.raf=requestAnimationFrame(loop);
+      };
+      loop();
+    }
+    if (st==="end"){
+      show($("hCount"),false); show($("stopBtn"),false); show($("bomb"),false); $("timer").classList.remove("warn");
+      const w=m.winner, {r,b}=GB.host.teams(this.players), L=this.bomb.lives||{};
+      $("winTxt").className="win "+(w==="red"?"r":w==="blue"?"b":"t");
+      $("winMascot").innerHTML = w==="tie" ? "" : ART.mascot(w,"wm");
+      $("winTxt").textContent= w==="red"?"Red wins!": w==="blue"?"Blue wins!":"It's a tie!";
+      $("whyTxt").textContent = (m.why==="lives" ? T(w==="tie"?"red":other(w))+" ran out of lives!" : "Time's up!")+"   Lives left: Red "+(L.red||0)+" · Blue "+(L.blue||0);
+      const top=l=>l.slice().sort((x,y)=>(y.score||0)-(x.score||0)).slice(0,3).map((p,i)=>`<div class="row">${ART.medal(i)} <span class="av">${ART.avatar(p.av,"",true)}</span> ${esc(p.name)} <span class="s">${p.score||0}</span></div>`).join("")||"<div class='row'>—</div>";
+      $("mvpR").innerHTML=top(r); $("mvpB").innerHTML=top(b);
+      const all=[...r,...b], best=k=>all.slice().sort((x,y)=>(y[k]||0)-(x[k]||0))[0], bs=best("score"), bc=best("best");
+      $("awards").innerHTML =
+        (bs&&bs.score?`<div class="row">${ART.icon("target")} <span class="av">${ART.avatar(bs.av,"",true)}</span> ${esc(bs.name)}<span class="s">${bs.score}</span></div><div class="cap">Most correct</div>`:"")+
+        (bc&&bc.best?`<div class="row">${ART.icon("flame")} <span class="av">${ART.avatar(bc.av,"",true)}</span> ${esc(bc.name)}<span class="s">x${bc.best}</span></div><div class="cap">Longest streak</div>`:"")+
+        `<div class="row">${ART.icon("bomb")} <span>Bomb passes</span><span class="s">${this.bomb.passes||0}</span></div><div class="cap">The whole class</div>`;
+      show($("result"),true);
+      if (this._celebrated!==m.round){ this._celebrated=m.round; GB.fanfare(); GB.confetti($("confetti")); }
+    }
+  }
+};
+
+/* ================== PLAYER ================== */
+const Player = {
+  code:null, ref:null, pid:null, team:null, name:"", av:"a0", meta:{}, bomb:{}, score:0, combo:0, best:0, round:-1, q:null, locked:false, recent:[], timerInt:0, joined:false, _boomSeen:0,
+
+  async start(code){
+    this.code=code; this.ref=GB.db.ref("rooms/"+code);
+    const ok=await GB.join.checkGame(GAME, code); if (!ok) return;
+    show($("player"));
+    if (!ok.exists) $("pErr").textContent="Room "+code+" not found. Check the code on the big screen.";
+    GB.join.setup(this, { game:GAME, ref:this.ref, code, extra:{score:0, best:0}, onEnter:()=>this.enter() });
+    $("pSay").onclick=()=>{ if(this.q) GB.speak(this.q.en); };
+  },
+
+  showAv(){ $("pAvBtn").innerHTML=ART.avatar(this.av); $("pAvSm").innerHTML=this.joined?ART.avatar(this.av):ART.avatar("a5"); $("pAvBig").innerHTML=ART.avatar(this.av); },
+
+  enter(){
+    if (this.joined) return; this.joined=true;
+    const me=GB.join.presence(this, this.ref);
+    me.on("value",s=>{
+      const v=s.val();
+      if (!v || !v.name){ if (this.joined){ GB.join.kicked(this, this.ref, me, v); this.ref.child("bomb").off(); this.setBar(); } return; }
+      this.team=v.team; this.name=v.name;
+      if (typeof v.score==="number" && v.score<this.score) this.score=v.score;
+      this.setBar();
+    });
+    this.ref.child("meta").on("value",s=>{ this.meta=s.val()||{}; this.render(); });
+    this.ref.child("bomb").on("value",s=>{ this.bomb=s.val()||{}; this.drawStatus(); });
+  },
+
+  setBar(){
+    const P=$("player"); P.classList.toggle("red",this.team==="red"&&this.joined); P.classList.toggle("blue",this.team==="blue"&&this.joined);
+    $("pMe").textContent=this.joined ? this.name : "GameBox";
+    $("pSc").innerHTML=ART.icon("check")+" "+this.score; show($("pSc"),this.joined);
+    $("pTeamBig").innerHTML=this.team==="blue"?ART.mascot("blue")+"Blue Team":ART.mascot("red")+"Red Team";
+    this.showAv();
+  },
+
+  drawStatus(){
+    const B=this.bomb, el=$("pStatus"); if (!B.holder || !this.team) return;
+    const L=B.lives||{}, mine=B.holder===this.team;
+    $("pLives").innerHTML=["red","blue"].map(t=>`<span>${Array.from({length:L[t]||0},()=>HEART(t==="red"?"#e0533d":"#3a78c9")).join("")||"0"}</span>`).join("");
+    if (B.phase==="boom"){
+      const me=B.boomTeam===this.team;
+      el.className="pstatus boom"; el.innerHTML=`<span class="pb">${BOMB(true)}</span><span><b>${me?"BOOM! You lost a life":"BOOM! "+T(B.boomTeam)+" lost a life"}</b><small>${me?"Get ready for the next bomb…":"Phew! Next bomb is coming…"}</small></span>`;
+      if (B.nextAt!==this._boomSeen){ this._boomSeen=B.nextAt; try{ navigator.vibrate && navigator.vibrate(me?[300,100,300]:80); }catch(e){} if(me) beep(90,.6,"sawtooth",.2); }
+      return;
+    }
+    const left=(B.need||3)-(B.prog||0);
+    if (mine){ el.className="pstatus mine"; el.innerHTML=`<span class="pb">${BOMB(false)}</span><span><b>You have the bomb!</b><small>${left} more right answer${left===1?"":"s"} to throw it!</small></span>`; }
+    else { el.className="pstatus safe"; el.innerHTML=`<span class="pb">${BOMB(false)}</span><span><b>${T(B.holder)} has the bomb</b><small>${(B.extra||0)<EXTRA_MAX?"Right answers make them need +1 more!":"Keep going — they still need "+left+"!"}</small></span>`; }
+    if (this._lastHolder!==B.holder){ if (this._lastHolder && mine){ try{ navigator.vibrate && navigator.vibrate([100,50,100]); }catch(e){} beep(700,.12,"square",.1); } this._lastHolder=B.holder; }
+  },
+
+  render(){
+    const m=this.meta, st=m.state||"lobby";
+    if (!this.joined) return;
+    show($("pJoin"),false);
+    clearInterval(this.timerInt);
+    if (st==="lobby"){ show($("pWait"),true); show($("pPlay"),false); show($("pEnd"),false); show($("pCount"),false); this.score=0; this.setBar(); return; }
+    if (st==="play"){
+      if (m.round!==this.round){ this.round=m.round; this.score=0; this.combo=0; this.best=0; this.recent=[]; this._lastHolder=null; this.setBar(); this.nextQ(); }
+      show($("pWait"),false); show($("pEnd"),false); show($("pPlay"),true); this.drawStatus();
+      let lastN=null;
+      const tick=()=>{
+        const t=now();
+        if (t<m.startAt){
+          show($("pCount"),true); const n=Math.ceil((m.startAt-t)/1000);
+          const lab = n>3 ? "go" : String(n);
+          if (lab!==lastN){ lastN=lab; $("pCountN").innerHTML= n>3 ? ART.avatar(this.av) : lab; $("pCountN").style.animation="none"; void $("pCountN").offsetWidth; $("pCountN").style.animation=""; }
+          $("pCountT").textContent = n>3 ? "Get ready!" : "Ready…";
+        } else show($("pCount"),false);
+        const left=Math.max(0,Math.ceil((m.endAt-Math.max(t,m.startAt))/1000));
+        $("pTime").textContent=fmt(left*1000);
+        $("pTimeBox").classList.toggle("warn", left<=10 && t>=m.startAt);
+      };
+      tick(); this.timerInt=setInterval(tick,250);
+      return;
+    }
+    if (st==="end"){
+      show($("pCount"),false); show($("pPlay"),false); show($("pWait"),false); show($("pEnd"),true);
+      const w=m.winner, mine=w===this.team;
+      $("pWin").textContent= w==="tie"?"It's a tie!": mine ? "You win!" : T(w)+" wins!";
+      $("pWin").style.color= w==="red"?"var(--red)":w==="blue"?"var(--blue)":"var(--orange)";
+      $("pWinSub").textContent= w==="tie"?"What a battle!": mine ? "You survived the bomb!" : "So close! Next time!";
+      $("pEndAv").innerHTML= mine ? ART.img("trophy") : ART.avatar(this.av);
+      $("pMine").textContent=this.score; $("pBest").textContent=this.best;
+      try{ navigator.vibrate && navigator.vibrate(mine?[80,60,80,60,200]:200); }catch(e){}
+    }
+  },
+
+  nextQ(){
+    const W=this.meta.words||[]; if(W.length<4) return;
+    const q=GB.makeQuestion(W, this.meta.mode||"mix", this.recent);
+    this.q=q;
+    const isEn = q.dir==="en2zh";
+    $("pAsk").textContent = isEn ? "What does it mean?" : "Which English word?";
+    $("pQ").textContent = isEn ? q.en : q.zh;
+    $("pQ").classList.toggle("zh",!isEn);
+    show($("pSay"), isEn);
+    $("pOpts").innerHTML = q.opts.map(k=>`<button class="opt" data-k="${k}">${esc(isEn?W[k][1]:W[k][0])}</button>`).join("");
+    for (const b of $("pOpts").children) b.onclick=()=>this.answer(+b.dataset.k,b);
+  },
+
+  toast(txt,bad){ const d=document.createElement("div"); d.className="toast"+(bad?" bad":""); d.textContent=txt; document.body.appendChild(d); setTimeout(()=>d.remove(),950); },
+
+  answer(k,btn){
+    if (this.locked || this.meta.state!=="play" || now()<this.meta.startAt || now()>this.meta.endAt) return;
+    this.locked=true;
+    if (k===this.q.answer){
+      btn.classList.add("ok");
+      this.score++; this.combo++; this.best=Math.max(this.best,this.combo); this.setBar();
+      this.ref.child("players/"+this.pid).update({score:this.score, best:this.best});
+      this.toast(this.bomb.holder===this.team ? "Pass it!" : pick(CHEERS_OK));
+      beep(880,.08,"triangle",.15); beep(1320,.12,"triangle",.12,.07);
+      setTimeout(()=>{ this.locked=false; this.nextQ(); },450);
+    } else {
+      this.combo=0;
+      btn.classList.add("no");
+      for (const b of $("pOpts").children) if(+b.dataset.k===this.q.answer) b.classList.add("ans");
+      this.toast(pick(CHEERS_NO),true);
+      beep(160,.25,"sawtooth",.12);
+      try{ navigator.vibrate && navigator.vibrate(150); }catch(e){}
+      setTimeout(()=>{ this.locked=false; this.nextQ(); },1400);
+    }
+  }
+};
+
+boot();
+</script>
+</body>
+</html>
