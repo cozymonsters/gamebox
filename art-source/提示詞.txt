@@ -30,3 +30,27 @@ Two team mascot monsters side by side with space between them, 2048x1024 px, pla
 ==================== 補畫小提醒 ====================
 - 若線條太粗或出現外框：追加 "no outlines, flatter, more like a mid-century picture book"
 - 以後要補畫新角色：貼共同風格 + 附上 characters.png，說 "Draw N more monsters in exactly the same style as this sheet"
+
+==================== 1b. 第二批 16 隻（characters-2.png）2026-10-21 ====================
+（先貼共同風格，並附上 character-sheet.png 當風格參考）
+Using exactly the same style as the attached character sheet (flat shapes, no outlines, thin black stick limbs, googly eyes, small darker texture marks, same muted retro palette, cream background), draw 16 NEW funny monsters. They must look clearly different from every monster in the attached sheet. Same layout: evenly spaced 4x4 grid, 2048x2048 px, each monster centered in its own 512x512 cell with generous padding, no overlap, plain cream background, full body.
+
+Give each one a different personality, body idea and pose:
+1. tiny bat-winged monster doing a happy jump
+2. tall shaggy-furred monster giving itself a hug
+3. slime monster with drippy edges, waving hello
+4. octopus-like monster with tentacles, juggling three small balls
+5. long-necked monster wearing round glasses, reading a book
+6. round fluffy monster with a big belly patch, holding a balloon
+7. ghost-sheet monster with stubby legs, peeking shyly
+8. four-armed monster flexing all its arms proudly
+9. cyclops monster with a tiny horn, wearing big headphones
+10. cactus-like spiky monster with a little flower on its head, giving a thumbs up
+11. donut-shaped monster with a hole in the middle, laughing
+12. half-moon monster with long floppy ears, sleepy, wrapped in a scarf
+13. cupcake-shaped monster with a swirl on top, cheering with arms up
+14. monster with eyes on three stalks, holding a giant pencil
+15. lightning-bolt-shaped zippy monster running with motion lines
+16. chubby monster with a curly tail and a backpack, cheeky grin
+
+Use each palette colour at least twice; vary expressions (cheeky, surprised, proud, focused, laughing, sleepy). Keep props simple, flat and in the same palette. No text, no letters, no numbers, no watermark.
