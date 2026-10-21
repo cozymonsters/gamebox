@@ -33,12 +33,13 @@
 @keyframes blown{20%{transform:translateY(-40px) rotate(-20deg) scale(1.1);filter:brightness(.5)}60%{transform:translateY(-10px) rotate(12deg)}}
 .sidelbl{position:absolute;top:14px;font-family:var(--display);font-weight:600;font-size:20px;color:#fff;border-radius:12px;padding:2px 14px}
 .sidelbl.r{left:16px;background:var(--red)} .sidelbl.b{right:16px;background:var(--blue)}
-.bomb{position:absolute;left:50%;top:6%;width:min(260px,21vw);aspect-ratio:1;margin-left:calc(min(260px,21vw) / -2);z-index:4;transition:filter .3s}
-.bomb svg{width:100%;height:100%;overflow:visible;animation:wob 1s ease-in-out infinite}
-.bomb.hot svg{animation:wob .22s ease-in-out infinite;filter:drop-shadow(0 0 22px rgba(224,83,61,.9))}
+.bomb{position:absolute;left:50%;top:3%;width:min(230px,18vw);aspect-ratio:380/450;margin-left:calc(min(230px,18vw) / -2);z-index:4;transition:filter .3s}
+.bimg{display:block;width:100%;height:100%;object-fit:contain;user-select:none}
+.bomb .bimg{animation:wob 1s ease-in-out infinite;transform-origin:50% 65%}
+.bomb.hot .bimg{animation:wob .22s ease-in-out infinite;filter:drop-shadow(0 0 22px rgba(224,83,61,.9))}
 @keyframes wob{25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
-.bomb .spark{transform-origin:center;transform-box:fill-box;animation:spark .25s steps(2) infinite}
-@keyframes spark{50%{transform:scale(1.4) rotate(30deg)}}
+.boomimg{position:absolute;top:2%;width:min(380px,30vw);margin-left:calc(min(380px,30vw) / -2);z-index:8;pointer-events:none;animation:boomPop 1.6s cubic-bezier(.2,1.6,.4,1) forwards}
+@keyframes boomPop{0%{transform:scale(.2) rotate(-10deg);opacity:0}15%{transform:scale(1.15) rotate(4deg);opacity:1}70%{transform:scale(1) rotate(0);opacity:1}100%{transform:scale(1.1);opacity:0}}
 .need{position:absolute;left:50%;top:calc(100% + 6px);transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;white-space:nowrap}
 .need .dots{display:flex;gap:8px;background:#fff;border-radius:100px;padding:7px 12px;box-shadow:0 3px 0 rgba(0,0,0,.08)}
 .need .dots i{width:24px;height:24px;border-radius:50%;background:var(--line);display:block;transition:background .2s,transform .2s}
@@ -62,13 +63,14 @@
 .hfoot{position:absolute;right:34px;bottom:30px;z-index:6}
 /* ---- phone ---- */
 .pstatus{display:flex;align-items:center;gap:12px;border-radius:20px;padding:10px 14px 10px 10px;background:var(--paper);border:3px solid var(--line);transition:background .2s}
-.pstatus .pb{flex:none;width:64px;height:64px}
-.pstatus .pb svg{width:100%;height:100%;overflow:visible;animation:wob 1s ease-in-out infinite}
+.pstatus .pb{flex:none;width:58px;height:68px}
+.pstatus .pb .bimg{animation:wob 1s ease-in-out infinite;transform-origin:50% 65%}
 .pstatus b{display:block;font-family:var(--display);font-weight:700;font-size:21px;line-height:1.1}
 .pstatus small{display:block;font-size:14px;font-weight:800;color:var(--sub);margin-top:2px}
 .pstatus.mine{background:var(--tc);border-color:var(--tc);color:#fff;animation:alarm 1s infinite}
 .pstatus.mine small{color:#fff;opacity:.9}
-.pstatus.mine .pb svg{animation:wob .25s ease-in-out infinite}
+.pstatus.mine .pb .bimg{animation:wob .25s ease-in-out infinite}
+.pstatus.boom .pb .bimg{animation:gb-pop .5s}
 @keyframes alarm{50%{box-shadow:0 0 0 6px rgba(224,83,61,.25)}}
 .pstatus.boom{background:var(--ink);border-color:var(--ink);color:#fff}
 .pstatus.safe{background:#e3f1e8;border-color:#bfe0cb}
@@ -265,19 +267,9 @@ const fuseMs = sudden => sudden ? 10000 + rand(8000) : 18000 + rand(14000);
 const other = t => t === "red" ? "blue" : "red";
 const T = t => t === "red" ? "Red" : "Blue";
 const HEART = c => `<svg viewBox="0 0 24 24"><path fill="${c}" d="M12 21s-8.5-5.2-8.5-11.4A4.8 4.8 0 0 1 12 6.9a4.8 4.8 0 0 1 8.5 2.7C20.5 15.8 12 21 12 21z"/></svg>`;
-// cute monster bomb (flat, no outlines, googly eyes) — eyes worry more when the fuse is short
-const BOMB = (hot) => `<svg viewBox="0 0 120 120">
-  <path d="M74 30 C82 18 92 14 100 18" fill="none" stroke="#c9972a" stroke-width="5" stroke-linecap="round"/>
-  <g class="spark" transform="translate(100 17)"><path d="M0-11 3-3 11 0 3 3 0 11-3 3-11 0-3-3z" fill="#f2c14e"/><circle r="3.5" fill="#fff"/></g>
-  <rect x="58" y="27" width="20" height="14" rx="4" fill="#3a3550" transform="rotate(35 68 34)"/>
-  <circle cx="56" cy="70" r="40" fill="#2b2440"/>
-  <path d="M30 56 q6-14 22-18" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="6" stroke-linecap="round"/>
-  <circle cx="44" cy="66" r="11" fill="#fff"/><circle cx="68" cy="66" r="11" fill="#fff"/>
-  <circle cx="${hot?42:46}" cy="${hot?64:68}" r="5" fill="#1d1d1f"/><circle cx="${hot?70:66}" cy="${hot?64:68}" r="5" fill="#1d1d1f"/>
-  ${hot ? '<ellipse cx="56" cy="88" rx="7" ry="8" fill="#1d1d1f"/><path d="M28 50l10 6M84 50l-10 6" stroke="#fff" stroke-width="3" stroke-linecap="round"/>'
-        : '<path d="M47 86 q9 7 18 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>'}
-  <circle cx="34" cy="80" r="5" fill="#e98bb0" opacity=".55"/><circle cx="78" cy="80" r="5" fill="#e98bb0" opacity=".55"/>
-</svg>`;
+// hand-drawn bomb sprites: calm / panic (same frame), plus the pop burst
+const BOMB = (hot) => `<img class="bimg" src="img/${hot?"bomb-panic":"bomb"}.webp" alt="" draggable="false">`;
+const BOOM = () => `<img class="bimg" src="img/boom.webp" alt="" draggable="false">`;
 
 function boot(){
   const r=(GB.params.get("r")||"").replace(/\D/g,"");
@@ -297,7 +289,7 @@ const Host = {
     this.ref = GB.db.ref("rooms/"+this.code);
     $("hCode").textContent=this.code; $("hCode2").textContent=this.code;
     GB.host.drawQR(GB.baseUrl+"?r="+this.code, $("qr"));
-    ART.preload(["bg-tug","trophy","team-red","team-blue"]);
+    ART.preload(["bg-tug","trophy","team-red","team-blue","bomb","bomb-panic","boom"]);
     if (existing && String(existing).replace(/\D/g,"")===this.code) this.view="lobby";
     $("toLobby").onclick=()=>{ this.view="lobby"; this.render(); };
     $("toSetup").onclick=()=>{ this.view="setup"; this.render(); };
@@ -378,7 +370,7 @@ const Host = {
     this.setHot(this._hot);
   },
   setHot(hot){ this._hot=!!hot; const el=$("bomb"); el.classList.toggle("hot",this._hot); const svg=BOMB(this._hot);
-    if (el.dataset.h!==String(this._hot)){ el.dataset.h=this._hot; const old=el.querySelector("svg"); if(old) old.remove(); el.insertAdjacentHTML("afterbegin",svg); } },
+    if (el.dataset.h!==String(this._hot)){ el.dataset.h=this._hot; const old=el.querySelector(".bimg"); if(old) old.remove(); el.insertAdjacentHTML("afterbegin",svg); } },
 
   throwFx(from,to){
     const el=$("bomb"), W=$("fieldWrap").clientWidth, dx=(to==="red"?-1:1)*W*.5;
@@ -402,6 +394,7 @@ const Host = {
     lives[t]=Math.max(0,(lives[t]||0)-1);
     this.ref.child("bomb").update({phase:"boom", lives, boomTeam:t, nextAt:now()+BOOM_PAUSE});
     const f=document.createElement("div"); f.className="boomfx"; f.style.setProperty("--bx",t==="red"?"25%":"75%"); $("fieldWrap").appendChild(f); setTimeout(()=>f.remove(),1200);
+    const bi=document.createElement("div"); bi.className="boomimg"; bi.style.left=t==="red"?"25%":"75%"; bi.innerHTML=BOOM(); $("fieldWrap").appendChild(bi); setTimeout(()=>bi.remove(),1700);
     const W=$("fieldWrap"); W.classList.remove("shake"); void W.offsetWidth; W.classList.add("shake");
     const side=t==="red"?$("sideR"):$("sideB"); side.classList.remove("blown"); void side.offsetWidth; side.classList.add("blown"); setTimeout(()=>side.classList.remove("blown"),1300);
     beep(90,.9,"sawtooth",.3); beep(60,1.2,"square",.2,.05); beep(40,1.4,"sine",.35,.1);
@@ -505,6 +498,7 @@ const Player = {
     this.code=code; this.ref=GB.db.ref("rooms/"+code);
     const ok=await GB.join.checkGame(GAME, code); if (!ok) return;
     show($("player"));
+    ART.preload(["bomb","bomb-panic","boom"]);
     if (!ok.exists) $("pErr").textContent="Room "+code+" not found. Check the code on the big screen.";
     GB.join.setup(this, { game:GAME, ref:this.ref, code, extra:{score:0, best:0}, onEnter:()=>this.enter() });
     $("pSay").onclick=()=>{ if(this.q) GB.speak(this.q.en); };
@@ -540,7 +534,7 @@ const Player = {
     $("pLives").innerHTML=["red","blue"].map(t=>`<span>${Array.from({length:L[t]||0},()=>HEART(t==="red"?"#e0533d":"#3a78c9")).join("")||"0"}</span>`).join("");
     if (B.phase==="boom"){
       const me=B.boomTeam===this.team;
-      el.className="pstatus boom"; el.innerHTML=`<span class="pb">${BOMB(true)}</span><span><b>${me?"BOOM! You lost a life":"BOOM! "+T(B.boomTeam)+" lost a life"}</b><small>${me?"Get ready for the next bomb…":"Phew! Next bomb is coming…"}</small></span>`;
+      el.className="pstatus boom"; el.innerHTML=`<span class="pb">${BOOM()}</span><span><b>${me?"BOOM! You lost a life":"BOOM! "+T(B.boomTeam)+" lost a life"}</b><small>${me?"Get ready for the next bomb…":"Phew! Next bomb is coming…"}</small></span>`;
       if (B.nextAt!==this._boomSeen){ this._boomSeen=B.nextAt; try{ navigator.vibrate && navigator.vibrate(me?[300,100,300]:80); }catch(e){} if(me) beep(90,.6,"sawtooth",.2); }
       return;
     }
