@@ -1,0 +1,32 @@
+GameBox 美術素材提示詞（ChatGPT 生圖用）
+建立日期：2026-10-21
+用法：在同一個 ChatGPT 對話裡，每張先貼「共同風格」，再貼該張的提示詞。
+原圖存放在「原圖」資料夾，檔名請照下面括號裡的名稱。
+
+==================== 共同風格（每張都先貼） ====================
+Style for every image: quirky flat vector illustration of funny little monsters, mid-century / Scandinavian picture-book feel. Simple geometric blob bodies in flat solid colors with NO outlines on the bodies, very thin black line legs and arms (stick limbs with small feet), big googly eyes (white circles with black dots), simple mouths with a few chunky teeth or fangs, and small hand-drawn texture marks like short fur strokes, dots or hatching in a slightly darker tone of the body color. Funny, odd and charming, not babyish, not scary. Muted retro palette: sage green #5fae7b, cobalt blue #3a78c9, burnt orange #e2683a, teal #5bbcbc, lavender #9b8fd6, mustard yellow #f2c14e, pink #e98bb0, black #1d1d1f, on a warm cream background #faf6ec. No text, no letters, no numbers, no watermark.
+
+==================== 1. 學生頭像 16 隻（characters.png） ====================
+A character sheet of 16 different funny monsters arranged in an evenly spaced 4x4 grid, 2048x2048 px, each monster centered in its own 512x512 cell with generous padding, no overlap, plain cream background. Full body, front view, each with a different body shape (circle, tall oval, triangle, bean, square, cloud, droplet, long caterpillar, egg, pear, star-like fuzzball, mushroom) and a different main color from the palette. Vary the details: one eye, three eyes, eyes on stalks, horns, antennae, floppy ears, tiny wings, spikes, fur, spots, stripes. Vary the expressions: smug, shocked, grinning, sleepy, excited, determined. Every monster must be easy to recognize at a small size.
+
+==================== 2a. 拔河封面（cover-tug.png） ====================
+Wide game cover, 1600x900 px, for a game called Tug of War. Two teams of the monsters from the character sheet pull a thick rope against each other on a simple flat grass field: a red-and-orange team on the left, a blue-and-teal team on the right, a small yellow flag in the middle of the rope. Funny straining faces, thin legs leaning back. Minimal flat background with a cream sky and a few simple clouds. Keep the bottom quarter simple because a title will be placed there.
+
+==================== 2b. 投籃封面（cover-hoops.png） ====================
+Wide game cover, 1600x900 px, for a basketball shooting game called Hoops. A monster from the character sheet jumps on thin legs to shoot an orange basketball toward a simple flat hoop, with a dotted arc showing the ball's path. Minimal flat indoor background with a few simple shapes. Keep the bottom quarter simple because a title will be placed there.
+
+==================== 3a. 拔河背景（bg-tug.png） ====================
+Wide background, 1920x1080 px, for a tug of war game screen in the same flat style: top half is a cream sky with a few simple flat clouds and a low row of simple rounded trees and bushes on the horizon; bottom half is a flat sage-green field with a few small hand-drawn grass strokes. Keep the center completely empty, no characters, no rope, because game elements will be placed on top.
+
+==================== 3b. 投籃背景（bg-hoops.png） ====================
+Wide background, 1920x1080 px, for a basketball game screen in the same flat style: a simple indoor gym with a muted indigo wall, a few flat geometric shapes and stripes as decoration, and a flat mustard-colored wooden floor in the bottom third with a few thin floor lines. No hoops, no players, no ball. Keep the center open because game elements will be placed on top.
+
+==================== 4. 遊戲物件（items.png） ====================
+Game sprites in the same flat style on a plain cream background, each separate with space around it: (1) a basketball hoop, front view, flat white backboard, orange rim and a simple line net, about 600x700 px; (2) an orange basketball with thin black lines, about 300x300 px; (3) a big golden trophy with a tiny monster face, about 500x500 px.
+
+==================== 5. 紅藍隊吉祥物（mascots.png） ====================
+Two team mascot monsters side by side with space between them, 2048x1024 px, plain cream background: (1) Red team, a round burnt-orange and red monster with small horns, raising both thin arms and cheering; (2) Blue team, a tall cobalt-blue and teal monster with antennae, flexing its thin arms with a confident grin. Same style as the character sheet.
+
+==================== 補畫小提醒 ====================
+- 若線條太粗或出現外框：追加 "no outlines, flatter, more like a mid-century picture book"
+- 以後要補畫新角色：貼共同風格 + 附上 characters.png，說 "Draw N more monsters in exactly the same style as this sheet"
