@@ -550,6 +550,7 @@ function boot(){
   const r = (params.get("r")||"").replace(/\D/g,"");
   if (params.has("host")) return Host.start(params.get("host"));
   if (r.length===4) return Player.start(r);
+  location.replace(dirUrl); return;  // no room: go to the GameBox home
   show($("floor"),false);
   show($("landing"));
   $("lCode").addEventListener("input",e=>{ e.target.value=e.target.value.replace(/\D/g,"").slice(0,4); });
@@ -831,7 +832,7 @@ const Player = {
     try{
       const g=(await this.ref.child("meta/game").get()).val();
       const st=(await this.ref.child("meta/state").get()).exists();
-      if (st && (g||"tug")!==GAME){ location.replace(dirUrl+"?r="+code); return; }
+      if (st && (g||"tug")!==GAME){ location.replace(dirUrl+(g||"tug")+".html?r="+code); return; }
     }catch(e){}
     show($("player")); show($("floor"),false); $("pCodeLbl").textContent=code;
     this.pid = store.get("tug.pid") || ("p"+Date.now().toString(36)+rand(1e6).toString(36));
