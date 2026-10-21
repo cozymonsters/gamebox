@@ -1,8 +1,8 @@
-# 🎮 English GameBox
+# English GameBox
 
 Classroom English vocabulary games. The teacher shows a game on the big screen; students join on their phones by scanning a QR code. No app or account needed.
 
-**Play:** https://david-su-1981.github.io/gamebox/
+**Play:** https://cozymonsters.github.io/gamebox/
 
 ## Games
 
