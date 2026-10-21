@@ -54,3 +54,26 @@ Give each one a different personality, body idea and pose:
 16. chubby monster with a curly tail and a backpack, cheeky grin
 
 Use each palette colour at least twice; vary expressions (cheeky, surprised, proud, focused, laughing, sleepy). Keep props simple, flat and in the same palette. No text, no letters, no numbers, no watermark.
+
+==================== 1c. 第三批 16 隻・運動道具（character-sheet-04.png）2026-10-21 ====================
+（先貼共同風格，並附上 character-sheet.png 當風格參考）
+Using exactly the same style as the attached character sheet (flat shapes, no outlines, thin black stick limbs, googly eyes, small darker texture marks, same muted retro palette, cream background), draw 16 NEW funny monsters, each with one sports prop. Their body shapes must be clearly different from the attached sheet and from donuts, cacti, cupcakes, lightning bolts, moons, pyramids, cubes, ghosts, octopuses and bats. Same layout: evenly spaced 4x4 grid, 2048x2048 px, each monster centered in its own 512x512 cell with generous padding, no overlap, plain cream background, full body. Keep each prop inside its own cell.
+
+1. hexagon-shaped monster spinning a basketball on one finger
+2. tall noodle-like wobbly monster blowing a whistle, cheeks puffed
+3. star-shaped monster swinging a tennis racket
+4. potato-shaped monster riding a skateboard, arms out for balance
+5. squat round monster wearing big boxing gloves, cheeky grin
+6. bean-shaped monster doing a keepy-uppy with a soccer ball on its knee
+7. acorn-shaped monster in a baseball cap holding a baseball bat on its shoulder
+8. pear-shaped monster wearing swim goggles and a swim ring
+9. long-legged monster skipping with a jump rope
+10. rock-shaped bumpy monster lifting a small dumbbell, straining
+11. bell-shaped monster holding a badminton racket and a shuttlecock
+12. onion-shaped monster with a sprout on top, holding a ping-pong paddle
+13. jellybean-shaped monster about to serve a volleyball
+14. sock-shaped monster on roller skates, zooming
+15. heart-shaped monster proudly wearing a gold medal
+16. eggplant-shaped monster holding a stopwatch, looking focused
+
+Use each palette colour at least twice; vary expressions (cheeky, determined, proud, surprised, laughing, focused). Props must be simple, flat and in the same muted palette. No text, no letters, no numbers, no watermark.
