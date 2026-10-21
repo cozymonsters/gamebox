@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#faf6ec">
+<title>Color Grab · GameBox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="gb.css?v=37485ccd">
+<style>
+.hidden{display:none!important}  /* works even before gb.css arrives */
+.setup-wrap{flex:1;padding:6px 24px 28px;overflow:auto}
+.setrow:nth-child(5) .emo{background:var(--pink)}
+#host{height:100vh;overflow:hidden}
+#arena{flex:1;display:flex;flex-direction:column;min-height:0;position:relative;padding:12px 24px 18px;gap:14px}
+/* ---- board (big screen) ---- */
+.bwrap{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;border-radius:26px;transition:background .4s}
+.bwrap.crunch{background:rgba(242,193,78,.18);animation:crunchGlow 1s infinite}
+@keyframes crunchGlow{50%{background:rgba(242,193,78,.32)}}
+.board{--ts:80px;--g:8px;display:grid;gap:var(--g);padding:calc(var(--g) * 1.6);background:var(--paper);border-radius:calc(var(--ts) * .34);box-shadow:0 10px 0 rgba(0,0,0,.14),0 18px 40px rgba(0,0,0,.18)}
+.tile{width:var(--ts);height:var(--ts);border-radius:calc(var(--ts) * .22);background:#e9e2cf;position:relative;display:flex;align-items:center;justify-content:center;transition:background .25s}
+.tile.star{background:#f6e2a8}
+.tile.red{background:var(--red)} .tile.blue{background:var(--blue)}
+.tile img{width:80%;height:80%;object-fit:contain;filter:drop-shadow(0 3px 0 rgba(0,0,0,.15))}
+.tile .st{position:absolute;display:flex;color:var(--mustard-d)}
+.tile .st svg{width:100%;height:100%}
+.tile.star:not(.red):not(.blue) .st{inset:22%}
+.tile.red .st,.tile.blue .st{top:5%;right:5%;width:30%;height:30%;color:#fff}
+.tile.pop{animation:tpop .45s cubic-bezier(.2,1.8,.4,1)}
+@keyframes tpop{0%{transform:scale(.55)}100%{transform:scale(1)}}
+.tile.steal{animation:tsteal .6s}
+@keyframes tsteal{0%{transform:rotate(0) scale(1)}25%{transform:rotate(-12deg) scale(1.18)}50%{transform:rotate(10deg) scale(.9)}100%{transform:rotate(0) scale(1)}}
+.tile.cap{animation:tcap .7s both;animation-delay:calc(var(--d,0) * 70ms)}
+@keyframes tcap{0%{transform:rotateY(0)}50%{transform:rotateY(90deg) scale(1.1)}100%{transform:rotateY(0)}}
+.sidelbl{font-family:var(--display);font-weight:600}
+.dbl{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:var(--mustard);color:var(--ink);border:3px solid #fff;border-radius:16px;padding:4px 20px;font-family:var(--display);font-weight:700;font-size:26px;z-index:5;white-space:nowrap;animation:gb-wiggle .6s infinite}
+.dbl .gi{width:.9em;height:.9em}
+.hfoot{position:absolute;right:34px;bottom:30px;z-index:6}
+.capfx{position:absolute;z-index:6;pointer-events:none;font-family:var(--display);font-weight:700;font-size:30px;color:#fff;border-radius:14px;padding:2px 14px;white-space:nowrap;animation:capRise 1.6s ease-out forwards}
+.capfx.r{background:var(--red)} .capfx.b{background:var(--blue)}
+@keyframes capRise{0%{transform:translate(-50%,0) scale(.4);opacity:0}15%{transform:translate(-50%,-10px) scale(1.15);opacity:1}100%{transform:translate(-50%,-80px) scale(1);opacity:0}}
+/* ---- phone ---- */
+.pscore{display:flex;align-items:center;gap:6px;font-family:var(--display);font-weight:600;font-size:17px}
+.pscore b{color:#fff;border-radius:10px;padding:0 10px;min-width:34px;text-align:center}
+.pscore .r{background:var(--red)} .pscore .b{background:var(--blue)}
+.qwrap{display:flex;flex-direction:column;gap:12px;flex:1}
+#pMap{position:fixed;inset:0;z-index:40;background:var(--cream);display:flex;flex-direction:column;padding:16px 14px calc(16px + env(safe-area-inset-bottom));gap:12px}
+.mhead{display:flex;align-items:center;gap:12px}
+.mhead .ic{flex:none;width:52px;height:52px;border-radius:16px;background:var(--tc);color:#fff;display:flex;align-items:center;justify-content:center}
+.mhead .ic svg{width:30px;height:30px}
+.mhead b{display:block;font-family:var(--display);font-weight:700;font-size:26px;line-height:1.05}
+.mhead small{display:block;font-size:14px;font-weight:800;color:var(--sub)}
+.mhead .cnt{margin-left:auto;font-family:var(--display);font-weight:700;font-size:22px;background:var(--mustard);border-radius:12px;padding:2px 12px}
+.mbar{height:8px;border-radius:8px;background:#e9e2cf;overflow:hidden}
+.mbar i{display:block;height:100%;background:var(--tc);border-radius:8px;transform-origin:left;transform:scaleX(1)}
+.mbar i.run{transition:transform linear}
+.mgrid{display:grid;gap:5px;margin:auto 0;width:100%}
+.mt{aspect-ratio:1;border-radius:22%;background:#e9e2cf;position:relative;display:flex;align-items:center;justify-content:center;opacity:.42;transition:opacity .2s,transform .15s;-webkit-tap-highlight-color:transparent}
+.mt.star{background:#f6e2a8}
+.mt.red{background:var(--red)} .mt.blue{background:var(--blue)}
+.mt img{width:78%;height:78%;object-fit:contain}
+.mt .st{position:absolute;display:flex;color:var(--mustard-d)} .mt .st svg{width:100%;height:100%}
+.mt.star:not(.red):not(.blue) .st{inset:24%}
+.mt.red .st,.mt.blue .st{top:4%;right:4%;width:32%;height:32%;color:#fff}
+.mt.ok{opacity:1;box-shadow:0 0 0 3px #fff,0 4px 10px rgba(0,0,0,.18);animation:okPulse 1.2s infinite}
+.mt.ok.foe{box-shadow:0 0 0 3px #fff,0 0 0 6px var(--tc)}
+@keyframes okPulse{50%{transform:scale(.93)}}
+.mt.ok:active{transform:scale(.85)}
+.mt.mine-now{opacity:1;animation:tpop .4s}
+#player.crunch .pinfo .t{background:var(--mustard);border-color:var(--mustard)}
+.mhint{font-size:14px;font-weight:800;color:var(--sub);text-align:center}
+</style>
+</head>
+<body>
+<div class="doodles"></div>
+
+<!-- ============ HOST (teacher computer) ============ -->
+<section id="host" class="screen hidden">
+  <header class="gb-top">
+    <a class="brand" href="./"><span class="ic" data-art="logo"></span>GameBox</a>
+    <span class="game">· Color Grab</span>
+    <div class="sp"></div>
+    <span class="net" id="hNet">Connecting…</span>
+    <span class="codetag">CODE<b id="hCode">----</b></span>
+  </header>
+
+  <!-- step 1: settings -->
+  <div class="setup-wrap" id="setup">
+    <div class="panel">
+      <div class="hero">
+        <div class="cover"><img src="img/cover-grab.webp" alt=""></div>
+        <div class="info">
+          <div class="eyebrow">Game settings</div>
+          <h1>Color Grab</h1>
+          <div class="tagline">Paint the map. Grab the most land!</div>
+          <div class="chips">
+            <div class="chip"><span class="i" data-i="clock"></span><div><small>Duration</small><b>2–4 min</b></div></div>
+            <div class="chip"><span class="i" data-i="users"></span><div><small>Teams</small><b>Red vs Blue</b></div></div>
+            <div class="chip"><span class="i" data-i="grid"></span><div><small>Twist</small><b>Steal &amp; surround</b></div></div>
+          </div>
+          <div class="act"><button class="go" id="toLobby">Continue <i data-i="play"></i></button></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="setbox">
+          <div class="setrow"><span class="emo" data-i="book"></span><div class="txt"><h4>Word List</h4><p>Which words will students practice?</p></div>
+            <div class="ctl"><select class="sel" id="sSet"></select><button class="btn-soft" id="editWords"><i data-i="pencil"></i> My Words</button></div></div>
+          <div class="setrow"><span class="emo" data-i="help"></span><div class="txt"><h4>Question Type</h4><p>Show English and pick 中文, or the other way</p></div>
+            <div class="ctl"><select class="sel" id="sMode"><option value="mix">Mixed</option><option value="en2zh">English → 中文</option><option value="zh2en">中文 → English</option></select></div></div>
+          <div class="setrow"><span class="emo" data-i="grid"></span><div class="txt"><h4>Map Size</h4><p>Bigger class, bigger map</p></div>
+            <div class="ctl"><select class="sel" id="sSize"><option value="6x4">Small · 24 tiles</option><option value="8x5" selected>Medium · 40 tiles</option><option value="10x6">Large · 60 tiles</option></select></div></div>
+          <div class="setrow"><span class="emo" data-i="timer"></span><div class="txt"><h4>Time Limit</h4><p>Last 20 seconds: every right answer paints 2 tiles</p></div>
+            <div class="ctl"><select class="sel" id="sTime"><option value="120">2 minutes</option><option value="180" selected>3 minutes</option><option value="240">4 minutes</option></select></div></div>
+          <div class="setrow"><span class="emo" data-i="brush"></span><div class="txt"><h4>How it works</h4><p>Right answer = paint 1 tile. Empty tiles anywhere; the other team's tiles only next to yours. Surround a small area to grab it all. Gold tiles = 3 points.</p></div></div>
+          <div class="setnote">Students can already join with the code at the top right.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- step 2: lobby -->
+  <div class="lobby hidden" id="lobby">
+    <div class="lob-top">
+      <div class="lob-qr" id="qr"></div>
+      <div class="lob-join">
+        <div class="l1">Scan the QR code to join</div>
+        <div class="l2"><span class="rc">Room code</span><span class="bigcode" id="hCode2">----</span></div>
+      </div>
+      <div class="lob-peek"><img src="img/m/a14.webp" alt=""><img src="img/m/a52.webp" alt=""><img src="img/m/a26.webp" alt=""></div>
+      <div class="lob-act"><button class="go" id="startBtn" disabled>Start <i data-i="play"></i></button><button class="pill ghost" id="toSetup"><i data-i="sliders"></i> Settings</button></div>
+    </div>
+    <div class="lob-teams">
+      <div class="tcol red"><div class="th"><span data-art="red"></span>Red Team <span class="n" id="rN">0</span></div><div class="names" id="rNames"></div></div>
+      <div class="tcol blue"><div class="th"><span data-art="blue"></span>Blue Team <span class="n" id="bN">0</span></div><div class="names" id="bNames"></div></div>
+    </div>
+    <div class="lob-hint" id="startHint">Need at least 1 player on each team.</div>
+  </div>
+
+  <!-- step 3: game -->
+  <div id="arena" class="hidden">
+    <div class="scorebar">
+      <div class="tscore r"><span data-art="red"></span><span class="nm">Red</span><span class="pts" id="rPts">0</span><span class="ppl" id="rCnt"></span></div>
+      <div class="timer" id="timer">0:00</div>
+      <div class="tscore b"><span class="ppl" id="bCnt"></span><span class="pts" id="bPts">0</span><span class="nm">Blue</span><span data-art="blue"></span></div>
+    </div>
+    <div class="bwrap" id="bwrap">
+      <div class="board" id="board"></div>
+      <div class="dbl hidden" id="dbl"><i data-i="brush"></i> Double paint! <i data-i="brush"></i></div>
+      <div class="countdown hidden" id="hCount"><span>3</span></div>
+    </div>
+    <div class="hfoot"><button class="pill ghost" id="stopBtn"><i data-i="stop"></i> End now</button></div>
+    <div class="result hidden" id="result">
+      <canvas class="confetti" id="confetti"></canvas>
+      <div class="rcard">
+        <div class="rhead"><img class="tro" src="img/trophy.webp" alt=""><div class="wtxt"><div class="win" id="winTxt">Red wins!</div><div class="why" id="whyTxt"></div></div><span id="winMascot"></span></div>
+        <div class="rbody"><div class="mvps">
+          <div class="mvp r"><h3><i data-i="flame"></i> Red MVPs</h3><div class="rows" id="mvpR"></div></div>
+          <div class="mvp y"><h3><i data-i="star"></i> Awards</h3><div class="rows" id="awards"></div></div>
+          <div class="mvp b"><h3><i data-i="bolt"></i> Blue MVPs</h3><div class="rows" id="mvpB"></div></div>
+        </div></div>
+        <div class="rbtns"><button class="go" id="againBtn"><i data-i="refresh"></i> Play again</button><button class="pill ghost" id="lobbyBtn"><i data-i="users"></i> Back to lobby</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="wordModal">
+    <div class="mcard">
+      <div class="mh"><i data-i="pencil"></i> My Words</div>
+      <div class="mb">
+        <div class="hint">One word per line: English + 中文. Example: <b>coach 教練</b>. At least 4 words. Saved on this computer and shared by all GameBox games.</div>
+        <textarea id="wordText" placeholder="coach 教練&#10;referee 裁判&#10;warm up 暖身"></textarea>
+        <div class="err" id="wordErr"></div>
+        <div class="row"><button class="btn-soft" id="wordCancel">Cancel</button><button class="btn-ink" style="width:auto;padding:10px 22px;font-size:17px" id="wordSave">Save &amp; use</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PLAYER (student phone) ============ -->
+<section id="player" class="screen hidden">
+  <div class="p-top"><span class="av" id="pAvSm"></span><span class="me" id="pMe">GameBox</span><span class="sc hidden" id="pSc"></span></div>
+
+  <div class="p-body" id="pJoin">
+    <div class="joincard">
+      <h1>Join the game</h1>
+      <div class="room">Color Grab · Room <b id="pCodeLbl"></b></div>
+      <div class="avpick"><div class="big" id="pAvBtn"></div><div class="t"><b>Meet your monster!</b>It plays for you today</div></div>
+      <div class="lbl">Your name</div>
+      <input id="pName" class="field" maxlength="8" placeholder="Name" autocomplete="off">
+      <div class="lbl">Pick your team</div>
+      <div class="teampick">
+        <button class="tbtn red" data-team="red"><span class="e" data-art="red"></span>Red</button>
+        <button class="tbtn blue" data-team="blue"><span class="e" data-art="blue"></span>Blue</button>
+      </div>
+      <button class="btn-ink" id="pGo" disabled>Join</button>
+      <div class="err" id="pErr"></div>
+    </div>
+  </div>
+
+  <div class="p-body hidden" id="pWait">
+    <div class="wait">
+      <div class="bigav" id="pAvBig"></div>
+      <h2>You're in!</h2>
+      <div class="tbadge" id="pTeamBig">Red Team</div>
+      <div class="msg" style="margin-top:14px">Paint the map with your team!</div>
+      <div class="sub">Waiting for the teacher. Keep your screen on!</div>
+    </div>
+  </div>
+
+  <div class="p-body hidden" id="pPlay">
+    <div class="pinfo"><span class="t" id="pTimeBox"><i data-i="timer"></i> <span id="pTime">--</span></span><span class="pscore"><b class="r" id="pR">0</b><b class="b" id="pB">0</b></span></div>
+    <div class="qwrap">
+      <div class="qcard">
+        <div class="ask" id="pAsk">What does it mean?</div>
+        <div class="q" id="pQ">—</div>
+        <button class="say hidden" id="pSay" aria-label="Listen" data-i="volume"></button>
+      </div>
+      <div class="opts" id="pOpts"></div>
+    </div>
+  </div>
+
+  <div class="p-body hidden" id="pEnd">
+    <div class="wait">
+      <div class="bigav" id="pEndAv"></div>
+      <div class="res" id="pWin">Red wins!</div>
+      <div class="msg" id="pWinSub"></div>
+      <div class="stats">
+        <div class="stat"><b id="pMine">0</b><span>Correct</span></div>
+        <div class="stat"><b id="pTiles">0</b><span>Tiles painted</span></div>
+      </div>
+      <div class="sub" style="margin-top:8px">Wait for the next round…</div>
+    </div>
+  </div>
+
+  <div id="pMap" class="hidden">
+    <div class="mhead"><span class="ic" data-i="brush"></span><span><b>Pick a tile!</b><small id="pMapSub">Tap a glowing tile</small></span><span class="cnt hidden" id="pPaints">×2</span></div>
+    <div class="mbar"><i id="pMapBar"></i></div>
+    <div class="mgrid" id="pGrid"></div>
+    <div class="mhint">Empty tiles: anywhere · Other team: only next to yours · Gold = 3 points</div>
+  </div>
+
+  <div class="pcount hidden" id="pCount"><b id="pCountN">3</b><span id="pCountT">Get ready!</span></div>
+</section>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="gb-art.js?v=6ae51ada"></script>
+<script src="gb.js?v=de79c29c"></script>
+<script>
+"use strict";
+const GAME="grab";
+const { $, show, esc, store, rand, pick, fmt, beep } = GB;
+const now = GB.now;
+const CHEERS_NO = ["Oops!","Almost!","Try again!","Not quite!"];
+const DOUBLE_MS = 20000;      // last 20 s: each right answer paints 2 tiles
+const PICK_MS = 6000;         // phone auto-picks a tile after 6 s
+const MAX_CAP = 6;            // surround up to 6 tiles to grab them
+const STAR_PTS = 3;
+const other = t => t === "red" ? "blue" : "red";
+const T = t => t === "red" ? "Red" : "Blue";
+
+/* ---- shared map rules (host + phone use the same code) ---- */
+const Map_ = {
+  nb(i, C, R){ const x=i%C, y=(i/C)|0, o=[]; if(x>0)o.push(i-1); if(x<C-1)o.push(i+1); if(y>0)o.push(i-C); if(y<R-1)o.push(i+C); return o; },
+  owner(g,i){ return g[i] && g[i].t || null; },
+  has(g,team,N){ for(let i=0;i<N;i++) if(Map_.owner(g,i)===team) return true; return false; },
+  valid(g,i,team,C,R){
+    const o=Map_.owner(g,i);
+    if (!o) return true;
+    if (o===team) return false;
+    if (!Map_.has(g,team,C*R)) return true;                  // nothing left? you may steal anywhere
+    return Map_.nb(i,C,R).some(n=>Map_.owner(g,n)===team);
+  },
+  validList(g,team,C,R){ const out=[]; for(let i=0;i<C*R;i++) if(Map_.valid(g,i,team,C,R)) out.push(i); return out; },
+  // after `team` paints i: every small region of not-yet-ours tiles that is closed in by our tiles (and the edge) flips
+  captures(g,i,team,C,R){
+    const seen=new Set([i]), out=[];
+    for (const s of Map_.nb(i,C,R)){
+      if (Map_.owner(g,s)===team || seen.has(s)) continue;
+      const reg=[s], q=[s]; seen.add(s); let big=false;
+      while(q.length){ const c=q.pop(); for(const n of Map_.nb(c,C,R)){ if(Map_.owner(g,n)===team || seen.has(n)) continue; seen.add(n); reg.push(n); q.push(n); if(reg.length>MAX_CAP) big=true; } }
+      if (!big) out.push(...reg);
+    }
+    return out;
+  },
+  points(g,stars,N){ const p={red:0,blue:0}; for(let i=0;i<N;i++){ const o=Map_.owner(g,i); if(o) p[o]+= stars.includes(i)?STAR_PTS:1; } return p; },
+  tileHTML(g,i,stars,cls){ const o=Map_.owner(g,i), st=stars.includes(i);
+    return `<div class="${cls}${o?" "+o:""}${st?" star":""}" data-i="${i}">${o&&g[i].av?ART.avatar(g[i].av,"",true):""}${st?`<span class="st">${ART.icon("star")}</span>`:""}</div>`; }
+};
+const dims = m => { const [C,R]=String(m.size||"8x5").split("x").map(Number); return {C,R,N:C*R}; };
+
+function boot(){
+  const r=(GB.params.get("r")||"").replace(/\D/g,"");
+  if (GB.params.has("host")) return Host.start(GB.params.get("host"));
+  if (r.length===4) return Player.start(r);
+  location.replace(GB.dirUrl);
+}
+
+/* ================== HOST (the referee) ================== */
+const Host = {
+  code:null, ref:null, meta:{}, players:{}, grid:{}, tokens:{}, painted:{}, bestCap:null, raf:0, view:"setup", ended:false, dbl:false, _boardKey:"", _celebrated:-1,
+
+  async start(existing){
+    show($("host")); GB.unlockAudio(); GB.host.netStatus($("hNet"));
+    GB.host.initSettings(["sMode","sTime","sSize"]);
+    this.code = await GB.host.openRoom(GAME, existing);
+    this.ref = GB.db.ref("rooms/"+this.code);
+    $("hCode").textContent=this.code; $("hCode2").textContent=this.code;
+    GB.host.drawQR(GB.baseUrl+"?r="+this.code, $("qr"));
+    ART.preload(["trophy","team-red","team-blue"]);
+    if (existing && String(existing).replace(/\D/g,"")===this.code) this.view="lobby";
+    $("toLobby").onclick=()=>{ this.view="lobby"; this.render(); };
+    $("toSetup").onclick=()=>{ this.view="setup"; this.render(); };
+    $("startBtn").onclick=()=>this.startRound();
+    $("stopBtn").onclick=()=>this.finish();
+    $("againBtn").onclick=()=>this.startRound();
+    $("lobbyBtn").onclick=()=>{ this.view="lobby"; this.ref.child("meta").update({state:"lobby",winner:null}); };
+    this.ref.child("meta").on("value",s=>{ this.meta=s.val()||{}; this._boardKey=""; this.render(); });
+    this.ref.child("grid").on("value",s=>{ this.grid=s.val()||{}; this.drawBoard(); });
+    this.ref.child("players").on("value",s=>this.onPlayers(s.val()||{}));
+    this.ref.child("paint").on("child_added",s=>this.onPaint(s));
+    addEventListener("resize",()=>this.fit());
+  },
+
+  live(){ return this.meta.state==="play" && now()>=this.meta.startAt && now()<=this.meta.endAt+1500; },
+
+  onPlayers(p){
+    const prev=this.players; this.players=p;
+    if (this.live()){
+      for (const id in p){
+        const d=(p[id].score||0)-((prev[id]&&prev[id].score)||0);
+        if (d>0) this.tokens[id]=(this.tokens[id]||0)+d*(this.dbl?2:1);
+      }
+    }
+    this.renderTeams();
+  },
+
+  onPaint(snap){
+    const v=snap.val()||{}; snap.ref.remove();
+    if (!this.live()) return;
+    this.applyPaint(v, 0);
+  },
+
+  applyPaint(v, tries){
+    const p=this.players[v.pid]; if (!p || !p.team) return;
+    if ((this.tokens[v.pid]||0)<=0){ if (tries<3) setTimeout(()=>this.applyPaint(v,tries+1),700); return; }
+    const {C,R}=dims(this.meta), g=this.grid, team=p.team;
+    let i=+v.i;
+    if (!(i>=0 && i<C*R) || !Map_.valid(g,i,team,C,R)){          // someone got there first: take the closest legal tile
+      const ok=Map_.validList(g,team,C,R); if (!ok.length) return;
+      const x=i%C, y=(i/C)|0; ok.sort((a,b)=>(Math.abs(a%C-x)+Math.abs(((a/C)|0)-y))-(Math.abs(b%C-x)+Math.abs(((b/C)|0)-y)));
+      i=ok[0];
+    }
+    this.tokens[v.pid]--;
+    const was=Map_.owner(g,i), upd={};
+    upd[i]={t:team, av:p.av||"a0", by:v.pid};
+    const g2=Object.assign({},g,{[i]:upd[i]});
+    const cap=Map_.captures(g2,i,team,C,R);
+    for (const c of cap) upd[c]={t:team, av:p.av||"a0", by:v.pid};
+    this.painted[v.pid]=(this.painted[v.pid]||0)+1;
+    if (cap.length && (!this.bestCap || cap.length>this.bestCap.n)) this.bestCap={n:cap.length, pid:v.pid};
+    this._fx={i, steal:!!was, cap, team};
+    this.ref.child("grid").update(upd);
+  },
+
+  renderTeams(){
+    if ((this.meta.state||"lobby")==="lobby"){
+      const {r,b}=GB.host.renderLobby(this.players, this.ref);
+      $("startBtn").disabled = !(r.length&&b.length);
+      $("startHint").textContent = (r.length&&b.length) ? "Use the arrows to move a player to the other team, or X to remove." : "Need at least 1 player on each team.";
+    } else {
+      const {r,b}=GB.host.teams(this.players);
+      $("rCnt").innerHTML=ART.icon("users")+" "+r.length; $("bCnt").innerHTML=ART.icon("users")+" "+b.length;
+    }
+  },
+
+  fit(){
+    const {C,R}=dims(this.meta), W=$("bwrap").clientWidth-40, H=$("bwrap").clientHeight-40;
+    if (W<=0||H<=0) return;
+    const g=Math.max(5,Math.round(Math.min(W/C,H/R)*.09));
+    const ts=Math.floor(Math.min((W-g*(C+2.2))/C,(H-g*(R+2.2))/R));
+    const B=$("board"); B.style.setProperty("--ts",ts+"px"); B.style.setProperty("--g",g+"px"); B.style.gridTemplateColumns=`repeat(${C},var(--ts))`;
+  },
+
+  drawBoard(){
+    if (this.meta.state!=="play" && this.meta.state!=="end") return;
+    const {C,R,N}=dims(this.meta), stars=this.meta.stars||[], g=this.grid, B=$("board");
+    const key=C+"x"+R+":"+this.meta.round;
+    if (this._boardKey!==key){ this._boardKey=key; B.innerHTML=Array.from({length:N},(_,i)=>Map_.tileHTML(g,i,stars,"tile")).join(""); this.fit(); }
+    else for (let i=0;i<N;i++){
+      const el=B.children[i], o=Map_.owner(g,i), av=o?g[i].av:"";
+      if (el.dataset.o!==(o||"") || el.dataset.av!==av){ const n=document.createElement("div"); n.innerHTML=Map_.tileHTML(g,i,stars,"tile"); const t=n.firstChild; t.dataset.o=o||""; t.dataset.av=av; B.replaceChild(t,el); }
+    }
+    [...B.children].forEach((el,i)=>{ const o=Map_.owner(g,i); el.dataset.o=o||""; el.dataset.av=o?g[i].av:""; });
+    const fx=this._fx; this._fx=null;
+    if (fx){
+      const el=B.children[fx.i]; if (el){ el.classList.add(fx.steal?"steal":"pop"); }
+      if (fx.steal) beep(300,.12,"square",.08), beep(520,.12,"square",.07,.08); else beep(fx.team==="blue"?620:520,.07,"triangle",.12);
+      if (fx.cap.length){
+        fx.cap.forEach((c,k)=>{ const t=B.children[c]; if(t){ t.style.setProperty("--d",k); t.classList.add("cap"); } });
+        beep(523,.1,"triangle",.15); beep(659,.1,"triangle",.15,.08); beep(784,.18,"triangle",.15,.16);
+        const r=el.getBoundingClientRect(), W=$("bwrap").getBoundingClientRect(), d=document.createElement("div");
+        d.className="capfx "+(fx.team==="blue"?"b":"r"); d.textContent="Grabbed "+fx.cap.length+"!";
+        d.style.left=(r.left-W.left+r.width/2)+"px"; d.style.top=(r.top-W.top)+"px"; $("bwrap").appendChild(d); setTimeout(()=>d.remove(),1700);
+      }
+    }
+    const pts=Map_.points(g,stars,N);
+    for (const [t,id] of [["red","rPts"],["blue","bPts"]]){ const el=$(id); if (el.textContent!==String(pts[t])){ el.textContent=pts[t]; el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); } }
+  },
+
+  async startRound(){
+    const words=GB.host.words();
+    if (words.length<4) return alert("Need at least 4 words.");
+    const dur=+$("sTime").value, size=$("sSize").value, startAt=now()+4200;
+    const [C,R]=size.split("x").map(Number), N=C*R, stars=[];
+    const corners=[0,C-1,N-C,N-1];
+    while (stars.length<(N>=60?4:3)){ const i=rand(N); if (!stars.includes(i) && !corners.includes(i)) stars.push(i); }
+    const upd={};
+    for (const id in this.players){ upd["players/"+id+"/score"]=0; upd["players/"+id+"/tiles"]=0; }
+    Object.assign(upd,{ "grid":null, "paint":null, "meta/game":GAME, "meta/state":"play", "meta/round":(this.meta.round||0)+1, "meta/startAt":startAt, "meta/endAt":startAt+dur*1000,
+      "meta/words":words, "meta/mode":$("sMode").value, "meta/size":size, "meta/stars":stars, "meta/winner":null, "meta/rT":null, "meta/bT":null });
+    this.ended=false; this.tokens={}; this.painted={}; this.bestCap=null; this.dbl=false; this._boardKey=""; this.view="lobby";
+    await this.ref.update(upd);
+  },
+
+  finish(){
+    if (this.ended || this.meta.state!=="play") return;
+    this.ended=true; GB.buzzer && GB.buzzer();
+    setTimeout(()=>{                                        // let the last paints land
+      const {N}=dims(this.meta), pts=Map_.points(this.grid,this.meta.stars||[],N);
+      const {r,b}=GB.host.teams(this.players), sum=l=>l.reduce((s,p)=>s+(p.score||0),0), rs=sum(r), bs=sum(b);
+      const winner = pts.red>pts.blue?"red": pts.blue>pts.red?"blue": rs>bs?"red": bs>rs?"blue":"tie";
+      const upd={"meta/state":"end","meta/winner":winner,"meta/rT":pts.red,"meta/bT":pts.blue,"meta/rC":rs,"meta/bC":bs};
+      if (this.bestCap) upd["meta/bestCap"]=this.bestCap;
+      for (const id in this.players) upd["players/"+id+"/tiles"]=this.painted[id]||0;
+      this.ref.update(upd);
+    },1200);
+  },
+
+  render(){
+    const m=this.meta, st=m.state||"lobby";
+    show($("setup"), st==="lobby" && this.view==="setup");
+    show($("lobby"), st==="lobby" && this.view==="lobby");
+    show($("arena"), st!=="lobby");
+    cancelAnimationFrame(this.raf);
+    if (st==="lobby"){ show($("result"),false); this.renderTeams(); return; }
+    this.renderTeams(); this.drawBoard(); requestAnimationFrame(()=>this.fit());
+    if (st==="play"){
+      show($("result"),false); show($("stopBtn"),true);
+      const loop=()=>{
+        const t=now();
+        if (t<m.startAt){
+          const n=Math.ceil((m.startAt-t)/1000);
+          show($("hCount"),true);
+          const lab = n>3 ? "Ready?" : String(n);
+          if ($("hCount").firstElementChild.textContent!==lab){ $("hCount").innerHTML="<span>"+lab+"</span>"; if(n<=3) beep(n===1?880:660,.15,"triangle",.25); }
+          $("hCount").firstElementChild.style.fontSize = n>3 ? "130px" : "";
+          $("timer").textContent=fmt(m.endAt-m.startAt);
+        } else {
+          if (!$("hCount").classList.contains("hidden")){ show($("hCount"),false); beep(1175,.35,"triangle",.3); this.shout("Grab the map!"); }
+          const left=Math.max(0,m.endAt-t);
+          $("timer").textContent=fmt(left);
+          $("timer").classList.toggle("warn",left<=10000);
+          const d=left<=DOUBLE_MS && left>0;
+          if (d!==this.dbl){ this.dbl=d; show($("dbl"),d); $("bwrap").classList.toggle("crunch",d); if(d) this.shout("Double paint!"); }
+          if (left<=0 && !this.ended) this.finish();
+        }
+        this.raf=requestAnimationFrame(loop);
+      };
+      loop();
+    }
+    if (st==="end"){
+      show($("hCount"),false); show($("stopBtn"),false); show($("dbl"),false); $("bwrap").classList.remove("crunch"); $("timer").classList.remove("warn"); this.dbl=false;
+      const w=m.winner, {r,b}=GB.host.teams(this.players);
+      $("winTxt").className="win "+(w==="red"?"r":w==="blue"?"b":"t");
+      $("winMascot").innerHTML = w==="tie" ? "" : ART.mascot(w,"wm");
+      $("winTxt").textContent= w==="red"?"Red wins!": w==="blue"?"Blue wins!":"It's a tie!";
+      $("whyTxt").textContent = "Land: Red "+(m.rT||0)+" · Blue "+(m.bT||0)+((m.rT===m.bT && w!=="tie")?"  (more right answers wins the tie)":"");
+      const top=l=>l.slice().sort((x,y)=>(y.score||0)-(x.score||0)).slice(0,3).map((p,i)=>`<div class="row">${ART.medal(i)} <span class="av">${ART.avatar(p.av,"",true)}</span> ${esc(p.name)} <span class="s">${p.score||0}</span></div>`).join("")||"<div class='row'>—</div>";
+      $("mvpR").innerHTML=top(r); $("mvpB").innerHTML=top(b);
+      const all=[...r,...b], best=k=>all.slice().sort((x,y)=>(y[k]||0)-(x[k]||0))[0], bt=best("tiles"), bs=best("score"), bc=m.bestCap, cp=bc&&this.players[bc.pid];
+      $("awards").innerHTML =
+        (bt&&bt.tiles?`<div class="row">${ART.icon("brush")} <span class="av">${ART.avatar(bt.av,"",true)}</span> ${esc(bt.name)}<span class="s">${bt.tiles}</span></div><div class="cap">Top painter</div>`:"")+
+        (cp?`<div class="row">${ART.icon("grid")} <span class="av">${ART.avatar(cp.av,"",true)}</span> ${esc(cp.name)}<span class="s">+${bc.n}</span></div><div class="cap">Biggest grab</div>`:"")+
+        (bs&&bs.score?`<div class="row">${ART.icon("target")} <span class="av">${ART.avatar(bs.av,"",true)}</span> ${esc(bs.name)}<span class="s">${bs.score}</span></div><div class="cap">Most correct</div>`:"");
+      show($("result"),true);
+      if (this._celebrated!==m.round){ this._celebrated=m.round; GB.fanfare(); GB.confetti($("confetti")); }
+    }
+  },
+
+  shout(txt){ const d=document.createElement("div"); d.className="shout"; d.textContent=txt; $("bwrap").appendChild(d); setTimeout(()=>d.remove(),1500); }
+};
+
+/* ================== PLAYER ================== */
+const Player = {
+  code:null, ref:null, pid:null, team:null, name:"", av:"a0", meta:{}, grid:{}, score:0, combo:0, best:0, tiles:0, paints:0, round:-1, q:null, locked:false, recent:[], timerInt:0, pickT:0, joined:false,
+
+  async start(code){
+    this.code=code; this.ref=GB.db.ref("rooms/"+code);
+    const ok=await GB.join.checkGame(GAME, code); if (!ok) return;
+    show($("player"));
+    if (!ok.exists) $("pErr").textContent="Room "+code+" not found. Check the code on the big screen.";
+    GB.join.setup(this, { game:GAME, ref:this.ref, code, extra:{score:0, best:0, tiles:0}, onEnter:()=>this.enter() });
+    $("pSay").onclick=()=>{ if(this.q) GB.speak(this.q.en); };
+    $("pGrid").onclick=e=>{ const t=e.target.closest(".mt.ok"); if (t) this.paintAt(+t.dataset.i); };
+  },
+
+  showAv(){ $("pAvBtn").innerHTML=ART.avatar(this.av); $("pAvSm").innerHTML=this.joined?ART.avatar(this.av):ART.avatar("a5"); $("pAvBig").innerHTML=ART.avatar(this.av); },
+
+  enter(){
+    if (this.joined) return; this.joined=true;
+    const me=GB.join.presence(this, this.ref);
+    me.on("value",s=>{
+      const v=s.val();
+      if (!v || !v.name){ if (this.joined){ GB.join.kicked(this, this.ref, me, v); this.ref.child("grid").off(); this.hideMap(); this.setBar(); } return; }
+      this.team=v.team; this.name=v.name; this.tiles=v.tiles||0;
+      if (typeof v.score==="number" && v.score<this.score) this.score=v.score;
+      this.setBar();
+      if (this.meta.state==="end") $("pTiles").textContent=this.tiles;
+    });
+    this.ref.child("meta").on("value",s=>{ this.meta=s.val()||{}; this.render(); });
+    this.ref.child("grid").on("value",s=>{ this.grid=s.val()||{}; this.drawScore(); if (!$("pMap").classList.contains("hidden")) this.drawMap(); });
+  },
+
+  setBar(){
+    const P=$("player"); P.classList.toggle("red",this.team==="red"&&this.joined); P.classList.toggle("blue",this.team==="blue"&&this.joined);
+    $("pMe").textContent=this.joined ? this.name : "GameBox";
+    $("pSc").innerHTML=ART.icon("check")+" "+this.score; show($("pSc"),this.joined);
+    $("pTeamBig").innerHTML=this.team==="blue"?ART.mascot("blue")+"Blue Team":ART.mascot("red")+"Red Team";
+    this.showAv();
+  },
+
+  drawScore(){ const {N}=dims(this.meta), p=Map_.points(this.grid,this.meta.stars||[],N); $("pR").textContent=p.red; $("pB").textContent=p.blue; },
+
+  /* ---- the paint map ---- */
+  openMap(){
+    show($("pMap"),true); this.drawMap();
+    try{ navigator.vibrate && navigator.vibrate(40); }catch(e){}
+    clearTimeout(this.pickT);
+    const bar=$("pMapBar"); bar.classList.remove("run"); bar.style.transitionDuration="0ms"; bar.style.transform="scaleX(1)"; void bar.offsetWidth;
+    bar.classList.add("run"); bar.style.transitionDuration=PICK_MS+"ms"; bar.style.transform="scaleX(0)";
+    this.pickT=setTimeout(()=>this.autoPick(), PICK_MS);
+  },
+  hideMap(){ clearTimeout(this.pickT); show($("pMap"),false); },
+  drawMap(){
+    const {C,R,N}=dims(this.meta), stars=this.meta.stars||[], g=this.grid, G=$("pGrid");
+    const ok=new Set(Map_.validList(g,this.team,C,R));
+    G.style.gridTemplateColumns=`repeat(${C},1fr)`;
+    G.style.maxWidth = `min(100%, calc((100vh - 230px) * ${C/R}))`;
+    G.innerHTML=Array.from({length:N},(_,i)=>Map_.tileHTML(g,i,stars,"mt")).join("");
+    [...G.children].forEach((el,i)=>{ if (ok.has(i)){ el.classList.add("ok"); if (Map_.owner(g,i)) el.classList.add("foe"); } });
+    $("pPaints").textContent="×"+this.paints; show($("pPaints"), this.paints>1);
+    $("pMapSub").textContent = ok.size ? "Tap a glowing tile" : "Map is full!";
+  },
+  autoPick(){
+    const {C,R}=dims(this.meta), ok=Map_.validList(this.grid,this.team,C,R);
+    if (!ok.length){ this.paints=0; this.hideMap(); return; }
+    // prefer empty tiles next to our land, then any empty, then steals
+    const near=ok.filter(i=>!Map_.owner(this.grid,i) && Map_.nb(i,C,R).some(n=>Map_.owner(this.grid,n)===this.team));
+    const empty=ok.filter(i=>!Map_.owner(this.grid,i));
+    this.paintAt(pick(near.length?near:empty.length?empty:ok));
+  },
+  paintAt(i){
+    if (this.paints<=0) return;
+    this.paints--;
+    this.ref.child("paint").push({pid:this.pid, i, at:now()});
+    const el=$("pGrid").children[i];
+    if (el){ el.className="mt "+this.team+" mine-now"+((this.meta.stars||[]).includes(i)?" star":""); el.innerHTML=ART.avatar(this.av,"",true)+((this.meta.stars||[]).includes(i)?`<span class="st">${ART.icon("star")}</span>`:""); }
+    beep(this.team==="blue"?620:520,.08,"triangle",.15);
+    clearTimeout(this.pickT);
+    setTimeout(()=>{ if (this.paints>0) this.openMap(); else this.hideMap(); }, 380);
+  },
+
+  render(){
+    const m=this.meta, st=m.state||"lobby";
+    if (!this.joined) return;
+    show($("pJoin"),false);
+    clearInterval(this.timerInt);
+    if (st==="lobby"){ this.hideMap(); this.paints=0; show($("pWait"),true); show($("pPlay"),false); show($("pEnd"),false); show($("pCount"),false); this.score=0; this.setBar(); return; }
+    if (st==="play"){
+      if (m.round!==this.round){ this.round=m.round; this.score=0; this.combo=0; this.best=0; this.paints=0; this.recent=[]; this.hideMap(); this.setBar(); this.nextQ(); }
+      show($("pWait"),false); show($("pEnd"),false); show($("pPlay"),true); this.drawScore();
+      let lastN=null;
+      const tick=()=>{
+        const t=now();
+        if (t<m.startAt){
+          show($("pCount"),true); const n=Math.ceil((m.startAt-t)/1000);
+          const lab = n>3 ? "go" : String(n);
+          if (lab!==lastN){ lastN=lab; $("pCountN").innerHTML= n>3 ? ART.avatar(this.av) : lab; $("pCountN").style.animation="none"; void $("pCountN").offsetWidth; $("pCountN").style.animation=""; }
+          $("pCountT").textContent = n>3 ? "Get ready!" : "Ready…";
+        } else show($("pCount"),false);
+        const left=Math.max(0,m.endAt-Math.max(t,m.startAt));
+        $("pTime").textContent=fmt(Math.ceil(left/1000)*1000);
+        $("pTimeBox").classList.toggle("warn", left<=10000 && t>=m.startAt);
+        $("player").classList.toggle("crunch", left<=DOUBLE_MS && left>0 && t>=m.startAt);
+        if (left<=0 && t>=m.startAt && this.paints>0 && !$("pMap").classList.contains("hidden")) this.autoPick();
+      };
+      tick(); this.timerInt=setInterval(tick,250);
+      return;
+    }
+    if (st==="end"){
+      this.hideMap(); this.paints=0; $("player").classList.remove("crunch");
+      show($("pCount"),false); show($("pPlay"),false); show($("pWait"),false); show($("pEnd"),true);
+      const w=m.winner, mine=w===this.team;
+      $("pWin").textContent= w==="tie"?"It's a tie!": mine ? "You win!" : T(w)+" wins!";
+      $("pWin").style.color= w==="red"?"var(--red)":w==="blue"?"var(--blue)":"var(--orange)";
+      $("pWinSub").textContent= "Land: Red "+(m.rT||0)+" · Blue "+(m.bT||0);
+      $("pEndAv").innerHTML= mine ? ART.img("trophy") : ART.avatar(this.av);
+      $("pMine").textContent=this.score; $("pTiles").textContent=this.tiles;
+      try{ navigator.vibrate && navigator.vibrate(mine?[80,60,80,60,200]:200); }catch(e){}
+    }
+  },
+
+  nextQ(){
+    const W=this.meta.words||[]; if(W.length<4) return;
+    const q=GB.makeQuestion(W, this.meta.mode||"mix", this.recent);
+    this.q=q;
+    const isEn = q.dir==="en2zh";
+    $("pAsk").textContent = isEn ? "What does it mean?" : "Which English word?";
+    $("pQ").textContent = isEn ? q.en : q.zh;
+    $("pQ").classList.toggle("zh",!isEn);
+    show($("pSay"), isEn);
+    $("pOpts").innerHTML = q.opts.map(k=>`<button class="opt" data-k="${k}">${esc(isEn?W[k][1]:W[k][0])}</button>`).join("");
+    for (const b of $("pOpts").children) b.onclick=()=>this.answer(+b.dataset.k,b);
+  },
+
+  toast(txt,bad){ const d=document.createElement("div"); d.className="toast"+(bad?" bad":""); d.textContent=txt; document.body.appendChild(d); setTimeout(()=>d.remove(),950); },
+
+  answer(k,btn){
+    if (this.locked || this.paints>0 || this.meta.state!=="play" || now()<this.meta.startAt || now()>this.meta.endAt) return;
+    this.locked=true;
+    if (k===this.q.answer){
+      btn.classList.add("ok");
+      const dbl = this.meta.endAt-now() <= DOUBLE_MS;
+      this.score++; this.combo++; this.best=Math.max(this.best,this.combo); this.setBar();
+      this.ref.child("players/"+this.pid).update({score:this.score, best:this.best});
+      beep(880,.08,"triangle",.15); beep(1320,.12,"triangle",.12,.07);
+      setTimeout(()=>{ this.locked=false; this.nextQ(); this.paints+= dbl?2:1; this.openMap(); },350);
+    } else {
+      this.combo=0;
+      btn.classList.add("no");
+      for (const b of $("pOpts").children) if(+b.dataset.k===this.q.answer) b.classList.add("ans");
+      this.toast(pick(CHEERS_NO),true);
+      beep(160,.25,"sawtooth",.12);
+      try{ navigator.vibrate && navigator.vibrate(150); }catch(e){}
+      setTimeout(()=>{ this.locked=false; this.nextQ(); },1400);
+    }
+  }
+};
+
+boot();
+</script>
+</body>
+</html>

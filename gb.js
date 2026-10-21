@@ -113,7 +113,10 @@ math 數學` }
       let en, zh;
       let m = line.match(/^(.+?)\s*[\t,，=:：]\s*(.+)$/);
       if (m && /[A-Za-z]/.test(m[1]) && !/[A-Za-z]/.test(m[2].replace(/[；;（）()]/g,""))) { en=m[1]; zh=m[2]; }
-      else { m = line.match(/^([A-Za-z][A-Za-z\s'’.\-\/]*?)\s*([^A-Za-z].*)$/); if(m){ en=m[1]; zh=m[2]; } }
+      else {                                                    // "warm up 暖身", "T-shirt T恤", "apple蘋果"
+        m = line.match(/^([A-Za-z][A-Za-z\s'’.\-\/]*?)\s+(\S*[^\x00-\x7F].*)$/) || line.match(/^([A-Za-z][A-Za-z\s'’.\-\/]*?)\s*([^\x00-\x7F].*)$/);
+        if(m){ en=m[1]; zh=m[2]; }
+      }
       if(!en||!zh) continue;
       en=en.trim().replace(/\s+/g," "); zh=zh.trim().replace(/^[\-–—:：,，\s]+/,"");
       if(!en||!zh) continue;
