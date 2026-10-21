@@ -12,7 +12,7 @@
 :root{
   --cream:#faf6ec; --paper:#fffdf8; --line:#ebe3d2; --line-d:#d9cfba; --ink:#1d1d1f; --sub:#6d665b;
   --red:#e0533d; --blue:#3a78c9; --go:#4c9a68; --go-d:#357550; --mustard:#f2c14e; --orange:#e2683a; --teal:#5bbcbc; --lav:#9b8fd6; --pink:#e98bb0;
-  --bg:#3d4486; --on-bg:#fff; --on-bg-sub:rgba(255,255,255,.78); --lift:rgba(0,0,0,.25);
+  --panel:#e7e5f4; --panel-d:#cfcbe8; --bg:#3d4486; --on-bg:#fff; --on-bg-sub:rgba(255,255,255,.78); --lift:rgba(0,0,0,.25);
   --display:"Fredoka","Nunito",sans-serif;
   --body:"Nunito","PingFang TC","Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif;
 }
@@ -38,16 +38,16 @@ img{-webkit-user-drag:none;user-select:none}
 .notice{background:#fff3cd;color:#664d03;border:2px solid #f2d888;border-radius:14px;padding:12px 16px;font-weight:800;text-align:center}
 
 /* picker */
-.picker{border-radius:28px;background:var(--paper);border:2px solid var(--line);box-shadow:0 8px 0 var(--lift);overflow:hidden}
+.picker{border-radius:28px;background:var(--panel);border:2px solid var(--panel);box-shadow:0 8px 0 var(--lift);overflow:hidden}
 .hero{display:flex;align-items:center;gap:32px;padding:26px}
-.hero .cover{flex:0 0 min(50%,600px);aspect-ratio:16/9;border-radius:20px;overflow:hidden;background:var(--cream);border:3px solid var(--ink);box-shadow:0 6px 0 var(--ink)}
+.hero .cover{flex:0 0 min(50%,600px);aspect-ratio:16/9;border-radius:20px;overflow:hidden;background:var(--cream)}
 .hero .cover img{width:100%;height:100%;object-fit:cover;display:block}
 .hero .info{flex:1;min-width:0}
 .eyebrow{font-weight:900;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--orange);margin-bottom:2px}
 .hero h2{margin:0;font-family:var(--display);font-weight:700;font-size:56px;line-height:1;letter-spacing:-.01em}
 .hero .tagline{font-size:19px;font-weight:700;color:var(--sub);margin:8px 0 16px}
 .chips{display:flex;gap:10px;flex-wrap:wrap}
-.chip{display:flex;align-items:center;gap:10px;background:var(--cream);border-radius:14px;padding:8px 14px}
+.chip{display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;padding:8px 14px}
 .chip .i{display:flex;color:var(--orange)} .chip .i .gi{width:22px;height:22px}
 .chip:nth-child(2) .i{color:var(--blue)} .chip:nth-child(3) .i{color:var(--go)}
 .chip small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--sub);font-weight:900}
@@ -57,25 +57,29 @@ img{-webkit-user-drag:none;user-select:none}
 .go:hover{transform:translateY(-1px)} .go:active{transform:translateY(4px);box-shadow:0 1px 0 var(--go-d)}
 .go .gi{width:.85em;height:.85em;stroke-width:2.6}
 .howlink{font-weight:800;font-size:15px;color:var(--sub);text-decoration:underline;text-underline-offset:3px}
-.rules{margin-top:14px;background:var(--cream);border-radius:14px;padding:12px 16px;font-weight:700;line-height:1.55;font-size:15px}
+.rules{margin-top:14px;background:#fff;border-radius:14px;padding:12px 16px;font-weight:700;line-height:1.55;font-size:15px}
 .rules ul{margin:0;padding-left:20px}
 
 .gamesec{padding:6px 26px 30px}
 .sectitle{font-family:var(--display);font-weight:600;font-size:28px;margin:0 0 16px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:26px;padding:6px 6px 10px}
-.card{position:relative;aspect-ratio:16/9;border-radius:20px;overflow:hidden;cursor:pointer;background:var(--cream);border:3px solid var(--ink);box-shadow:0 5px 0 var(--ink);transition:transform .15s,box-shadow .15s;text-align:left;padding:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:22px;padding-top:4px}
+.card{position:relative;aspect-ratio:16/9;border-radius:22px;overflow:hidden;cursor:pointer;background:var(--cream);border:5px solid transparent;box-shadow:0 2px 6px rgba(45,50,110,.12);transition:transform .2s,box-shadow .2s,border-color .2s;text-align:left;padding:0}
+.card img.cv{transition:filter .2s}
+.card:not(.sel):not(.soon) img.cv{filter:saturate(.7) brightness(.96)}
+.card:not(.sel):not(.soon):hover img.cv{filter:none}
 .card img.cv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.card:hover{transform:translateY(-3px);box-shadow:0 8px 0 var(--ink)}
-.card.sel{transform:translateY(-3px);box-shadow:0 8px 0 var(--ink),0 0 0 5px var(--paper),0 0 0 10px var(--orange)}
-.card .pick{position:absolute;top:12px;left:12px;display:none;align-items:center;gap:4px;background:var(--orange);color:#fff;font-weight:900;font-size:13px;letter-spacing:.06em;padding:3px 10px;border-radius:100px}
-.card.sel .pick{display:flex}
+.card:hover{transform:translateY(-3px);box-shadow:0 10px 20px rgba(45,50,110,.18)}
+.card.sel{border-color:#fff;transform:translateY(-5px);box-shadow:0 16px 30px rgba(45,50,110,.3)}
+.card .ok{position:absolute;top:10px;left:10px;width:32px;height:32px;border-radius:50%;background:#fff;color:var(--go);display:none;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.card .ok .gi{width:19px;height:19px;stroke-width:3}
+.card.sel .ok{display:flex}
 .card .nm{position:absolute;left:12px;bottom:12px;font-family:var(--display);font-weight:600;font-size:24px;background:var(--paper);border-radius:12px;padding:2px 14px;line-height:1.3}
 .card .badge{position:absolute;top:12px;right:12px;background:var(--mustard);color:var(--ink);font-weight:900;font-size:12px;letter-spacing:.08em;padding:3px 10px;border-radius:100px}
-.card.soon{cursor:default;border-style:dashed;border-color:var(--line-d);box-shadow:none;display:flex;align-items:center;justify-content:center;gap:4px}
+.card.soon{cursor:default;border:3px dashed #b9b5d6;background:transparent;box-shadow:none;display:flex;align-items:center;justify-content:center;gap:4px}
 .card.soon:hover{transform:none;box-shadow:none}
-.card.soon img{height:58%;width:auto;filter:grayscale(1) opacity(.35)}
-.card.soon .q{font-family:var(--display);font-weight:700;font-size:80px;color:var(--line-d);line-height:1}
-.card.soon .nm{background:transparent;color:var(--sub);font-size:20px}
+.card.soon img{height:58%;width:auto;filter:grayscale(1) opacity(.3)}
+.card.soon .q{font-family:var(--display);font-weight:700;font-size:80px;color:#b9b5d6;line-height:1}
+.card.soon .nm{background:transparent;color:#6f6a94;font-size:20px}
 
 /* how it works */
 .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
@@ -170,7 +174,7 @@ const store = { get(k){ try{ return localStorage.getItem(k); }catch(e){ return n
 /* ---------- game picker ---------- */
 let sel = GAMES.find(g=>g.id===store.get("gb.sel")) || GAMES[0];
 $("grid").innerHTML = GAMES.map(g=>`
-  <button class="card" data-g="${g.id}" aria-label="${esc(g.name)}"><img class="cv" src="img/${g.cover}.webp" alt=""><span class="pick">${ART.icon("check")} SELECTED</span>${g.isNew?'<span class="badge">NEW</span>':""}<div class="nm">${esc(g.name)}</div></button>`).join("")
+  <button class="card" data-g="${g.id}" aria-label="${esc(g.name)}"><img class="cv" src="img/${g.cover}.webp" alt=""><span class="ok">${ART.icon("check")}</span>${g.isNew?'<span class="badge">NEW</span>':""}<div class="nm">${esc(g.name)}</div></button>`).join("")
   + `<div class="card soon"><img src="img/m/a14.webp" alt=""><span class="q">?</span><div class="nm">More games coming soon</div></div>`;
 function showSel(){
   $("hName").textContent=sel.name; $("hTag").textContent=sel.tagline; $("hCover").src="img/"+sel.cover+".webp";

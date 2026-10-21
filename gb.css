@@ -7,7 +7,7 @@
   --teal:#5bbcbc; --lav:#9b8fd6; --pink:#e98bb0; --orange:#e2683a;
   --yellow:var(--mustard); --green:#4c9a68; --purple:#7d6cc7; --text:var(--ink); --gray:#a39c8e; --white:#fff;
   --o1:#e2683a; --o1d:#b14d24; --o2:#7d6cc7; --o2d:#5b4ca0; --o3:#2b9a94; --o3d:#1d736e; --o4:#d45d8c; --o4d:#a8406a;
-  --bg:#3d4486; --on-bg:#fff; --on-bg-sub:rgba(255,255,255,.78); --lift:rgba(0,0,0,.25);
+  --panel:#e7e5f4; --panel-d:#cfcbe8; --bg:#3d4486; --on-bg:#fff; --on-bg-sub:rgba(255,255,255,.78); --lift:rgba(0,0,0,.25);
   --display:"Fredoka","Nunito",sans-serif;
   --body:"Nunito","PingFang TC","Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif;
 }
@@ -64,9 +64,9 @@ img{-webkit-user-drag:none;user-select:none}
 .btn-soft:hover{background:#fff}
 
 /* ---------- panel: cover art + info, then settings ---------- */
-.panel{border-radius:24px;background:var(--paper);border:2px solid var(--line);box-shadow:0 8px 0 var(--lift);overflow:hidden}
+.panel{border-radius:24px;background:var(--panel);border:2px solid var(--panel);box-shadow:0 8px 0 var(--lift);overflow:hidden}
 .hero{position:relative;display:flex;align-items:center;gap:30px;padding:24px}
-.hero .cover{flex:0 0 min(44%,520px);aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:var(--cream);border:3px solid var(--ink);box-shadow:0 6px 0 var(--ink)}
+.hero .cover{flex:0 0 min(44%,520px);aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:var(--cream)}
 .hero .cover img{width:100%;height:100%;object-fit:cover;display:block}
 .hero .bgart{display:none}
 .hero .info{flex:1;position:relative;min-width:0}
@@ -74,7 +74,7 @@ img{-webkit-user-drag:none;user-select:none}
 .hero h1{margin:0;font-family:var(--display);font-weight:700;font-size:52px;line-height:1.02;letter-spacing:-.01em}
 .hero .tagline{font-size:19px;font-weight:700;color:var(--sub);margin:6px 0 16px}
 .chips{display:flex;gap:10px;flex-wrap:wrap}
-.chip{display:flex;align-items:center;gap:10px;background:var(--cream);border-radius:14px;padding:8px 14px}
+.chip{display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;padding:8px 14px}
 .chip .i{display:flex;color:var(--orange)} .chip .i .gi{width:22px;height:22px}
 .chip small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--sub);font-weight:900}
 .chip b{font-size:15px;font-weight:900}
@@ -84,7 +84,7 @@ img{-webkit-user-drag:none;user-select:none}
 
 /* ---------- settings rows ---------- */
 .setbox{display:flex;flex-direction:column;gap:10px}
-.setrow{display:flex;align-items:center;gap:16px;background:#fff;border:2px solid var(--line);border-radius:16px;padding:12px 18px}
+.setrow{display:flex;align-items:center;gap:16px;background:#fff;border:2px solid #fff;border-radius:16px;padding:12px 18px}
 .setrow .emo{flex:none;width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff}
 .setrow .emo .gi{width:26px;height:26px}
 .setrow:nth-child(1) .emo{background:var(--orange)} .setrow:nth-child(2) .emo{background:var(--lav)}
