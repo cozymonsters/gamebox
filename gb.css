@@ -114,8 +114,9 @@ img{-webkit-user-drag:none;user-select:none}
 .lob-act{display:flex;flex-direction:column;align-items:center;gap:10px}
 .lob-teams{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:22px;min-height:0}
 .tcol{display:flex;flex-direction:column;border-radius:22px;background:var(--paper);border:2px solid var(--line);min-height:0;overflow:hidden}
-.tcol .th{position:relative;display:flex;align-items:center;gap:12px;padding:10px 20px 10px 104px;min-height:68px;font-family:var(--display);font-weight:600;font-size:30px;color:#fff}
-.tcol .th .mascot{position:absolute;left:16px;bottom:-8px;height:74px;width:auto}
+.tcol .th{position:relative;display:flex;align-items:center;gap:12px;padding:10px 20px 10px 88px;min-height:72px;font-family:var(--display);font-weight:600;font-size:30px;color:#fff}
+.tcol .th>[data-art]{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:58px;height:58px;border-radius:50%;background:var(--paper);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -3px 0 rgba(0,0,0,.08)}
+.tcol .th .mascot{height:46px;width:auto}
 .tcol.red .th{background:var(--red)} .tcol.blue .th{background:var(--blue)}
 .tcol .th .n{margin-left:auto;font-family:var(--body);font-weight:900;font-size:18px;background:rgba(255,255,255,.25);border-radius:100px;padding:2px 13px}
 .tcol.red .names{background:linear-gradient(var(--red-l),var(--paper) 60%)} .tcol.blue .names{background:linear-gradient(var(--blue-l),var(--paper) 60%)}
@@ -135,9 +136,10 @@ img{-webkit-user-drag:none;user-select:none}
 /* ---------- scoreboard (shared by game screens) ---------- */
 .scorebar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
 .tscore{position:relative;display:flex;align-items:center;gap:12px;border-radius:20px;padding:8px 18px;color:#fff;min-height:70px}
-.tscore.r{background:var(--red);justify-self:stretch;padding-left:92px} .tscore.b{background:var(--blue);justify-self:stretch;justify-content:flex-end;padding-right:92px}
-.tscore .mascot{position:absolute;bottom:-6px;height:84px;width:auto}
-.tscore.r .mascot{left:8px} .tscore.b .mascot{right:8px}
+.tscore.r{background:var(--red);justify-self:stretch;padding-left:80px} .tscore.b{background:var(--blue);justify-self:stretch;justify-content:flex-end;padding-right:80px}
+.tscore>[data-art]{position:absolute;top:50%;transform:translateY(-50%);width:56px;height:56px;border-radius:50%;background:var(--paper);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -3px 0 rgba(0,0,0,.08)}
+.tscore.r>[data-art]{left:10px} .tscore.b>[data-art]{right:10px}
+.tscore .mascot{height:44px;width:auto}
 .tscore .nm{font-family:var(--display);font-weight:600;font-size:32px}
 .tscore .pts{font-family:var(--display);font-weight:600;font-size:44px;line-height:1.1;background:#fff;border-radius:14px;padding:0 14px;min-width:84px;text-align:center}
 .tscore.r .pts{color:var(--red)} .tscore.b .pts{color:var(--blue)}
@@ -214,8 +216,8 @@ canvas.confetti{position:absolute;inset:0;pointer-events:none;z-index:9}
 .avgrid button.sel{border-color:var(--ink);background:#fff}
 .teampick{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .tbtn{-webkit-appearance:none;appearance:none;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;min-height:118px;padding:8px 6px 10px;border-radius:18px;font-family:var(--display);font-weight:600;font-size:26px;line-height:1;color:#fff;opacity:.5;transform:scale(.96);transition:opacity .15s,transform .15s}
-.tbtn .e{display:flex;align-items:flex-end;justify-content:center;height:70px}
-.tbtn .e img{height:100%;width:auto}
+.tbtn .e{display:flex;align-items:center;justify-content:center;width:70px;height:70px;border-radius:50%;background:var(--paper);margin-bottom:6px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.08)}
+.tbtn .e img{height:54px;width:auto}
 .tbtn.red{background:var(--red);box-shadow:0 5px 0 var(--red-d)} .tbtn.blue{background:var(--blue);box-shadow:0 5px 0 var(--blue-d)}
 .tbtn.sel{opacity:1;transform:none}
 .tbtn.sel .e img{animation:gb-hop 1.4s infinite}
@@ -227,8 +229,8 @@ canvas.confetti{position:absolute;inset:0;pointer-events:none;z-index:9}
 .bigav img{width:100%;height:100%;object-fit:contain}
 .bigav .gi{width:100%;height:100%;color:var(--mustard);stroke-width:1.6}
 .wait h2{margin:0;font-family:var(--display);font-weight:700;font-size:44px;line-height:1}
-.tbadge{display:inline-flex;align-items:center;gap:8px;font-family:var(--display);font-weight:600;font-size:28px;color:#fff;background:var(--tc);border-radius:16px;padding:4px 18px 4px 8px}
-.tbadge img{height:44px;width:auto}
+.tbadge{display:inline-flex;align-items:center;gap:10px;font-family:var(--display);font-weight:600;font-size:28px;color:#fff;background:var(--tc);border-radius:16px;padding:5px 18px 5px 6px}
+.tbadge img{height:42px;width:42px;padding:4px;border-radius:50%;background:var(--paper);object-fit:contain}
 .wait .msg{font-size:20px;font-weight:900}
 .wait .sub{font-weight:700;color:var(--sub)}
 .pinfo{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:900;font-size:17px}
