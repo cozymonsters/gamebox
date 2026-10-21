@@ -207,3 +207,34 @@ canvas.confetti{position:absolute;inset:0;pointer-events:none;z-index:9}
   .lob-teams{grid-template-columns:1fr;padding:14px 16px}
   .bigcode{font-size:44px}
 }
+
+/* ---------- drawn icons / avatars (no emoji) ---------- */
+.gi{width:1.15em;height:1.15em;vertical-align:-.2em;flex:none;display:inline-block}
+i[data-i]{font-style:normal;display:inline-flex;align-items:center}
+.avsvg{width:100%;height:100%;display:block}
+.medal{width:1.5em;height:1.5em;vertical-align:middle;flex:none}
+.brand .ic svg{width:30px;height:30px}
+.brand .ic{background:var(--yellow)}
+.net:before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#51cf66;margin-right:6px;vertical-align:1px}
+.net.off:before{background:#fff}
+.go .gi,.pill .gi,.btn-soft .gi{width:1em;height:1em}
+.hero .bgart svg{width:190px;height:190px;stroke-width:1.6}
+.chip .i{display:flex;color:var(--yellow)} .chip .i .gi{width:22px;height:22px}
+.setrow .emo{color:var(--indigo);display:flex;justify-content:center} .setrow .emo .gi{width:28px;height:28px}
+.tcol .th .gi{width:26px;height:26px}
+.pchip .av{width:28px;height:28px;display:inline-block}
+.pchip button .gi{width:13px;height:13px}
+.mvp h3 .gi{width:20px;height:20px;vertical-align:-3px}
+.mvp .row .av{width:28px;height:28px;display:inline-block;flex:none}
+.p-top .av{width:34px;height:34px;display:inline-block;flex:none}
+.p-top .sc .gi{width:15px;height:15px}
+.avpick .big{padding:6px} .avpick .big svg{width:100%;height:100%}
+.bigav{width:130px;height:130px;font-size:0}
+.bigav .gi{width:100%;height:100%;color:var(--yellow);stroke-width:1.6}
+.tbtn .e{display:flex;justify-content:center;margin-bottom:4px} .tbtn .e .gi{width:30px;height:30px}
+.tbadge .gi{width:28px;height:28px;vertical-align:-4px}
+.pinfo .t .gi{width:17px;height:17px}
+.say{display:flex;align-items:center;justify-content:center;color:var(--indigo)} .say .gi{width:24px;height:24px}
+.toast{font-size:42px}
+.pcount b .gi{width:150px;height:150px;stroke-width:1.8}
+.padsm{background:var(--yellow);border-radius:8px;padding:2px;width:100%;height:100%;display:block}
