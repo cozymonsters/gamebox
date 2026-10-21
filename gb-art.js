@@ -1,4 +1,4 @@
-/* ===== English GameBox · hand-drawn SVG art (icons, avatars, medals). No emoji. ===== */
+/* ===== English GameBox · art helpers: line icons, monster avatars (img/m), mascots, medals. No emoji. ===== */
 "use strict";
 const ART = (() => {
   /* ---------- line icons (24x24, stroke = currentColor) ---------- */
@@ -40,62 +40,21 @@ const ART = (() => {
   const gamepad = (cls = "") =>
     `<svg class="${cls}" viewBox="0 0 48 48" aria-hidden="true"><path d="M14 15h20c6 0 10 5 10 12v3c0 4-3 6-6 6-2 0-3.4-1-4.6-2.6L31 30H17l-2.4 3.4C13.4 35 12 36 10 36c-3 0-6-2-6-6v-3c0-7 4-12 10-12z" fill="#1a0b5e"/><path d="M14 21v8M10 25h8" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="22.5" r="2.4" fill="#ef4560"/><circle cx="36.5" cy="27" r="2.4" fill="#2d8cf0"/><circle cx="27.5" cy="27" r="2.4" fill="#2e9d48"/></svg>`;
 
-  /* ---------- character avatars (original "buddies") ---------- */
-  const COLORS = ["#ff6b6b","#ffa94d","#fcc419","#51cf66","#20c997","#339af0","#5c7cfa","#9775fa","#f06595","#ff922b","#22b8cf","#94d82d"];
-  const N = 24;
+  /* ---------- character avatars: 16 hand-drawn monsters (img/m/a0–a15.webp) ---------- */
+  const N = 16;
   const AVATARS = Array.from({ length: N }, (_, i) => "a" + i);
-  const shade = (hex, f) => {
-    const n = parseInt(hex.slice(1), 16);
-    const ch = s => Math.max(0, Math.min(255, Math.round(((n >> s) & 255) * (1 + f))));
-    return "#" + [16, 8, 0].map(s => ch(s).toString(16).padStart(2, "0")).join("");
-  };
   const idx = id => {
     const m = /^a(\d+)$/.exec(String(id || ""));
     if (m && +m[1] < N) return +m[1];
     let h = 0; for (const c of String(id || "x")) h = (h * 31 + c.codePointAt(0)) >>> 0;
     return h % N;
   };
-  const INK = "#1d1b3a";
-  function avatar(id, cls = ""){
-    const i = idx(id);
-    const c = COLORS[(i * 5) % 12], d = shade(c, -0.28), l = shade(c, 0.35);
-    const shape = ["round","square","egg","pear"][(i + Math.floor(i / 12)) % 4];
-    const ears  = ["cat","bear","bunny","antenna","horns","sprout","none"][(i * 3 + 1) % 7];
-    const eyes  = ["big","dot","happy","wink"][(i * 7 + Math.floor(i / 4)) % 4];
-    const mouth = ["smile","open","cat","teeth"][(i * 5 + 2) % 4];
-    let s = "";
-    // ears / top things (behind the body)
-    if (ears === "cat")   s += `<path d="M20 44 26 9 47 28z M80 44 74 9 53 28z" fill="${c}" stroke="${d}" stroke-width="3" stroke-linejoin="round"/><path d="M27 34 29 18 39 28z M73 34 71 18 61 28z" fill="#ffc9d6"/>`;
-    if (ears === "bear")  s += `<circle cx="25" cy="27" r="12" fill="${c}" stroke="${d}" stroke-width="3"/><circle cx="75" cy="27" r="12" fill="${c}" stroke="${d}" stroke-width="3"/><circle cx="25" cy="27" r="5.5" fill="${l}"/><circle cx="75" cy="27" r="5.5" fill="${l}"/>`;
-    if (ears === "bunny") s += `<ellipse cx="36" cy="18" rx="8.5" ry="19" fill="${c}" stroke="${d}" stroke-width="3"/><ellipse cx="64" cy="18" rx="8.5" ry="19" fill="${c}" stroke="${d}" stroke-width="3"/><ellipse cx="36" cy="19" rx="3.8" ry="12" fill="#ffc9d6"/><ellipse cx="64" cy="19" rx="3.8" ry="12" fill="#ffc9d6"/>`;
-    if (ears === "antenna") s += `<path d="M39 24 31 7M61 24 69 7" stroke="${INK}" stroke-width="3" stroke-linecap="round"/><circle cx="31" cy="7" r="5.5" fill="#ffd43b" stroke="${INK}" stroke-width="2"/><circle cx="69" cy="7" r="5.5" fill="#ffd43b" stroke="${INK}" stroke-width="2"/>`;
-    if (ears === "horns") s += `<path d="M29 30 23 7 41 23z M71 30 77 7 59 23z" fill="#fff3bf" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>`;
-    if (ears === "sprout") s += `<path d="M50 22V10" stroke="#2b8a3e" stroke-width="3.5" stroke-linecap="round"/><path d="M50 13C41 2 30 7 33 14c5 4 11 3 17-1z" fill="#51cf66" stroke="#2b8a3e" stroke-width="2"/><path d="M50 11c8-10 20-6 17 1-5 4-11 3-17-1z" fill="#69db7c" stroke="#2b8a3e" stroke-width="2"/>`;
-    // body
-    const body = {
-      round:  `<circle cx="50" cy="57" r="37"/>`,
-      square: `<rect x="14" y="20" width="72" height="72" rx="26"/>`,
-      egg:    `<ellipse cx="50" cy="58" rx="34" ry="37"/>`,
-      pear:   `<path d="M50 20c14 0 22 9 24 21 9 6 13 15 13 25 0 16-16 26-37 26S13 82 13 66c0-10 4-19 13-25 2-12 10-21 24-21z"/>`
-    }[shape];
-    s += `<g fill="${c}" stroke="${d}" stroke-width="3">${body}</g>`;
-    s += `<ellipse cx="50" cy="79" rx="21" ry="10" fill="#fff" opacity=".3"/>`;
-    s += `<circle cx="27" cy="65" r="6" fill="#ff8fab" opacity=".55"/><circle cx="73" cy="65" r="6" fill="#ff8fab" opacity=".55"/>`;
-    // eyes
-    const bigEye = (x) => `<circle cx="${x}" cy="50" r="10" fill="#fff" stroke="${d}" stroke-width="2"/><circle cx="${x + 2}" cy="52" r="5.5" fill="${INK}"/><circle cx="${x + 3.8}" cy="50" r="2" fill="#fff"/>`;
-    const dotEye = (x) => `<circle cx="${x}" cy="52" r="5" fill="${INK}"/><circle cx="${x + 1.6}" cy="50.4" r="1.7" fill="#fff"/>`;
-    const arcEye = (x) => `<path d="M${x - 6} 54q6-8 12 0" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>`;
-    if (eyes === "big")   s += bigEye(37) + bigEye(63);
-    if (eyes === "dot")   s += dotEye(38) + dotEye(62);
-    if (eyes === "happy") s += arcEye(37) + arcEye(63);
-    if (eyes === "wink")  s += bigEye(37) + arcEye(63);
-    // mouth
-    if (mouth === "smile") s += `<path d="M42 67q8 8 16 0" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>`;
-    if (mouth === "open")  s += `<path d="M41 65q9 14 18 0z" fill="${INK}"/><path d="M45.5 71q4.5 5 9 0-4.5-3-9 0z" fill="#ff6b81"/>`;
-    if (mouth === "cat")   s += `<path d="M42 66q4 5 8 0 4 5 8 0" fill="none" stroke="${INK}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>`;
-    if (mouth === "teeth") s += `<path d="M40 65q10 11 20 0z" fill="${INK}"/><rect x="46" y="65" width="8" height="4.5" rx="1" fill="#fff"/>`;
-    return `<svg class="avsvg ${cls}" viewBox="0 0 100 100" aria-hidden="true">${s}</svg>`;
-  }
+  const INK = "#1d1d1f";
+  const img = (src, cls = "") => `<img class="${cls}" src="img/${src}.webp" alt="" draggable="false">`;
+  const avatar = (id, cls = "") => img("m/a" + idx(id), "avsvg " + cls);
+  const mascot = (team, cls = "") => img(team === "blue" ? "team-blue" : "team-red", "mascot " + cls);
+  // warm the cache so avatars appear instantly on slow 4G
+  function preload(list){ for (const s of list){ const i = new Image(); i.src = "img/" + s + ".webp"; } }
 
   /* ---------- medals, badges, ball ---------- */
   const MEDAL = [["#ffd43b","#e67700"],["#e9ecef","#868e96"],["#ffb380","#c2410c"]];
@@ -105,7 +64,7 @@ const ART = (() => {
     return `<svg class="medal" viewBox="0 0 24 24"><path d="M7 1.5 10 9M17 1.5 14 9" stroke="#5c7cfa" stroke-width="3" stroke-linecap="round"/><circle cx="12" cy="14.5" r="8" fill="${a}" stroke="${b}" stroke-width="2"/><text x="12" y="18.3" text-anchor="middle" font-size="10" font-weight="900" fill="${b}" font-family="Nunito,sans-serif">${i + 1}</text></svg>`;
   }
   const three = () => `<svg class="medal" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#ff9f1c" stroke="#c26f00" stroke-width="2"/><text x="12" y="16.5" text-anchor="middle" font-size="12" font-weight="900" fill="#fff" font-family="Nunito,sans-serif">3</text></svg>`;
-  const ball = (cls = "") => `<svg class="${cls}" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" fill="#f26b1d" stroke="${INK}" stroke-width="5"/><path d="M6 50h88M50 6v88M20 18c14 16 14 48 0 64M80 18c-14 16-14 48 0 64" fill="none" stroke="${INK}" stroke-width="4.5"/><ellipse cx="34" cy="30" rx="10" ry="6" fill="#fff" opacity=".25" transform="rotate(-30 34 30)"/></svg>`;
+  const ball = (cls = "") => img("ball", "ballimg " + cls);
 
   /* ---------- crowd of fans ---------- */
   function crowd(n){
@@ -119,12 +78,14 @@ const ART = (() => {
     return out;
   }
 
-  return { icon, gamepad, avatar, AVATARS, medal, three, ball, crowd };
+  return { icon, gamepad, avatar, AVATARS, mascot, img, preload, medal, three, ball, crowd };
 })();
 
 /* fill any <i data-i="name"> / <span data-art="gamepad"> placeholders in the page */
 ART.hydrate = (root = document) => {
   root.querySelectorAll("[data-i]").forEach(el => { if (!el.dataset.done){ el.insertAdjacentHTML("afterbegin", ART.icon(el.dataset.i)); el.dataset.done = 1; } });
-  root.querySelectorAll("[data-art]").forEach(el => { if (!el.dataset.done){ const a = el.dataset.art; el.insertAdjacentHTML("afterbegin", a === "gamepad" ? ART.gamepad() : a === "ball" ? ART.ball() : ""); el.dataset.done = 1; } });
+  const art = a => a === "gamepad" ? ART.gamepad() : a === "ball" ? ART.ball() : a === "logo" ? ART.avatar("a5", "logo")
+    : a === "red" || a === "blue" ? ART.mascot(a) : a === "trophy" ? ART.img("trophy", "trophy") : /^a\d+$/.test(a) ? ART.avatar(a) : "";
+  root.querySelectorAll("[data-art]").forEach(el => { if (!el.dataset.done){ el.insertAdjacentHTML("afterbegin", art(el.dataset.art)); el.dataset.done = 1; } });
 };
 if (document.readyState !== "loading") ART.hydrate(); else document.addEventListener("DOMContentLoaded", () => ART.hydrate());

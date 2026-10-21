@@ -141,7 +141,7 @@ math 數學` }
 
   function confetti(canvas){
     const ctx=canvas.getContext("2d"); const W=canvas.width=canvas.offsetWidth, H=canvas.height=canvas.offsetHeight;
-    const cols=["#ef4560","#2d8cf0","#ffc83d","#2e9d48","#8e44ad","#e84393","#ff9f1c"];
+    const cols=["#e0533d","#3a78c9","#f2c14e","#5fae7b","#9b8fd6","#e98bb0","#5bbcbc","#e2683a"];
     const ps=Array.from({length:180},()=>({x:Math.random()*W,y:-20-Math.random()*H*.6,vx:(Math.random()-.5)*4,vy:2+Math.random()*4,r:Math.random()*6.28,vr:(Math.random()-.5)*.3,w:8+Math.random()*8,h:6+Math.random()*6,c:pick(cols)}));
     const t0=performance.now();
     (function f(t){ ctx.clearRect(0,0,W,H);
@@ -248,7 +248,14 @@ math 數學` }
       P.av = store.get("tug.av"); if (!AVATARS.includes(P.av)) P.av = pick(AVATARS);
       $("pCodeLbl").textContent=opts.code;
       if (!$("pName").value) $("pName").value=P.name; P.showAv();
-      $("pAvBtn").onclick=()=>{ let a; do{ a=pick(AVATARS); }while(a===P.av); P.av=a; store.set("tug.av",a); P.showAv(); beep(700,.06,"triangle",.12); };
+      const grid=$("pAvGrid");
+      const setAv=a=>{ P.av=a; store.set("tug.av",a); P.showAv(); beep(700,.06,"triangle",.12);
+        if (grid) for (const b of grid.children) b.classList.toggle("sel",b.dataset.av===a); };
+      if (grid){
+        grid.innerHTML=AVATARS.map(a=>`<button data-av="${a}" class="${a===P.av?"sel":""}" aria-label="Monster ${a}">${ART.avatar(a)}</button>`).join("");
+        for (const b of grid.children) b.onclick=()=>setAv(b.dataset.av);
+      }
+      $("pAvBtn").onclick=()=>setAv(AVATARS[(AVATARS.indexOf(P.av)+1)%AVATARS.length]);
       const check=()=>{ $("pGo").disabled=!($("pName").value.trim() && P.team); };
       const pickTeam=t=>{ P.team=t; document.querySelectorAll(".tbtn").forEach(b=>b.classList.toggle("sel",b.dataset.team===t)); check(); };
       document.querySelectorAll(".tbtn").forEach(b=>b.onclick=()=>pickTeam(b.dataset.team));
