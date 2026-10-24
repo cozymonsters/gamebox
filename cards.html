@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en" class="phone">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#faf6ec">
+<title>Flashcards · GameBox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="gb.css?v=f2e0fa00">
+<style>
+.hidden{display:none!important}
+body{background:var(--cream)}
+#fc{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;max-width:560px;margin:0 auto;padding:0 14px calc(16px + env(safe-area-inset-bottom))}
+.fhead{display:flex;align-items:center;gap:10px;padding:12px 0 8px}
+.fhead .brand{display:flex;align-items:center;gap:8px;font-family:var(--display);font-weight:600;font-size:20px;color:var(--ink);text-decoration:none}
+.fhead .brand .ic{width:34px;height:34px;display:inline-flex}
+.fhead .brand .ic img{width:100%;height:100%;object-fit:contain}
+.fhead .sp{flex:1}
+.fhead .cnt{font-weight:900;font-size:15px;background:var(--paper);border:2px solid var(--line);border-radius:12px;padding:2px 10px;font-variant-numeric:tabular-nums}
+.setname{font-family:var(--display);font-weight:600;font-size:22px;line-height:1.15;margin:2px 0 8px}
+.bar{height:10px;border-radius:10px;background:#e9e2cf;overflow:hidden;display:flex}
+.bar i{display:block;height:100%;background:var(--go);transition:width .3s}
+.tools{display:flex;gap:8px;margin:10px 0 12px;flex-wrap:wrap}
+.tool{display:inline-flex;align-items:center;gap:6px;background:var(--paper);border:2px solid var(--line);border-radius:12px;padding:6px 12px;font-weight:900;font-size:14px;color:var(--ink)}
+.tool .gi{width:18px;height:18px}
+.tool.on{background:var(--ink);border-color:var(--ink);color:#fff}
+/* the card */
+.stage{flex:1;display:flex;align-items:stretch;perspective:1400px;min-height:300px;position:relative}
+.flip{position:relative;flex:1;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.3,1.3,.5,1);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.flip.back{transform:rotateY(180deg)}
+.flip.out-r{transition:transform .28s ease-in,opacity .28s;transform:translateX(120%) rotate(14deg);opacity:0}
+.flip.out-l{transition:transform .28s ease-in,opacity .28s;transform:translateX(-120%) rotate(-14deg);opacity:0}
+.flip.back.out-r{transform:rotateY(180deg) translateX(-120%) rotate(-14deg)}
+.flip.back.out-l{transform:rotateY(180deg) translateX(120%) rotate(14deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--paper);border-radius:28px;box-shadow:0 8px 0 var(--line),0 16px 30px rgba(61,68,134,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:26px 22px 54px;text-align:center;overflow:hidden}
+.face.b{transform:rotateY(180deg);background:#fff}
+.face .tag{position:absolute;top:16px;left:18px;font-size:13px;font-weight:900;color:var(--sub);letter-spacing:.08em;text-transform:uppercase}
+.face .mon{position:absolute;right:12px;bottom:10px;width:64px;height:64px;opacity:.95}
+.face .mon img{width:100%;height:100%;object-fit:contain}
+.face .hint{position:absolute;bottom:18px;left:0;right:0;font-size:13px;font-weight:800;color:var(--sub)}
+.big{font-family:var(--display);font-weight:600;font-size:clamp(40px,13vw,66px);line-height:1.08;word-break:break-word}
+.big.zh{font-family:var(--body);font-weight:900;font-size:clamp(36px,11vw,58px)}
+.qtext{font-weight:900;font-size:clamp(20px,5.6vw,25px);line-height:1.4;text-align:left;align-self:stretch}
+.qsub{align-self:stretch;text-align:left;background:var(--cream);border-radius:12px;padding:8px 11px;margin-top:10px;font-size:15px;font-weight:800;line-height:1.45;white-space:pre-line}
+.qsub.en{font-family:"Times New Roman",Georgia,serif;font-weight:400;font-size:17px}
+.ans{font-weight:900;font-size:clamp(20px,5.8vw,26px);line-height:1.35;color:var(--go-d)}
+.why{margin-top:14px;background:#e3f1e8;color:#2d5e40;border-radius:12px;padding:9px 12px;font-size:15px;font-weight:800;line-height:1.45;text-align:left;align-self:stretch}
+.say{position:absolute;right:14px;top:12px;width:48px;height:48px;border-radius:50%;background:var(--cream);display:flex;align-items:center;justify-content:center;color:var(--ink);z-index:2}
+.say .gi{width:24px;height:24px}
+/* buttons */
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.act{display:flex;align-items:center;justify-content:center;gap:8px;min-height:62px;border-radius:18px;font-family:var(--display);font-weight:600;font-size:21px;color:#fff;transition:transform .06s}
+.act .gi{width:22px;height:22px}
+.act.again{background:var(--orange);box-shadow:0 6px 0 #b94f25}
+.act.got{background:var(--go);box-shadow:0 6px 0 var(--go-d)}
+.act:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.legend{display:flex;justify-content:space-between;font-size:13px;font-weight:800;color:var(--sub);margin-top:8px}
+/* done */
+.done{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;padding:20px 0}
+.done .mon{width:150px;height:150px}
+.done .mon img{width:100%;height:100%;object-fit:contain}
+.done h2{font-family:var(--display);font-weight:700;font-size:38px;margin:0}
+.done p{margin:0;font-weight:800;color:var(--sub);font-size:16px}
+.done .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+.done .go{font-size:20px}
+.err{margin:40px 0;text-align:center;font-weight:800;color:var(--sub)}
+</style>
+</head>
+<body>
+<div id="fc">
+  <div class="fhead"><a class="brand" href="./"><span class="ic" data-art="logo"></span>GameBox</a><div class="sp"></div><span class="cnt" id="cnt">0 / 0</span></div>
+  <div class="setname" id="setName">Flashcards</div>
+  <div class="bar"><i id="barGot" style="width:0"></i></div>
+  <div class="tools" id="tools">
+    <button class="tool" id="tSide"><i data-i="swap"></i> <span id="tSideTxt">English first</span></button>
+    <button class="tool" id="tShuf"><i data-i="refresh"></i> Shuffle</button>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="flip" id="flip">
+      <div class="face f" id="faceF"></div>
+      <div class="face b" id="faceB"></div>
+    </div>
+  </div>
+  <div id="ctrl">
+    <div class="acts">
+      <button class="act again" id="bAgain"><i data-i="refresh"></i> Again</button>
+      <button class="act got" id="bGot"><i data-i="check"></i> Got it</button>
+    </div>
+    <div class="legend"><span>Tap the card to flip</span><span id="leftTxt"></span></div>
+  </div>
+
+  <div class="done hidden" id="done">
+    <div class="mon" id="doneMon"></div>
+    <h2>All done!</h2>
+    <p id="doneTxt"></p>
+    <div class="row">
+      <button class="go" id="bRestart"><i data-i="refresh"></i> Start over</button>
+    </div>
+  </div>
+  <div class="err hidden" id="err"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="gb-quiz.js?v=0f47520e"></script>
+<script src="gb-art.js?v=6ae51ada"></script>
+<script src="gb.js?v=01bf2a33"></script>
+<script>
+"use strict";
+const { $, show, esc, store, shuffle, pick, params, SETS, parseWords, speak, db } = GB;
+const Cards = {
+  key:"", name:"", items:[], quiz:false, zhFirst:false, pile:[], firstTry:0, seen:new Set(), cur:null, busy:false,
+
+  async load(){
+    const k=params.get("set")||"", r=(params.get("r")||"").replace(/\D/g,"");
+    try{
+      if (r.length===4){
+        const d=(await db.ref("rooms/"+r+"/deck").get()).val();
+        if (!d || !d.words) return this.fail("This card set is not available. Ask your teacher for a new QR code.");
+        this.key="r"+r; this.name=d.name||"My Words"; this.quiz=!!d.quiz; this.items=d.words;
+      } else if (SETS[k]){
+        this.key=k; this.name=SETS[k].name; this.quiz=!!SETS[k].quiz; this.items=this.quiz ? SETS[k].quiz : parseWords(SETS[k].words);
+      } else return this.fail("Card set not found. Scan the QR code on the big screen again.");
+    }catch(e){ return this.fail("Could not load the cards. Check your connection and try again."); }
+    if (this.items.length<1) return this.fail("This card set is empty.");
+    document.title=this.name+" · Flashcards";
+    $("setName").textContent=this.name;
+    show($("tSide"), !this.quiz);
+    this.zhFirst = !this.quiz && store.get("fc.zh")==="1";
+    this.sideLabel();
+    $("flip").onclick=()=>this.flip();
+    $("bAgain").onclick=()=>this.next(false);
+    $("bGot").onclick=()=>this.next(true);
+    $("tSide").onclick=()=>{ this.zhFirst=!this.zhFirst; store.set("fc.zh",this.zhFirst?"1":"0"); this.sideLabel(); this.draw(); };
+    $("tShuf").onclick=()=>this.start(true);
+    $("bRestart").onclick=()=>this.start(true);
+    this.swipe();
+    addEventListener("keydown",e=>{ if(e.key===" "){ e.preventDefault(); this.flip(); } if(e.key==="ArrowRight") this.next(true); if(e.key==="ArrowLeft") this.next(false); });
+    this.start(true);
+  },
+  fail(msg){ show($("stage"),false); show($("ctrl"),false); show($("tools"),false); $("err").textContent=msg; show($("err"),true); },
+  sideLabel(){ $("tSideTxt").textContent=this.zhFirst?"中文 first":"English first"; $("tSide").classList.toggle("on",this.zhFirst); },
+
+  start(mix){
+    this.pile=this.items.map((_,i)=>i); if (mix) shuffle(this.pile);
+    this.firstTry=0; this.seen=new Set();
+    show($("done"),false); show($("stage"),true); show($("ctrl"),true);
+    this.draw();
+  },
+
+  draw(){
+    const F=$("flip"); F.className="flip"; this.busy=false;
+    if (!this.pile.length) return this.finish();
+    const i=this.pile[0], it=this.items[i], mon=`<span class="mon">${ART.avatar(ART.AVATARS[i % ART.AVATARS.length],"",true)}</span>`;
+    if (this.quiz){
+      const sub = it.s ? `<div class="qsub${/[一-鿿]/.test(it.s.replace(/^原文[^：:]*[：:]/,""))?"":" en"}">${esc(it.s)}</div>` : "";
+      $("faceF").innerHTML=`<span class="tag">Question</span><div class="qtext">${esc(it.q)}</div>${sub}<span class="hint">Tap to see the answer</span>${mon}`;
+      $("faceB").innerHTML=`<span class="tag">Answer</span><div class="ans">${esc(it.o[it.a])}</div>${it.w?`<div class="why">${esc(it.w)}</div>`:""}${mon}`;
+    } else {
+      const [en,zh]=it, enSide=`<div class="big">${esc(en)}</div>`, zhSide=`<div class="big zh">${esc(zh)}</div>`;
+      const sayBtn=`<button class="say" data-say="1" aria-label="Listen">${ART.icon("volume")}</button>`;
+      $("faceF").innerHTML=`<span class="tag">${this.zhFirst?"中文":"English"}</span>${this.zhFirst?zhSide:enSide+sayBtn}<span class="hint">Tap to flip</span>${mon}`;
+      $("faceB").innerHTML=`<span class="tag">${this.zhFirst?"English":"中文"}</span>${this.zhFirst?enSide+sayBtn:zhSide}${mon}`;
+      for (const b of document.querySelectorAll("[data-say]")) b.onclick=e=>{ e.stopPropagation(); speak(en); };
+    }
+    const total=this.items.length, left=this.pile.length, known=total-left;
+    $("cnt").textContent=Math.min(known+1,total)+" / "+total;
+    $("barGot").style.width=(known/total*100)+"%";
+    $("leftTxt").textContent=left+" left";
+  },
+
+  flip(){ if (this.busy || !this.pile.length) return; $("flip").classList.toggle("back"); },
+
+  next(got){
+    if (this.busy || !this.pile.length) return;
+    this.busy=true;
+    const i=this.pile.shift();
+    if (got){ if (!this.seen.has(i)) this.firstTry++; }
+    else { this.seen.add(i); this.pile.splice(Math.min(this.pile.length, 3+Math.floor(Math.random()*3)), 0, i); }   // comes back a few cards later
+    $("flip").classList.add(got?"out-r":"out-l");
+    try{ navigator.vibrate && navigator.vibrate(got?15:[10,40,10]); }catch(e){}
+    setTimeout(()=>this.draw(), 260);
+  },
+
+  finish(){
+    show($("stage"),false); show($("ctrl"),false); show($("done"),true);
+    $("doneMon").innerHTML=ART.img("trophy");
+    const n=this.items.length;
+    $("doneTxt").textContent=`You knew ${this.firstTry} of ${n} on the first try.`+(this.firstTry<n?" Go again to lock in the tricky ones!":" Amazing! You're ready for the game.");
+    $("cnt").textContent=n+" / "+n; $("barGot").style.width="100%"; $("leftTxt").textContent="";
+    GB.fanfare && GB.fanfare();
+  },
+
+  swipe(){
+    let x0=null, y0=0;
+    const S=$("stage");
+    S.addEventListener("touchstart",e=>{ x0=e.touches[0].clientX; y0=e.touches[0].clientY; },{passive:true});
+    S.addEventListener("touchend",e=>{
+      if (x0===null) return; const dx=e.changedTouches[0].clientX-x0, dy=e.changedTouches[0].clientY-y0; x0=null;
+      if (Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.3) this.next(dx>0);
+    },{passive:true});
+  }
+};
+Cards.load();
+</script>
+</body>
+</html>

@@ -66,7 +66,15 @@ defense 防守
 gym 體育館
 stadium 體育場
 record 紀錄
-tie 平手` },
+tie 平手
+attack 進攻
+league 聯盟
+court 球場
+substitute 替補球員
+victory 勝利
+spectator 觀眾
+uniform 制服
+teamwork 團隊合作` },
     school: { name: "School Life", words: `teacher 老師
 classmate 同學
 classroom 教室
@@ -177,6 +185,7 @@ math 數學` }
         }
       }
       history.replaceState(null,"",baseUrl+"?host="+code);
+      host.code=code;
       return code;
     },
 
@@ -201,6 +210,33 @@ math 數學` }
       const modeLock=()=>{ const m=$("sMode"); if(!m) return; const quiz=!!(SETS[sel.value]&&SETS[sel.value].quiz); m.disabled=quiz; const row=m.closest(".setrow"); if(row) row.style.opacity=quiz?.45:""; };
       fill(); modeLock();
       sel.onchange=()=>{ store.set("tug.set",sel.value); modeLock(); };
+      // flashcards: a QR code students scan to review the selected list on their phones before the game
+      if (!$("cardsBtn")){
+        const b=document.createElement("button"); b.className="btn-soft"; b.id="cardsBtn"; b.innerHTML=ART.icon("qr")+" Flashcards";
+        $("editWords").insertAdjacentElement("afterend", b);
+        const m=document.createElement("div"); m.className="modal hidden"; m.id="cardsModal";
+        m.innerHTML=`<div class="mcard cardsm"><div class="mh">${ART.icon("qr")} Flashcards</div><div class="mb">
+          <div class="cq"><div class="qrbox" id="cardsQR"></div><div class="ctext"><b id="cardsName"></b><span id="cardsCount"></span>
+          <p>Scan to review on your phone before the game. Flip each card, then tap <em>Got it</em> or <em>Again</em>.</p></div></div>
+          <div class="row"><button class="go" id="cardsDone">Done</button></div></div></div>`;
+        document.body.appendChild(m);
+        m.onclick=e=>{ if(e.target===m) show(m,false); };
+        $("cardsDone").onclick=()=>show(m,false);
+        b.onclick=async()=>{
+          const k=sel.value, custom=k==="custom", list=host.words(), quiz=!custom && !!SETS[k].quiz;
+          $("cardsName").textContent = custom ? "My Words" : SETS[k].name;
+          $("cardsCount").textContent = list.length+(quiz?" questions":" words");
+          $("cardsQR").innerHTML='<div class="qrwait">Loading…</div>'; show(m);
+          let url = dirUrl+"cards.html?set="+k;
+          if (custom){                                  // teacher's own list lives on this computer: share it through the room
+            for (let i=0;i<40 && !host.code;i++) await new Promise(r=>setTimeout(r,150));
+            if (!host.code){ $("cardsQR").innerHTML='<div class="qrwait">Not connected yet. Try again.</div>'; return; }
+            await db.ref("rooms/"+host.code+"/deck").set({ name:"My Words", words:list });
+            url = dirUrl+"cards.html?r="+host.code;
+          }
+          host.drawQR(url, $("cardsQR"));
+        };
+      }
       for (const id of ids){ const el=$(id); const v=store.get("tug."+id); if(v && [...el.options].some(o=>o.value===v)) el.value=v; el.onchange=()=>store.set("tug."+id,el.value); }
       // word editor modal
       $("editWords").onclick=()=>{ $("wordText").value=store.get("tug.custom")||""; $("wordErr").textContent=""; show($("wordModal")); $("wordText").focus(); };
@@ -248,6 +284,7 @@ math 數學` }
       }catch(e){ return { exists: true }; }
     },
     setup(P, opts){
+      document.documentElement.classList.add("phone");      // phone pages: cream all the way down (Safari tints its toolbar with the page background)
       P.pid = store.get("tug.pid") || ("p"+Date.now().toString(36)+rand(1e6).toString(36));
       store.set("tug.pid",P.pid);
       P.name = store.get("tug.name")||"";
