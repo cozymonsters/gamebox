@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="gb.css?v=37485ccd">
+<link rel="stylesheet" href="gb.css?v=a4e31f83">
 <style>
 .hidden{display:none!important}  /* works even before gb.css arrives */
 /* ---- Tug of War scene ---- */
@@ -83,7 +83,7 @@
       </div>
       <div class="panel-body">
         <div class="setbox">
-          <div class="setrow"><span class="emo" data-i="book"></span><div class="txt"><h4>Word List</h4><p>Which words will students practice?</p></div>
+          <div class="setrow"><span class="emo" data-i="book"></span><div class="txt"><h4>Question Bank</h4><p>Vocabulary, a topic quiz, or your own words</p></div>
             <div class="ctl"><select class="sel" id="sSet"></select><button class="btn-soft" id="editWords"><i data-i="pencil"></i> My Words</button></div></div>
           <div class="setrow"><span class="emo" data-i="help"></span><div class="txt"><h4>Question Type</h4><p>Show English and pick 中文, or the other way</p></div>
             <div class="ctl"><select class="sel" id="sMode"><option value="mix">Mixed</option><option value="en2zh">English → 中文</option><option value="zh2en">中文 → English</option></select></div></div>
@@ -225,8 +225,9 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="gb-quiz.js?v=ebe5bec7"></script>
 <script src="gb-art.js?v=6ae51ada"></script>
-<script src="gb.js?v=de79c29c"></script>
+<script src="gb.js?v=f2765d1c"></script>
 <script>
 "use strict";
 const GAME="tug";
@@ -490,18 +491,7 @@ const Player = {
     }
   },
 
-  nextQ(){
-    const W=this.meta.words||[]; if(W.length<4) return;
-    const q=GB.makeQuestion(W, this.meta.mode||"mix", this.recent);
-    this.q=q;
-    const isEn = q.dir==="en2zh";
-    $("pAsk").textContent = isEn ? "What does it mean?" : "Which English word?";
-    $("pQ").textContent = isEn ? q.en : q.zh;
-    $("pQ").classList.toggle("zh",!isEn);
-    show($("pSay"), isEn);
-    $("pOpts").innerHTML = q.opts.map(k=>`<button class="opt" data-k="${k}">${esc(isEn?W[k][1]:W[k][0])}</button>`).join("");
-    for (const b of $("pOpts").children) b.onclick=()=>this.answer(+b.dataset.k,b);
-  },
+  nextQ(){ GB.renderQuestion(this); },
 
   toast(txt,bad){ const d=document.createElement("div"); d.className="toast"+(bad?" bad":""); d.textContent=txt; document.body.appendChild(d); setTimeout(()=>d.remove(),950); },
 
@@ -520,11 +510,11 @@ const Player = {
     } else {
       this.combo=0; $("pCombo").textContent="";
       btn.classList.add("no");
-      for (const b of $("pOpts").children) if(+b.dataset.k===this.q.answer) b.classList.add("ans");
+      for (const b of $("pOpts").children) if(+b.dataset.k===this.q.answer) b.classList.add("ans"); GB.showWhy(this.q);
       this.toast(pick(CHEERS_NO),true);
       beep(160,.25,"sawtooth",.12);
       try{ navigator.vibrate && navigator.vibrate(150); }catch(e){}
-      setTimeout(()=>{ this.locked=false; this.nextQ(); },1400);
+      setTimeout(()=>{ this.locked=false; this.nextQ(); },GB.wrongMs(this.q));
     }
   }
 };

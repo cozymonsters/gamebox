@@ -106,6 +106,8 @@ history 歷史
 science 科學
 math 數學` }
   };
+  if (window.GB_QUIZ) for (const k in window.GB_QUIZ) SETS[k]=window.GB_QUIZ[k];   // multiple-choice banks (gb-quiz.js)
+  const setSize = k => SETS[k].quiz ? SETS[k].quiz.length : parseWords(SETS[k].words).length;
   function parseWords(text){
     const out=[]; const seenEn=new Set(), seenZh=new Set();
     for (let line of String(text||"").split(/\r?\n/)){
@@ -191,13 +193,14 @@ math 數學` }
       const sel=$("sSet");
       const fill=()=>{
         sel.innerHTML="";
-        for (const k in SETS){ const o=document.createElement("option"); o.value=k; o.textContent=SETS[k].name+" ("+parseWords(SETS[k].words).length+" words)"; sel.appendChild(o); }
+        for (const k in SETS){ const o=document.createElement("option"); o.value=k; o.textContent=SETS[k].name+" ("+setSize(k)+(SETS[k].quiz?" questions)":" words)"); sel.appendChild(o); }
         const custom=parseWords(store.get("tug.custom")||"");
         if (custom.length>=4){ const o=document.createElement("option"); o.value="custom"; o.textContent="My Words ("+custom.length+" words)"; sel.appendChild(o); }
         const saved=store.get("tug.set"); if (saved && [...sel.options].some(o=>o.value===saved)) sel.value=saved;
       };
-      fill();
-      sel.onchange=()=>store.set("tug.set",sel.value);
+      const modeLock=()=>{ const m=$("sMode"); if(!m) return; const quiz=!!(SETS[sel.value]&&SETS[sel.value].quiz); m.disabled=quiz; const row=m.closest(".setrow"); if(row) row.style.opacity=quiz?.45:""; };
+      fill(); modeLock();
+      sel.onchange=()=>{ store.set("tug.set",sel.value); modeLock(); };
       for (const id of ids){ const el=$(id); const v=store.get("tug."+id); if(v && [...el.options].some(o=>o.value===v)) el.value=v; el.onchange=()=>store.set("tug."+id,el.value); }
       // word editor modal
       $("editWords").onclick=()=>{ $("wordText").value=store.get("tug.custom")||""; $("wordErr").textContent=""; show($("wordModal")); $("wordText").focus(); };
@@ -206,12 +209,12 @@ math 數學` }
         const list=parseWords($("wordText").value);
         if (list.length<4){ $("wordErr").textContent="Found "+list.length+" words. Need at least 4 (format: English 中文)."; return; }
         store.set("tug.custom",$("wordText").value); store.set("tug.set","custom");
-        fill(); sel.value="custom"; show($("wordModal"),false);
+        fill(); sel.value="custom"; modeLock(); show($("wordModal"),false);
       };
     },
     words(){
       const k=$("sSet").value;
-      return k==="custom" ? parseWords(store.get("tug.custom")||"") : parseWords(SETS[k].words);
+      return k==="custom" ? parseWords(store.get("tug.custom")||"") : SETS[k].quiz ? SETS[k].quiz : parseWords(SETS[k].words);
     },
 
     teams(players){
@@ -300,12 +303,47 @@ math 數學` }
   function makeQuestion(W, mode, recent){
     let i, guard=0;
     do { i=rand(W.length); } while (recent.includes(i) && guard++<50);
-    recent.push(i); if (recent.length>Math.min(8,W.length-1)) recent.shift();
+    recent.push(i); if (recent.length>Math.min(Array.isArray(W[0])?8:Math.floor(W.length*.6),W.length-1)) recent.shift();   // quiz banks: don't repeat a question too soon
+    if (!Array.isArray(W[i])){                                   // multiple-choice item {q,s,o,a,w}
+      const it=W[i]; return { quiz:true, text:it.q, sub:it.s||"", why:it.w||"", choices:it.o, answer:it.a, opts:shuffle(it.o.map((_,k)=>k)) };
+    }
     const dir = mode==="mix" ? (Math.random()<.5?"en2zh":"zh2en") : mode;
     const pool=shuffle(W.map((_,k)=>k).filter(k=>k!==i)).slice(0,3);
     return { en:W[i][0], zh:W[i][1], dir, answer:i, opts:shuffle([i,...pool]) };
   }
 
+  // shared by every game: draw the next question on the phone (Player needs meta, recent, q, answer())
+  function renderQuestion(P){
+    const W=P.meta.words||[]; if(W.length<4) return;
+    const q=makeQuestion(W, P.meta.mode||"mix", P.recent);
+    P.q=q;
+    const card=$("pQ").parentNode, old=card.querySelector(".why, .qsub"); if (old) old.remove();
+    card.querySelectorAll(".why, .qsub").forEach(e=>e.remove());
+    $("pQ").classList.toggle("long", !!q.quiz); $("pOpts").classList.toggle("long", !!q.quiz); card.classList.toggle("quiz", !!q.quiz); document.body.classList.toggle("quizq", !!q.quiz);
+    if (q.quiz){
+      $("pAsk").textContent = "Choose the best answer";
+      $("pQ").textContent = q.text; $("pQ").classList.remove("zh");
+      if (q.sub){ const d=document.createElement("div"); d.className="qsub"+(/[\u4e00-\u9fff]/.test(q.sub.replace(/^原文[^：:]*[：:]/,""))?"":" en"); d.textContent=q.sub; card.appendChild(d); }
+      show($("pSay"), false);
+      $("pOpts").innerHTML = q.opts.map(k=>`<button class="opt" data-k="${k}">${esc(q.choices[k])}</button>`).join("");
+    } else {
+      const isEn = q.dir==="en2zh";
+      $("pAsk").textContent = isEn ? "What does it mean?" : "Which English word?";
+      $("pQ").textContent = isEn ? q.en : q.zh;
+      $("pQ").classList.toggle("zh",!isEn);
+      show($("pSay"), isEn);
+      $("pOpts").innerHTML = q.opts.map(k=>`<button class="opt" data-k="${k}">${esc(isEn?W[k][1]:W[k][0])}</button>`).join("");
+    }
+    for (const b of $("pOpts").children) b.onclick=()=>P.answer(+b.dataset.k,b);
+  }
+  // after a wrong answer: show why (quiz items) and keep it on screen long enough to read
+  function showWhy(q){
+    if (!q || !q.quiz || !q.why) return;
+    const card=$("pQ").parentNode; card.querySelectorAll(".why").forEach(e=>e.remove());
+    const d=document.createElement("div"); d.className="why"; d.textContent=q.why; card.appendChild(d);
+  }
+  const wrongMs = q => q && q.quiz ? 3200 : 1400;
+
   return { db, now, $, show, esc, store, rand, pick, shuffle, fmt, params, baseUrl, dirUrl, AVATARS, SETS, parseWords,
-           beep, unlockAudio, fanfare, buzzer, speak, confetti, host, join, makeQuestion };
+           beep, unlockAudio, fanfare, buzzer, speak, confetti, host, join, makeQuestion, renderQuestion, showWhy, wrongMs };
 })();
