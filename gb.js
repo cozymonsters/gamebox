@@ -238,12 +238,6 @@ const GB = (() => {
       const rref=db.ref("rooms/"+code);
       if (!(await rref.child("meta/teams").get()).val()) await rref.child("meta/teams").set(randomTeams());   // older rooms
       watchTeams(rref);
-      // lobby: one tap for two new random names
-      const la=document.querySelector(".lob-act");
-      if (la && !$("teamsShuffle")){
-        const b=document.createElement("button"); b.className="pill ghost"; b.id="teamsShuffle"; b.innerHTML=ART.icon("shuffle")+" New team names"; b.title="Pick two new random team names";
-        b.onclick=()=>rref.child("meta/teams").set(randomTeams()); la.appendChild(b);
-      }
       return code;
     },
 
@@ -351,8 +345,46 @@ const GB = (() => {
           host.drawQR(url, $("cardsQR"));
         };
       }
-      for (const id of ids){ const el=$(id); const v=store.get("tug."+id); if(v && [...el.options].some(o=>o.value===v)) el.value=v; el.onchange=()=>store.set("tug."+id,el.value); }
+      for (const id of ids){
+        const el=$(id); const v=store.get("tug."+id);
+        if (id==="sTime" && v && +v>0) host.setTime(el, +v);
+        else if (v && [...el.options].some(o=>o.value===v)) el.value=v;
+        el.onchange=()=>store.set("tug."+id,el.value);
+        if (id==="sTime") host.timeInput(el);
+      }
     },
+    // Time Limit: the teacher types the time ("90", "1:30", "2 min" ...) or nudges it with − / +. The hidden <select id=sTime> keeps the seconds for the game code.
+    TIME_MIN: 30, TIME_MAX: 900,
+    fmtTime(sec){ const m=Math.floor(sec/60), x=sec%60; return m+":"+String(x).padStart(2,"0"); },
+    parseTime(t){
+      t=String(t||"").trim().toLowerCase().replace(/：/g,":");
+      let m;
+      if ((m=t.match(/^(\d{1,2}):(\d{1,2})$/))) return +m[1]*60 + +m[2];                     // 1:30
+      if ((m=t.match(/^(\d+(?:\.\d+)?)\s*(m|min|mins|minutes?|分|分鐘)$/))) return Math.round(+m[1]*60);
+      if ((m=t.match(/^(\d+)\s*(s|sec|secs|seconds?|秒)$/))) return +m[1];
+      if ((m=t.match(/^\d+(?:\.\d+)?$/))) { const n=+t; return n<=15 ? Math.round(n*60) : Math.round(n); }   // "3" = 3 minutes, "90" = 90 seconds
+      return NaN;
+    },
+    setTime(sel, sec){
+      sec=Math.max(host.TIME_MIN, Math.min(host.TIME_MAX, Math.round(sec)));
+      let o=[...sel.options].find(x=>+x.value===sec);
+      if (!o){ o=document.createElement("option"); o.value=sec; o.textContent=host.fmtTime(sec); sel.appendChild(o); }
+      sel.value=String(sec); return sec;
+    },
+    timeInput(sel){
+      if (sel._timeBox) return;
+      const box=document.createElement("div"); box.className="timebox";
+      box.innerHTML=`<button class="tb-step" data-d="-30" title="30 seconds less">−</button><input class="tb-in" inputmode="numeric" autocomplete="off" aria-label="Time limit (minutes:seconds)"><button class="tb-step" data-d="30" title="30 seconds more">+</button><span class="tb-unit">min</span>`;
+      sel.classList.add("hidden"); sel.insertAdjacentElement("afterend", box); sel._timeBox=box;
+      const inp=box.querySelector(".tb-in");
+      const show_=()=>{ inp.value=host.fmtTime(+sel.value); inp.classList.remove("bad"); };
+      const commit=()=>{ const sec=host.parseTime(inp.value); if (!isFinite(sec) || sec<=0){ inp.classList.add("bad"); setTimeout(show_,900); return; } host.setTime(sel, sec); sel.onchange&&sel.onchange(); show_(); };
+      inp.onchange=commit; inp.onblur=commit; inp.onkeydown=e=>{ if (e.key==="Enter"){ e.preventDefault(); inp.blur(); } };
+      inp.onfocus=()=>inp.select();
+      for (const b of box.querySelectorAll(".tb-step")) b.onclick=()=>{ host.setTime(sel, +sel.value + +b.dataset.d); sel.onchange&&sel.onchange(); show_(); };
+      show_();
+    },
+
     words(){
       const k=$("sSet").value;
       if (k.startsWith("kit:")){ const c=host.kitCache[k.slice(4)]; return c ? c.items : []; }
@@ -379,6 +411,9 @@ const GB = (() => {
         : `<div class="waiting">Waiting for players…<br><span class="dots"><i></i><i></i><i></i></span></div>`;
       $("rNames").innerHTML=chips(r); $("bNames").innerHTML=chips(b);
       $("rN").textContent=r.length; $("bN").textContent=b.length;
+      // big classes: smaller name tags so every name fits on the big screen without scrolling
+      const most=Math.max(r.length,b.length), lt=$("rNames").closest(".lob-teams");
+      if (lt){ lt.classList.toggle("dense", most>12 && most<=22); lt.classList.toggle("denser", most>22); }
       for (const el of document.querySelectorAll("[data-sw]")) el.onclick=()=>{ const p=players[el.dataset.sw]; if(p) ref.child("players/"+el.dataset.sw+"/team").set(p.team==="blue"?"red":"blue"); };
       for (const el of document.querySelectorAll("[data-x]")) el.onclick=()=>{ ref.child("players/"+el.dataset.x).remove(); };
       return {r,b};

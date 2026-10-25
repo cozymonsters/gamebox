@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="gb.css?v=d76da141">
+<link rel="stylesheet" href="gb.css?v=301fbaae">
 <style>
 .hidden{display:none!important}
 body{background:var(--cream)}
@@ -148,7 +148,7 @@ body{background:var(--cream)}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="gb-art.js?v=6ae51ada"></script>
-<script src="gb.js?v=89517491"></script>
+<script src="gb.js?v=2572a1c8"></script>
 <script>
 "use strict";
 const { $, show, esc, store, shuffle, params, SETS, parseWords, speak, voice, primeVoice, db, beep } = GB;
@@ -171,6 +171,8 @@ const Practice = {
         this.key=k; this.name=SETS[k].name; this.quiz=!!SETS[k].quiz; this.items=this.quiz ? SETS[k].quiz : parseWords(SETS[k].words);
       } else return this.fail(k ? "This practice link is no longer used. Ask your teacher for the new QR code." : "Practice set not found. Scan the QR code on the big screen again.");
     }catch(e){ return this.fail("Could not load the questions. Check your connection and try again."); }
+    // the questions are loaded: leave the database so this page doesn't use up one of the shared live connections (free plan: 100)
+    try{ db.goOffline(); }catch(e){}
     if (this.items.length<(this.quiz?1:4)) return this.fail("This set needs at least 4 words.");
     document.title=this.name+" · Practice";
     $("setName").textContent=this.name;

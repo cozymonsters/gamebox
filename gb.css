@@ -343,3 +343,22 @@ html.phone .doodles{display:none}
 .lob-join .l3{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:18px}
 .lob-join .l3 span{font-weight:900;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--sub);background:var(--cream);border-radius:999px;padding:3px 10px}
 .lob-join .l3 b{font-family:var(--display);font-weight:600;font-size:24px}
+
+/* ---------- Time Limit: type the time or use − / + ---------- */
+.timebox{display:flex;align-items:center;gap:8px}
+.timebox .tb-in{width:110px;text-align:center;font-family:var(--display);font-weight:600;font-size:24px;border:2px solid var(--line-d);border-radius:12px;padding:6px 8px;background:#fff;color:var(--ink)}
+.timebox .tb-in:focus{outline:none;border-color:var(--blue)}
+.timebox .tb-in.bad{border-color:var(--red);background:#fff5f3}
+.timebox .tb-step{width:42px;height:42px;border-radius:12px;background:var(--cream);border:2px solid var(--line-d);font-family:var(--display);font-weight:600;font-size:24px;line-height:1;display:flex;align-items:center;justify-content:center}
+.timebox .tb-step:hover{background:#fff}
+.timebox .tb-unit{font-weight:800;color:var(--sub);font-size:15px}
+
+/* lobby with many players: smaller name tags (dense ≥13 per team, denser ≥23) */
+.lob-teams.dense .names,.lob-teams.denser .names{gap:7px;padding:14px 12px 12px}
+.lob-teams.dense .pchip{font-size:17px;gap:6px;padding:3px 5px;border-radius:12px}
+.lob-teams.dense .pchip .av{width:30px;height:30px}
+.lob-teams.dense .pchip button{width:22px;height:22px}
+.lob-teams.denser .pchip{font-size:15px;gap:4px;padding:2px 4px;border-radius:10px;border-width:1.5px}
+.lob-teams.denser .pchip .av{width:24px;height:24px}
+.lob-teams.denser .pchip button{width:19px;height:19px;border-radius:6px}
+.lob-teams.denser .pchip button .gi{width:11px;height:11px}
