@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="gb.css?v=8f9aee90">
+<link rel="stylesheet" href="gb.css?v=eeaa3a3a">
 <style>
 .hidden{display:none!important}  /* works even before gb.css arrives */
 .setup-wrap{flex:1;padding:6px 24px 28px;overflow:auto}
@@ -248,7 +248,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="gb-quiz.js?v=44b94ba1"></script>
 <script src="gb-art.js?v=6ae51ada"></script>
-<script src="gb.js?v=3f554d24"></script>
+<script src="gb.js?v=27c112ce"></script>
 <script>
 "use strict";
 const GAME="grab";
@@ -412,7 +412,7 @@ const Host = {
   },
 
   async startRound(){
-    const words=GB.host.words();
+    const words=await GB.host.wordsReady();
     if (words.length<4) return alert("Need at least 4 words.");
     const dur=+$("sTime").value, size=$("sSize").value, startAt=now()+4200;
     const [C,R]=size.split("x").map(Number), N=C*R, stars=[];

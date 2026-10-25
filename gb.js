@@ -1,10 +1,15 @@
 /* ===== English GameBox · shared helpers (load after the Firebase SDK) ===== */
 "use strict";
 const GB = (() => {
-  firebase.initializeApp({
+  // Web config from Firebase console → Project settings → Your apps. apiKey/authDomain/appId are public identifiers (not passwords); teacher sign-in needs them.
+  const FB = {
     projectId: "fun-english-abd9b",
-    databaseURL: "https://fun-english-abd9b-default-rtdb.asia-southeast1.firebasedatabase.app"
-  });
+    databaseURL: "https://fun-english-abd9b-default-rtdb.asia-southeast1.firebasedatabase.app",
+    apiKey: "AIzaSyAkZ-EZhDKTq1KCaQTkPmyjXDYRWuCLXj4",
+    authDomain: "fun-english-abd9b.firebaseapp.com",
+    appId: "1:553629068314:web:563cbaf1731d484093f5a3"
+  };
+  firebase.initializeApp(Object.fromEntries(Object.entries(FB).filter(([k,v])=>v)));
   const db = firebase.database();
   let serverOffset = 0;
   db.ref(".info/serverTimeOffset").on("value", s => { serverOffset = s.val() || 0; });
@@ -197,6 +202,75 @@ math 數學` }
     })(t0);
   }
 
+  /* ---- teacher accounts & kits (question banks saved in Firebase) ----
+     kits/{id}              { owner, name, type:"words"|"quiz", items, count, updated }  readable by anyone who has the id (students practise / play it)
+     users/{uid}/kits/{id}  { name, type, count, updated }                                the teacher's own list (only they can read it)
+     users/{uid}/starter    true once the built-in banks have been copied into the account
+     Only teachers sign in (Google). Students never need an account. */
+  const AUTH_SRC = "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js";
+  const account = {
+    ready: !!(FB.apiKey && FB.authDomain),   // false until the web config is filled in above
+    user: null, loaded: false, _subs: [], _p: null,
+    load(){                                   // the auth SDK is loaded only when needed (phones never load it)
+      if (!account.ready) { account.loaded=true; return Promise.resolve(null); }
+      if (account._p) return account._p;
+      account._p = new Promise(res=>{
+        const go=()=>{ try{ firebase.auth().onAuthStateChanged(u=>{ account.user=u||null; account.loaded=true; res(account.user); for (const f of account._subs) f(account.user); }); }catch(e){ account.loaded=true; res(null); } };
+        if (firebase.auth) return go();
+        const sc=document.createElement("script"); sc.src=AUTH_SRC; sc.onload=go; sc.onerror=()=>{ account.loaded=true; res(null); }; document.head.appendChild(sc);
+      });
+      return account._p;
+    },
+    onChange(f){ account._subs.push(f); if (account.loaded) f(account.user); else account.load().then(()=>{ if (!account.ready) f(null); }); },
+    async signIn(){
+      await account.load(); const p=new firebase.auth.GoogleAuthProvider(); p.setCustomParameters({ prompt:"select_account" });
+      try{ return await firebase.auth().signInWithPopup(p); }
+      catch(e){ if (e && /popup-blocked|operation-not-supported/.test(e.code||"")) return firebase.auth().signInWithRedirect(p); throw e; }
+    },
+    signOut(){ return firebase.auth().signOut(); }
+  };
+  const arr = x => Array.isArray(x) ? x : Object.keys(x||{}).sort((a,b)=>a-b).map(k=>x[k]);   // Firebase may hand arrays back as objects
+  const txt = (x, n) => String(x==null?"":x).replace(/\s+/g," ").trim().slice(0, n);
+  function cleanItems(type, items){
+    items = arr(items);
+    if (type==="quiz") return items.map(it=>{
+      const o=arr(it.o).map(x=>txt(x,160)).filter(Boolean).slice(0,4), q={ q:txt(it.q,400), o, a:Math.max(0,Math.min(o.length-1, +it.a||0)) };
+      if (txt(it.s,400)) q.s=txt(it.s,400); if (txt(it.w,300)) q.w=txt(it.w,300); return q;
+    }).filter(q=>q.q && q.o.length>=2);
+    return items.map(p=>{ p=arr(p); return [txt(p[0],60), txt(p[1],60)]; }).filter(p=>p[0] && p[1]);
+  }
+  const kits = {
+    MAX: 300,
+    async list(){
+      const u=account.user; if (!u) return [];
+      const v=(await db.ref("users/"+u.uid+"/kits").get()).val()||{};
+      return Object.entries(v).map(([id,k])=>Object.assign({id},k)).sort((a,b)=>(b.updated||0)-(a.updated||0));
+    },
+    async get(id){
+      if (!/^[-\w]{6,40}$/.test(String(id||""))) return null;
+      const v=(await db.ref("kits/"+id).get()).val(); if (!v) return null;
+      return { id, owner:v.owner, name:v.name||"Untitled kit", type:v.type==="quiz"?"quiz":"words", items:cleanItems(v.type, v.items), updated:v.updated };
+    },
+    async save(kit){
+      const u=account.user; if (!u) throw new Error("Please sign in again.");
+      const type=kit.type==="quiz"?"quiz":"words", items=cleanItems(type, kit.items).slice(0,kits.MAX), name=txt(kit.name,60)||"Untitled kit";
+      const id=kit.id || db.ref("kits").push().key, T=firebase.database.ServerValue.TIMESTAMP;
+      await db.ref().update({ ["kits/"+id]:{ owner:u.uid, name, type, items, count:items.length, updated:T },
+                              ["users/"+u.uid+"/kits/"+id]:{ name, type, count:items.length, updated:T } });
+      return id;
+    },
+    async remove(id){ const u=account.user; await db.ref().update({ ["kits/"+id]:null, ["users/"+u.uid+"/kits/"+id]:null }); },
+    async duplicate(id){ const k=await kits.get(id); return kits.save({ name:(k.name+" (copy)").slice(0,60), type:k.type, items:k.items }); },
+    // first sign-in: copy the built-in banks into the account (saved last-to-first so the list shows them in the usual order)
+    async starter(){
+      const u=account.user; if (!u) return 0;
+      const ref=db.ref("users/"+u.uid+"/starter"); if ((await ref.get()).val()) return 0;
+      const keys=Object.keys(SETS).reverse();
+      for (const k of keys){ const S=SETS[k]; await kits.save({ name:S.name, type:S.quiz?"quiz":"words", items:S.quiz?S.quiz:parseWords(S.words) }); await new Promise(r=>setTimeout(r,30)); }
+      await ref.set(true); return keys.length;
+    }
+  };
+
   /* ---- host helpers ---- */
   const host = {
     netStatus(el){ db.ref(".info/connected").on("value",s=>{ const on=!!s.val(); el.textContent=on?"Online":"Reconnecting…"; el.classList.toggle("off",!on); }); },
@@ -232,36 +306,60 @@ math 數學` }
     },
 
     // settings: <select id=sSet>, plus any selects listed in ids (remembered per teacher)
+    // Question Bank: the signed-in teacher's kits (or the built-in banks when signed out), plus "My Words" typed on this computer
+    myKits: null, kitCache: {}, extraKit: null,
     initSettings(ids){
-      const sel=$("sSet");
+      const sel=$("sSet"), want=(params.get("kit")||"").trim();   // ?kit=<id> comes from "Play Live" on the My Kits page
+      const opt=(parent,v,t)=>{ const o=document.createElement("option"); o.value=v; o.textContent=t; parent.appendChild(o); return o; };
+      const label=k=>k.name+" ("+k.count+(k.type==="quiz"?" questions)":" words)");
       const fill=()=>{
         sel.innerHTML="";
-        for (const k in SETS){ const o=document.createElement("option"); o.value=k; o.textContent=SETS[k].name+" ("+setSize(k)+(SETS[k].quiz?" questions)":" words)"); sel.appendChild(o); }
+        if (host.extraKit && !(host.myKits||[]).some(k=>k.id===host.extraKit.id)){ const g=document.createElement("optgroup"); g.label="Shared kit"; sel.appendChild(g); opt(g,"kit:"+host.extraKit.id,label(host.extraKit)); }
+        if (host.myKits){
+          const g=document.createElement("optgroup"); g.label="My Kits"; sel.appendChild(g);
+          for (const k of host.myKits) opt(g,"kit:"+k.id,label(k));
+        } else for (const k in SETS) opt(sel,k,SETS[k].name+" ("+setSize(k)+(SETS[k].quiz?" questions)":" words)"));
         const custom=parseWords(store.get("tug.custom")||"");
-        if (custom.length>=4){ const o=document.createElement("option"); o.value="custom"; o.textContent="My Words ("+custom.length+" words)"; sel.appendChild(o); }
+        if (custom.length>=4) opt(sel,"custom","My Words ("+custom.length+" words)");
         const saved=store.get("tug.set"); if (saved && [...sel.options].some(o=>o.value===saved)) sel.value=saved;
+        if (!sel.value && sel.options.length) sel.selectedIndex=0;
       };
-      const modeLock=()=>{ const m=$("sMode"); if(!m) return; const quiz=!!(SETS[sel.value]&&SETS[sel.value].quiz); m.disabled=quiz; const row=m.closest(".setrow"); if(row) row.style.opacity=quiz?.45:""; };
-      fill(); modeLock();
-      sel.onchange=()=>{ store.set("tug.set",sel.value); modeLock(); };
+      const kitInfo=v=>{ const id=String(v||"").slice(4); return (host.myKits||[]).find(k=>k.id===id) || (host.extraKit&&host.extraKit.id===id?host.extraKit:null); };
+      const isQuiz=v=> v.startsWith("kit:") ? !!(kitInfo(v)&&kitInfo(v).type==="quiz") : !!(SETS[v]&&SETS[v].quiz);
+      const modeLock=()=>{ const m=$("sMode"); if(!m) return; const quiz=isQuiz(sel.value); m.disabled=quiz; const row=m.closest(".setrow"); if(row) row.style.opacity=quiz?.45:""; };
+      const prefetch=()=>{ const v=sel.value; if (!v.startsWith("kit:")) return; const id=v.slice(4); if (!host.kitCache[id]) kits.get(id).then(k=>{ if(k) host.kitCache[id]=k; }).catch(()=>{}); };
+      const refresh=()=>{ fill(); modeLock(); prefetch(); };
+      refresh();
+      sel.onchange=()=>{ store.set("tug.set",sel.value); modeLock(); prefetch(); };
+      // signed-in teachers see their own kits
+      account.onChange(async u=>{
+        try{ host.myKits = u ? await kits.list() : null; }catch(e){ host.myKits=null; }
+        if (want && !host.extraKit){ const k=await kits.get(want).catch(()=>null); if (k){ host.kitCache[k.id]=k; host.extraKit={ id:k.id, name:k.name, type:k.type, count:k.items.length }; store.set("tug.set","kit:"+k.id); } }
+        refresh();
+      });
+      // "My Kits" link next to My Words: where kits are made and edited
+      if (!$("kitsLink")){
+        const a=document.createElement("a"); a.className="btn-soft"; a.id="kitsLink"; a.href=dirUrl+"kits.html"; a.innerHTML=ART.icon("book")+" My Kits";
+        $("editWords").insertAdjacentElement("afterend", a);
+      }
       // practice: a QR code students scan to practise (4-choice quiz, cards.html) the selected list on their phones before the game
       if (!$("cardsBtn")){
         const b=document.createElement("button"); b.className="btn-soft"; b.id="cardsBtn"; b.innerHTML=ART.icon("qr")+" Practice";
-        $("editWords").insertAdjacentElement("afterend", b);
+        $("kitsLink").insertAdjacentElement("afterend", b);
         const m=document.createElement("div"); m.className="modal hidden"; m.id="cardsModal";
         m.innerHTML=`<div class="mcard cardsm"><div class="mh">${ART.icon("qr")} Practice before the game</div><div class="mb">
           <div class="cq"><div class="qrbox" id="cardsQR"></div><div class="ctext"><b id="cardsName"></b><span id="cardsCount"></span>
-          <p>Scan to practise on your phone. Four choices per question; missed ones come back until you get them right.</p></div></div>
+          <p>Scan to practise on your phone. Missed questions come back until you get them right.</p></div></div>
           <div class="row"><button class="go" id="cardsDone">Done</button></div></div></div>`;
         document.body.appendChild(m);
         m.onclick=e=>{ if(e.target===m) show(m,false); };
         $("cardsDone").onclick=()=>show(m,false);
         b.onclick=async()=>{
-          const k=sel.value, custom=k==="custom", list=host.words(), quiz=!custom && !!SETS[k].quiz;
-          $("cardsName").textContent = custom ? "My Words" : SETS[k].name;
-          $("cardsCount").textContent = list.length+(quiz?" questions":" words");
+          const k=sel.value, custom=k==="custom", kit=k.startsWith("kit:"), list=host.words(), quiz=isQuiz(k);
+          $("cardsName").textContent = custom ? "My Words" : kit ? (kitInfo(k)||{}).name||"Kit" : SETS[k].name;
+          $("cardsCount").textContent = (kit && kitInfo(k) ? kitInfo(k).count : list.length)+(quiz?" questions":" words");
           $("cardsQR").innerHTML='<div class="qrwait">Loading…</div>'; show(m);
-          let url = dirUrl+"cards.html?set="+k;
+          let url = kit ? dirUrl+"cards.html?k="+k.slice(4) : dirUrl+"cards.html?set="+k;
           if (custom){                                  // teacher's own list lives on this computer: share it through the room
             for (let i=0;i<40 && !host.code;i++) await new Promise(r=>setTimeout(r,150));
             if (!host.code){ $("cardsQR").innerHTML='<div class="qrwait">Not connected yet. Try again.</div>'; return; }
@@ -279,12 +377,19 @@ math 數學` }
         const list=parseWords($("wordText").value);
         if (list.length<4){ $("wordErr").textContent="Found "+list.length+" words. Need at least 4 (format: English 中文)."; return; }
         store.set("tug.custom",$("wordText").value); store.set("tug.set","custom");
-        fill(); sel.value="custom"; modeLock(); show($("wordModal"),false);
+        refresh(); sel.value="custom"; modeLock(); show($("wordModal"),false);
       };
     },
     words(){
       const k=$("sSet").value;
-      return k==="custom" ? parseWords(store.get("tug.custom")||"") : SETS[k].quiz ? SETS[k].quiz : parseWords(SETS[k].words);
+      if (k.startsWith("kit:")){ const c=host.kitCache[k.slice(4)]; return c ? c.items : []; }
+      return k==="custom" ? parseWords(store.get("tug.custom")||"") : SETS[k] ? (SETS[k].quiz ? SETS[k].quiz : parseWords(SETS[k].words)) : [];
+    },
+    // the selected bank's questions, waiting for a kit to finish loading if needed
+    async wordsReady(){
+      const k=$("sSet").value;
+      if (k.startsWith("kit:") && !host.kitCache[k.slice(4)]){ const c=await kits.get(k.slice(4)).catch(()=>null); if (c) host.kitCache[c.id]=c; }
+      return host.words();
     },
 
     teams(players){
@@ -415,6 +520,6 @@ math 數學` }
   }
   const wrongMs = q => q && q.quiz ? 3200 : 1400;
 
-  return { db, now, $, show, esc, store, rand, pick, shuffle, fmt, params, baseUrl, dirUrl, AVATARS, SETS, parseWords,
+  return { db, now, $, show, esc, store, rand, pick, shuffle, fmt, params, baseUrl, dirUrl, AVATARS, SETS, parseWords, account, kits,
            beep, unlockAudio, fanfare, buzzer, speak, voice, primeVoice, confetti, host, join, makeQuestion, renderQuestion, showWhy, wrongMs };
 })();

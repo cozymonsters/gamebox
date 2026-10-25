@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="gb.css?v=8f9aee90">
+<link rel="stylesheet" href="gb.css?v=eeaa3a3a">
 <style>
 .hidden{display:none!important}
 body{background:var(--cream)}
@@ -149,7 +149,7 @@ body{background:var(--cream)}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="gb-quiz.js?v=44b94ba1"></script>
 <script src="gb-art.js?v=6ae51ada"></script>
-<script src="gb.js?v=3f554d24"></script>
+<script src="gb.js?v=27c112ce"></script>
 <script>
 "use strict";
 const { $, show, esc, store, shuffle, params, SETS, parseWords, speak, voice, primeVoice, db, beep } = GB;
@@ -158,9 +158,13 @@ const Practice = {
   key:"", name:"", items:[], quiz:false, dir:"mix", queue:[], total:0, done:0, right:0, missed:new Set(), cur:null, locked:false,
 
   async load(){
-    const k=params.get("set")||"", r=(params.get("r")||"").replace(/\D/g,"");
+    const k=params.get("set")||"", r=(params.get("r")||"").replace(/\D/g,""), kid=(params.get("k")||"").trim();
     try{
-      if (r.length===4){
+      if (kid){                                        // a teacher's kit (My Kits page)
+        const kit=await GB.kits.get(kid);
+        if (!kit) return this.fail("This practice set is not available. Ask your teacher for a new QR code.");
+        this.key="k"+kid; this.name=kit.name; this.quiz=kit.type==="quiz"; this.items=kit.items;
+      } else if (r.length===4){
         const d=(await db.ref("rooms/"+r+"/deck").get()).val();
         if (!d || !d.words) return this.fail("This practice set is not available. Ask your teacher for a new QR code.");
         this.key="r"+r; this.name=d.name||"My Words"; this.quiz=!!d.quiz; this.items=d.words;

@@ -60,7 +60,7 @@ img{-webkit-user-drag:none;user-select:none}
 .go .gi{width:.9em;height:.9em;stroke-width:2.6}
 .btn-ink{width:100%;padding:15px;border-radius:14px;background:var(--ink);color:#fff;font-family:var(--display);font-weight:600;font-size:22px;box-shadow:0 4px 0 #000}
 .btn-ink:active{transform:translateY(2px);box-shadow:0 2px 0 #000} .btn-ink:disabled{background:#c9c1b1;box-shadow:0 4px 0 #a99f8b;cursor:default}
-.btn-soft{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:12px;background:var(--cream);color:var(--ink);font-weight:800;font-size:15px;border:2px solid var(--line-d)}
+.btn-soft{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:12px;background:var(--cream);color:var(--ink);font-weight:800;font-size:15px;border:2px solid var(--line-d);text-decoration:none}
 .btn-soft:hover{background:#fff}
 
 /* ---------- panel: cover art + info, then settings ---------- */
