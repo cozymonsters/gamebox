@@ -334,8 +334,9 @@ const GB = (() => {
       });
       // no set yet: "Continue" opens the picker (or My Sets) instead of a lobby that can't start
       const cont=$("toLobby"); if (cont && !cont._setGuard){ cont._setGuard=true; cont.addEventListener("click",e=>{ if (!info(sel.value)){ e.preventDefault(); e.stopImmediatePropagation(); $("setChange").click(); } }, true); }
-      // the teacher's home is My Sets: the GameBox logo on the big screen goes back there
-      const brand=document.querySelector(".gb-top .brand"); if (brand) brand.href=dirUrl+"sets.html";
+      // the GameBox logo goes to the home page (as everywhere); a separate "My Sets" button takes the teacher back to the sets
+      const top=document.querySelector(".gb-top"), net=top && top.querySelector(".net");
+      if (net && !$("toSets")){ const a=document.createElement("a"); a.className="pill white tosets"; a.id="toSets"; a.href=dirUrl+"sets.html"; a.innerHTML=ART.icon("book")+" My Sets"; net.insertAdjacentElement("beforebegin", a); }
       // practice: a QR code students scan to practise (4-choice quiz, cards.html) the selected list on their phones before the game
       if (!$("cardsBtn")){
         const b=document.createElement("button"); b.className="btn-soft"; b.id="cardsBtn"; b.innerHTML=ART.icon("qr")+" Practice";

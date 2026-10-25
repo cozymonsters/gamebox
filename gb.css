@@ -376,3 +376,6 @@ html.phone .doodles{display:none}
 .joinm .j3 span{font-weight:800;color:var(--sub)}
 .joinm .j3 b{font-family:var(--display);font-weight:600;font-size:56px;letter-spacing:.12em;background:var(--ink);color:#fff;border-radius:16px;padding:0 18px}
 @media (max-width:760px){ .mcard.joinm{flex-direction:column} .joinm .jq{width:260px;height:260px} }
+
+.tosets{padding:7px 14px;font-size:15px;text-decoration:none}
+.tosets .gi{width:18px;height:18px}
