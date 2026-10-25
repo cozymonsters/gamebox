@@ -179,8 +179,8 @@
       <div class="lob-act"><button class="go" id="startBtn" disabled>Tip off <i data-i="play"></i></button><button class="pill ghost" id="toSetup"><i data-i="sliders"></i> Settings</button></div>
     </div>
     <div class="lob-teams">
-      <div class="tcol red"><div class="th"><span data-art="red"></span>Red Team <span class="n" id="rN">0</span></div><div class="names" id="rNames"></div></div>
-      <div class="tcol blue"><div class="th"><span data-art="blue"></span>Blue Team <span class="n" id="bN">0</span></div><div class="names" id="bNames"></div></div>
+      <div class="tcol red"><div class="th"><span data-art="red"></span><span data-tn="red">Red Team</span> <span class="n" id="rN">0</span></div><div class="names" id="rNames"></div></div>
+      <div class="tcol blue"><div class="th"><span data-art="blue"></span><span data-tn="blue">Blue Team</span> <span class="n" id="bN">0</span></div><div class="names" id="bNames"></div></div>
     </div>
     <div class="lob-hint" id="startHint">Need at least 1 player on each team.</div>
   </div>
@@ -188,15 +188,15 @@
   <!-- step 3: game -->
   <div id="court" class="hidden">
     <div class="scorebar">
-      <div class="tscore r"><span data-art="red"></span><span class="nm">Red</span><span class="pts" id="rPts">0</span><span class="ppl" id="rCnt"></span></div>
+      <div class="tscore r"><span data-art="red"></span><span class="nm" data-tn="red">Red</span><span class="pts" id="rPts">0</span><span class="ppl" id="rCnt"></span></div>
       <div class="timer" id="timer">0:00</div>
-      <div class="tscore b"><span class="ppl" id="bCnt"></span><span class="pts" id="bPts">0</span><span class="nm">Blue</span><span data-art="blue"></span></div>
+      <div class="tscore b"><span class="ppl" id="bCnt"></span><span class="pts" id="bPts">0</span><span class="nm" data-tn="blue">Blue</span><span data-art="blue"></span></div>
     </div>
     <div class="courtArea" id="courtArea">
       <img class="coach r" src="img/team-red.webp" alt="">
       <img class="coach b" src="img/team-blue.webp" alt="">
-      <div class="hoop r" id="hoopR"><img class="hoopimg" src="img/hoop.webp" alt=""><span class="tagt">Red</span></div>
-      <div class="hoop b" id="hoopB"><img class="hoopimg" src="img/hoop.webp" alt=""><span class="tagt">Blue</span></div>
+      <div class="hoop r" id="hoopR"><img class="hoopimg" src="img/hoop.webp" alt=""><span class="tagt" data-tn="red">Red</span></div>
+      <div class="hoop b" id="hoopB"><img class="hoopimg" src="img/hoop.webp" alt=""><span class="tagt" data-tn="blue">Blue</span></div>
       <div class="lead"><h3><i data-i="flame"></i> Hot Shooters</h3><div class="rows" id="leadRows"></div></div>
       <div class="dbl hidden" id="dblBanner"></div>
       <div class="tricks" id="tricks"></div>
@@ -208,9 +208,9 @@
       <div class="rcard">
         <div class="rhead"><img class="tro" src="img/trophy.webp" alt=""><div class="wtxt"><div class="win" id="winTxt">Red wins!</div><div class="why" id="finalTxt"></div></div><span id="winMascot"></span></div>
         <div class="rbody"><div class="mvps">
-          <div class="mvp r"><h3><i data-i="flame"></i> Red MVPs</h3><div class="rows" id="mvpR"></div></div>
+          <div class="mvp r"><h3><i data-i="flame"></i> <span data-tn="red">Red</span> MVPs</h3><div class="rows" id="mvpR"></div></div>
           <div class="mvp y"><h3><i data-i="star"></i> Awards</h3><div class="rows" id="awards"></div></div>
-          <div class="mvp b"><h3><i data-i="bolt"></i> Blue MVPs</h3><div class="rows" id="mvpB"></div></div>
+          <div class="mvp b"><h3><i data-i="bolt"></i> <span data-tn="blue">Blue</span> MVPs</h3><div class="rows" id="mvpB"></div></div>
         </div></div>
         <div class="rbtns"><button class="go" id="againBtn"><i data-i="refresh"></i> Play again</button><button class="pill ghost" id="lobbyBtn"><i data-i="users"></i> Back to lobby</button></div>
       </div>
@@ -232,8 +232,8 @@
       <input id="pName" class="field" maxlength="8" placeholder="Name" autocomplete="off">
       <div class="lbl">Pick your team</div>
       <div class="teampick">
-        <button class="tbtn red" data-team="red"><span class="e" data-art="red"></span>Red</button>
-        <button class="tbtn blue" data-team="blue"><span class="e" data-art="blue"></span>Blue</button>
+        <button class="tbtn red" data-team="red"><span class="e" data-art="red"></span><span data-tn="red">Red</span></button>
+        <button class="tbtn blue" data-team="blue"><span class="e" data-art="blue"></span><span data-tn="blue">Blue</span></button>
       </div>
       <button class="btn-ink" id="pGo" disabled>Join</button>
       <div class="err" id="pErr"></div>
@@ -287,7 +287,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="gb-art.js?v=6ae51ada"></script>
-<script src="gb.js?v=4124d3e9"></script>
+<script src="gb.js?v=89517491"></script>
 <script>
 "use strict";
 const GAME="hoops";
@@ -362,7 +362,7 @@ const Host = {
   },
 
   showTrick(f, target, blocked, took){
-    const pw=POWERS[f.k], T=t=>t==="red"?"Red":"Blue";
+    const pw=POWERS[f.k], T=t=>GB.tn(t);
     const d=document.createElement("div"); d.className="trick "+(f.team==="blue"?"b":"r");
     const what = f.k==="shield" ? `raised a <span class="pw shield">${ART.icon("shield")} Shield</span>`
       : `used <span class="pw ${f.k}">${ART.icon(pw.icon)} ${pw.name}</span> on <span class="tg">${T(target)}</span>`;
@@ -560,8 +560,8 @@ const Host = {
       const w=m.winner;
       $("winTxt").className="win "+(w==="red"?"r":w==="blue"?"b":"t");
       $("winMascot").innerHTML = w==="tie" ? "" : ART.mascot(w,"wm");
-      $("winTxt").textContent= w==="red"?"Red wins!": w==="blue"?"Blue wins!":"It's a tie!";
-      $("finalTxt").textContent = "Final score: Red "+c.rP+" – "+c.bP+" Blue"+(c.balanced?"   (balanced for team size)":"");
+      $("winTxt").textContent= (w==="red"||w==="blue") ? GB.tnWin(w)+"!" : "It's a tie!";
+      $("finalTxt").textContent = "Final score: "+GB.tn("red")+" "+c.rP+" – "+c.bP+" "+GB.tn("blue")+(c.balanced?"   (balanced for team size)":"");
       const top=l=>l.slice().sort((x,y)=>(y.pts||0)-(x.pts||0)).slice(0,3).map((p,i)=>`<div class="row">${ART.medal(i)} <span class="av">${ART.avatar(p.av,"",true)}</span> ${esc(p.name)} <span class="s">${p.pts||0}</span></div>`).join("")||"<div class='row'>—</div>";
       $("mvpR").innerHTML=top(c.r); $("mvpB").innerHTML=top(c.b);
       const all=[...c.r,...c.b];
@@ -628,9 +628,9 @@ const Player = {
   },
   onHit(h){
     if (!h || !this.joined || h.round!==this.meta.round || this.meta.state!=="play" || now()-h.at>8000) return;
-    const p=POWERS[h.k], T=t=>t==="red"?"Red":"Blue", cls=h.from==="blue"?"b":"r";
+    const p=POWERS[h.k], T=t=>GB.tn(t), cls=h.from==="blue"?"b":"r";
     if (h.k==="shield"){ if (h.target===this.team) this.alert(ART.icon("shield")+" "+esc(h.name)+" raised a shield for your team!","ok"); return; }
-    if (h.blocked){ this.alert(ART.icon("shield")+" "+(h.target===this.team?"Your shield blocked "+p.name+"!":T(h.target)+"'s shield blocked it!"),"ok"); return; }
+    if (h.blocked){ this.alert(ART.icon("shield")+" "+(h.target===this.team?"Your shield blocked "+p.name+"!":GB.tnPos(h.target)+" shield blocked it!"),"ok"); return; }
     if (h.target!==this.team){ this.alert(ART.icon(p.icon)+" "+esc(h.name)+" hit "+T(h.target)+" with "+p.name+"!",cls); return; }
     this.alert(ART.icon(p.icon)+" "+esc(h.name)+" used "+p.name+" on you!",cls);
     try{ navigator.vibrate && navigator.vibrate([120,60,120]); }catch(e){}
@@ -669,7 +669,7 @@ const Player = {
     const P=$("player"); P.classList.toggle("red",this.team==="red"&&this.joined); P.classList.toggle("blue",this.team==="blue"&&this.joined);
     $("pMe").textContent=this.joined ? this.name : "GameBox";
     $("pSc").textContent=this.pts+" pts"; show($("pSc"),this.joined);
-    $("pTeamBig").innerHTML=this.team==="blue"?ART.mascot("blue")+"Blue Team":ART.mascot("red")+"Red Team";
+    $("pTeamBig").innerHTML=this.team==="blue"?ART.mascot("blue")+`<span data-tn="blue">${GB.esc(GB.tn("blue"))}</span>`:ART.mascot("red")+`<span data-tn="red">${GB.esc(GB.tn("red"))}</span>`;
     this.showAv();
   },
 
@@ -712,9 +712,9 @@ const Player = {
       this.clearFx(); $("player").classList.remove("crunch");
       show($("pCount"),false); show($("pPlay"),false); show($("pWait"),false); show($("pEnd"),true);
       const w=m.winner, mine=w===this.team;
-      $("pWin").textContent= w==="tie"?"It's a tie!": mine ? "You win!" : (w==="red"?"Red":"Blue")+" wins!";
+      $("pWin").textContent= w==="tie"?"It's a tie!": mine ? "You win!" : GB.tnWin(w)+"!";
       $("pWin").style.color= w==="red"?"var(--red)":w==="blue"?"var(--blue)":"var(--yellow)";
-      $("pWinSub").textContent= (m.rP!=null? "Red "+m.rP+" – "+m.bP+" Blue · " : "") + (w==="tie"?"What a game!": mine ? "Great teamwork!" : "So close!");
+      $("pWinSub").textContent= (m.rP!=null? GB.tn("red")+" "+m.rP+" – "+m.bP+" "+GB.tn("blue")+" · " : "") + (w==="tie"?"What a game!": mine ? "Great teamwork!" : "So close!");
       $("pEndAv").innerHTML= mine ? ART.img("trophy") : ART.avatar(this.av);
       $("pPts").textContent=this.pts; $("pMine").textContent=this.score; $("pThrees").textContent=this.threes; $("pBest").textContent=this.best;
       try{ navigator.vibrate && navigator.vibrate(mine?[80,60,80,60,200]:200); }catch(e){}

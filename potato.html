@@ -139,8 +139,8 @@
       <div class="lob-act"><button class="go" id="startBtn" disabled>Light it <i data-i="play"></i></button><button class="pill ghost" id="toSetup"><i data-i="sliders"></i> Settings</button></div>
     </div>
     <div class="lob-teams">
-      <div class="tcol red"><div class="th"><span data-art="red"></span>Red Team <span class="n" id="rN">0</span></div><div class="names" id="rNames"></div></div>
-      <div class="tcol blue"><div class="th"><span data-art="blue"></span>Blue Team <span class="n" id="bN">0</span></div><div class="names" id="bNames"></div></div>
+      <div class="tcol red"><div class="th"><span data-art="red"></span><span data-tn="red">Red Team</span> <span class="n" id="rN">0</span></div><div class="names" id="rNames"></div></div>
+      <div class="tcol blue"><div class="th"><span data-art="blue"></span><span data-tn="blue">Blue Team</span> <span class="n" id="bN">0</span></div><div class="names" id="bNames"></div></div>
     </div>
     <div class="lob-hint" id="startHint">Need at least 1 player on each team.</div>
   </div>
@@ -148,12 +148,12 @@
   <!-- step 3: game -->
   <div id="arena" class="hidden">
     <div class="scorebar">
-      <div class="tscore r"><span data-art="red"></span><span class="nm">Red</span><span class="lives" id="rLives"></span><span class="ppl" id="rCnt"></span></div>
+      <div class="tscore r"><span data-art="red"></span><span class="nm" data-tn="red">Red</span><span class="lives" id="rLives"></span><span class="ppl" id="rCnt"></span></div>
       <div class="timer" id="timer">0:00</div>
-      <div class="tscore b"><span class="ppl" id="bCnt"></span><span class="lives" id="bLives"></span><span class="nm">Blue</span><span data-art="blue"></span></div>
+      <div class="tscore b"><span class="ppl" id="bCnt"></span><span class="lives" id="bLives"></span><span class="nm" data-tn="blue">Blue</span><span data-art="blue"></span></div>
     </div>
     <div class="field-wrap" id="fieldWrap">
-      <span class="sidelbl r">Red</span><span class="sidelbl b">Blue</span>
+      <span class="sidelbl r" data-tn="red">Red</span><span class="sidelbl b" data-tn="blue">Blue</span>
       <div class="side r" id="sideR"></div>
       <div class="side b" id="sideB"></div>
       <div class="bomb" id="bomb"><div class="need" id="need"><span class="dots" id="needDots"></span><b id="needTxt"></b></div></div>
@@ -168,9 +168,9 @@
       <div class="rcard">
         <div class="rhead"><img class="tro" src="img/trophy.webp" alt=""><div class="wtxt"><div class="win" id="winTxt">Red wins!</div><div class="why" id="whyTxt"></div></div><span id="winMascot"></span></div>
         <div class="rbody"><div class="mvps">
-          <div class="mvp r"><h3><i data-i="flame"></i> Red MVPs</h3><div class="rows" id="mvpR"></div></div>
+          <div class="mvp r"><h3><i data-i="flame"></i> <span data-tn="red">Red</span> MVPs</h3><div class="rows" id="mvpR"></div></div>
           <div class="mvp y"><h3><i data-i="star"></i> Awards</h3><div class="rows" id="awards"></div></div>
-          <div class="mvp b"><h3><i data-i="bolt"></i> Blue MVPs</h3><div class="rows" id="mvpB"></div></div>
+          <div class="mvp b"><h3><i data-i="bolt"></i> <span data-tn="blue">Blue</span> MVPs</h3><div class="rows" id="mvpB"></div></div>
         </div></div>
         <div class="rbtns"><button class="go" id="againBtn"><i data-i="refresh"></i> Play again</button><button class="pill ghost" id="lobbyBtn"><i data-i="users"></i> Back to lobby</button></div>
       </div>
@@ -192,8 +192,8 @@
       <input id="pName" class="field" maxlength="8" placeholder="Name" autocomplete="off">
       <div class="lbl">Pick your team</div>
       <div class="teampick">
-        <button class="tbtn red" data-team="red"><span class="e" data-art="red"></span>Red</button>
-        <button class="tbtn blue" data-team="blue"><span class="e" data-art="blue"></span>Blue</button>
+        <button class="tbtn red" data-team="red"><span class="e" data-art="red"></span><span data-tn="red">Red</span></button>
+        <button class="tbtn blue" data-team="blue"><span class="e" data-art="blue"></span><span data-tn="blue">Blue</span></button>
       </div>
       <button class="btn-ink" id="pGo" disabled>Join</button>
       <div class="err" id="pErr"></div>
@@ -242,7 +242,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="gb-art.js?v=6ae51ada"></script>
-<script src="gb.js?v=4124d3e9"></script>
+<script src="gb.js?v=89517491"></script>
 <script>
 "use strict";
 const GAME="potato";
@@ -254,7 +254,7 @@ const EXTRA_MAX = 3;                         // the other team can add up to +3 
 const BOOM_PAUSE = 3800;                     // ms between a blast and the next bomb
 const fuseMs = sudden => sudden ? 10000 + rand(8000) : 18000 + rand(14000);
 const other = t => t === "red" ? "blue" : "red";
-const T = t => t === "red" ? "Red" : "Blue";
+const T = t => GB.tn(t);
 const HEART = c => `<svg viewBox="0 0 24 24"><path fill="${c}" d="M12 21s-8.5-5.2-8.5-11.4A4.8 4.8 0 0 1 12 6.9a4.8 4.8 0 0 1 8.5 2.7C20.5 15.8 12 21 12 21z"/></svg>`;
 // hand-drawn bomb sprites: calm / panic (same frame), plus the pop burst
 const BOMB = (hot) => `<img class="bimg" src="img/${hot?"bomb-panic":"bomb"}.webp" alt="" draggable="false">`;
@@ -355,7 +355,7 @@ const Host = {
     const n=$("need"); n.className="need "+(B.holder==="blue"?"b":"r");
     const need=B.need||3, prog=Math.min(B.prog||0,need), base=need-(B.extra||0);
     $("needDots").innerHTML=Array.from({length:need},(_,i)=>`<i class="${i<prog?"on":""}${i>=base?" extra":""}"></i>`).join("");
-    $("needTxt").textContent=T(B.holder)+" needs "+(need-prog)+" more";
+    $("needTxt").textContent=GB.tnV(B.holder,"needs","need")+" "+(need-prog)+" more";
     this.setHot(this._hot);
   },
   setHot(hot){ this._hot=!!hot; const el=$("bomb"); el.classList.toggle("hot",this._hot); const svg=BOMB(this._hot);
@@ -387,7 +387,7 @@ const Host = {
     const W=$("fieldWrap"); W.classList.remove("shake"); void W.offsetWidth; W.classList.add("shake");
     const side=t==="red"?$("sideR"):$("sideB"); side.classList.remove("blown"); void side.offsetWidth; side.classList.add("blown"); setTimeout(()=>side.classList.remove("blown"),1300);
     beep(90,.9,"sawtooth",.3); beep(60,1.2,"square",.2,.05); beep(40,1.4,"sine",.35,.1);
-    setTimeout(()=>this.shout(lives[t]===0 ? T(t)+" is out!" : "BOOM! "+T(t)+" loses a life"),150);
+    setTimeout(()=>this.shout(lives[t]===0 ? GB.tnV(t,"is","are")+" out!" : "BOOM! "+GB.tnV(t,"loses","lose")+" a life"),150);
   },
 
   nextBomb(){
@@ -464,8 +464,8 @@ const Host = {
       const w=m.winner, {r,b}=GB.host.teams(this.players), L=this.bomb.lives||{};
       $("winTxt").className="win "+(w==="red"?"r":w==="blue"?"b":"t");
       $("winMascot").innerHTML = w==="tie" ? "" : ART.mascot(w,"wm");
-      $("winTxt").textContent= w==="red"?"Red wins!": w==="blue"?"Blue wins!":"It's a tie!";
-      $("whyTxt").textContent = (m.why==="lives" ? T(w==="tie"?"red":other(w))+" ran out of lives!" : "Time's up!")+"   Lives left: Red "+(L.red||0)+" · Blue "+(L.blue||0);
+      $("winTxt").textContent= (w==="red"||w==="blue") ? GB.tnWin(w)+"!" : "It's a tie!";
+      $("whyTxt").textContent = (m.why==="lives" ? T(w==="tie"?"red":other(w))+" ran out of lives!" : "Time's up!")+"   Lives left: "+GB.tn("red")+" "+(L.red||0)+" · "+GB.tn("blue")+" "+(L.blue||0);
       const top=l=>l.slice().sort((x,y)=>(y.score||0)-(x.score||0)).slice(0,3).map((p,i)=>`<div class="row">${ART.medal(i)} <span class="av">${ART.avatar(p.av,"",true)}</span> ${esc(p.name)} <span class="s">${p.score||0}</span></div>`).join("")||"<div class='row'>—</div>";
       $("mvpR").innerHTML=top(r); $("mvpB").innerHTML=top(b);
       const all=[...r,...b], best=k=>all.slice().sort((x,y)=>(y[k]||0)-(x[k]||0))[0], bs=best("score"), bc=best("best");
@@ -513,7 +513,7 @@ const Player = {
     const P=$("player"); P.classList.toggle("red",this.team==="red"&&this.joined); P.classList.toggle("blue",this.team==="blue"&&this.joined);
     $("pMe").textContent=this.joined ? this.name : "GameBox";
     $("pSc").innerHTML=ART.icon("check")+" "+this.score; show($("pSc"),this.joined);
-    $("pTeamBig").innerHTML=this.team==="blue"?ART.mascot("blue")+"Blue Team":ART.mascot("red")+"Red Team";
+    $("pTeamBig").innerHTML=this.team==="blue"?ART.mascot("blue")+`<span data-tn="blue">${GB.esc(GB.tn("blue"))}</span>`:ART.mascot("red")+`<span data-tn="red">${GB.esc(GB.tn("red"))}</span>`;
     this.showAv();
   },
 
@@ -529,7 +529,7 @@ const Player = {
     }
     const left=(B.need||3)-(B.prog||0);
     if (mine){ el.className="pstatus mine"; el.innerHTML=`<span class="pb">${BOMB(false)}</span><span><b>You have the bomb!</b><small>${left} more right answer${left===1?"":"s"} to throw it!</small></span>`; }
-    else { el.className="pstatus safe"; el.innerHTML=`<span class="pb">${BOMB(false)}</span><span><b>${T(B.holder)} has the bomb</b><small>${(B.extra||0)<EXTRA_MAX?"Right answers make them need +1 more!":"Keep going — they still need "+left+"!"}</small></span>`; }
+    else { el.className="pstatus safe"; el.innerHTML=`<span class="pb">${BOMB(false)}</span><span><b>${GB.tnV(B.holder,"has","have")} the bomb</b><small>${(B.extra||0)<EXTRA_MAX?"Right answers make them need +1 more!":"Keep going — they still need "+left+"!"}</small></span>`; }
     if (this._lastHolder!==B.holder){ if (this._lastHolder && mine){ try{ navigator.vibrate && navigator.vibrate([100,50,100]); }catch(e){} beep(700,.12,"square",.1); } this._lastHolder=B.holder; }
   },
 
@@ -561,7 +561,7 @@ const Player = {
     if (st==="end"){
       show($("pCount"),false); show($("pPlay"),false); show($("pWait"),false); show($("pEnd"),true);
       const w=m.winner, mine=w===this.team;
-      $("pWin").textContent= w==="tie"?"It's a tie!": mine ? "You win!" : T(w)+" wins!";
+      $("pWin").textContent= w==="tie"?"It's a tie!": mine ? "You win!" : GB.tnWin(w)+"!";
       $("pWin").style.color= w==="red"?"var(--red)":w==="blue"?"var(--blue)":"var(--orange)";
       $("pWinSub").textContent= w==="tie"?"What a battle!": mine ? "You survived the bomb!" : "So close! Next time!";
       $("pEndAv").innerHTML= mine ? ART.img("trophy") : ART.avatar(this.av);

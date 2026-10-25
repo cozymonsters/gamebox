@@ -29,7 +29,7 @@ const GB = (() => {
 
   const AVATARS = ART.AVATARS;
 
-  // Question sets live in each teacher's My Sets (kits.html, Firebase). There are no built-in banks on the site any more.
+  // Question sets live in each teacher's My Sets (sets.html, Firebase). There are no built-in banks on the site any more.
   // window.GB_QUIZ is only set by local test fixtures (fixtures/banks.js).
   const SETS = {};
   if (window.GB_QUIZ) for (const k in window.GB_QUIZ) SETS[k]=window.GB_QUIZ[k];
@@ -191,6 +191,27 @@ const GB = (() => {
     }
   };
 
+  /* ---- team names: every new room gets two random names; the team colour (red / blue) shows which is which, so the names don't say it ---- */
+  const TEAM_POOL = {                                    // monster crews (red side a bit fiery, blue side a bit splashy)
+    red:  ["Chompers","Stompers","Fireballs","Rumblers","Spikers","Grumblers","Munchers","Roarers","Sizzlers","Fangsters","Hotheads","Gobblers"],
+    blue: ["Splashers","Bubblers","Wigglers","Zappers","Snowballs","Gigglers","Bouncers","Fuzzballs","Drippers","Glimmers","Snoozers","Blobbers"]
+  };
+  const teamNames = { red:"Red Team", blue:"Blue Team" };
+  const randomTeams = () => ({ red:pick(TEAM_POOL.red), blue:pick(TEAM_POOL.blue) });
+  const tn = t => teamNames[t==="blue"?"blue":"red"];
+  const plural = t => /s$/i.test(tn(t)) && !/\bTeam$/.test(tn(t));      // "Red Foxes win" / "Red Team wins"
+  const tnV = (t, one, many) => tn(t)+" "+(plural(t)?many:one);
+  const tnWin = t => tnV(t,"wins","win");
+  const tnPos = t => tn(t)+(/s$/i.test(tn(t))?"’":"’s");
+  const teamSubs = [];
+  function paintTeams(v){
+    if (v && v.red && v.blue){ teamNames.red=String(v.red).slice(0,20); teamNames.blue=String(v.blue).slice(0,20); }
+    for (const el of document.querySelectorAll("[data-tn]")) el.textContent = tn(el.dataset.tn);
+    for (const el of document.querySelectorAll("[data-tnw]")) el.textContent = tnWin(el.dataset.tnw);
+    for (const f of teamSubs) try{ f(); }catch(e){}
+  }
+  const watchTeams = ref => ref.child("meta/teams").on("value", s=>paintTeams(s.val()));
+
   /* ---- host helpers ---- */
   const host = {
     netStatus(el){ db.ref(".info/connected").on("value",s=>{ const on=!!s.val(); el.textContent=on?"Online":"Reconnecting…"; el.classList.toggle("off",!on); }); },
@@ -207,13 +228,22 @@ const GB = (() => {
           const c=String(1000+rand(9000));
           const m=(await db.ref("rooms/"+c+"/meta").get()).val();
           if (!m || (Date.now()-(m.created||0)) > 6*3600e3){
-            await db.ref("rooms/"+c).set({ meta:{ game, state:"lobby", round:0, created:firebase.database.ServerValue.TIMESTAMP } });
+            await db.ref("rooms/"+c).set({ meta:{ game, state:"lobby", round:0, created:firebase.database.ServerValue.TIMESTAMP, teams:randomTeams() } });
             code=c;
           }
         }
       }
       history.replaceState(null,"",baseUrl+"?host="+code);
       host.code=code;
+      const rref=db.ref("rooms/"+code);
+      if (!(await rref.child("meta/teams").get()).val()) await rref.child("meta/teams").set(randomTeams());   // older rooms
+      watchTeams(rref);
+      // lobby: one tap for two new random names
+      const la=document.querySelector(".lob-act");
+      if (la && !$("teamsShuffle")){
+        const b=document.createElement("button"); b.className="pill ghost"; b.id="teamsShuffle"; b.innerHTML=ART.icon("shuffle")+" New team names"; b.title="Pick two new random team names";
+        b.onclick=()=>rref.child("meta/teams").set(randomTeams()); la.appendChild(b);
+      }
       return code;
     },
 
@@ -226,7 +256,7 @@ const GB = (() => {
     },
 
     // settings: <select id=sSet>, plus any selects listed in ids (remembered per teacher)
-    // Question Set: the signed-in teacher's sets from My Sets (kits.html). Internally a set is still called a "kit".
+    // Question Set: the signed-in teacher's sets from My Sets (sets.html). Internally a set is still called a "kit".
     myKits: null, kitCache: {}, extraKit: null,
     initSettings(ids){
       const sel=$("sSet"), want=(params.get("kit")||"").trim();   // ?kit=<id> comes from "Play Live" on the My Sets page
@@ -272,12 +302,12 @@ const GB = (() => {
         // picker: the teacher's sets, one tap to switch (same room, students stay)
         const m=document.createElement("div"); m.className="modal hidden"; m.id="setsModal";
         m.innerHTML=`<div class="mcard setsm"><div class="mh">${ART.icon("book")} Choose a set</div><div class="mb"><div class="setlist" id="setList"></div>
-          <div class="row spread"><a class="btn-soft" href="${dirUrl}kits.html" target="_blank" rel="noopener">${ART.icon("pencil")} Make or edit sets in My Sets</a><button class="pill ghost" id="setsClose">Cancel</button></div></div></div>`;
+          <div class="row spread"><a class="btn-soft" href="${dirUrl}sets.html" target="_blank" rel="noopener">${ART.icon("pencil")} Make or edit sets in My Sets</a><button class="pill ghost" id="setsClose">Cancel</button></div></div></div>`;
         document.body.appendChild(m);
         m.onclick=e=>{ if (e.target===m) show(m,false); };
         $("setsClose").onclick=()=>show(m,false);
         $("setChange").onclick=()=>{
-          if (account.loaded && !account.user && !Object.keys(SETS).length){ location.href=dirUrl+"kits.html"; return; }
+          if (account.loaded && !account.user && !Object.keys(SETS).length){ location.href=dirUrl+"sets.html"; return; }
           const opts=[...sel.querySelectorAll("option")].filter(o=>o.value && !o.disabled);
           $("setList").innerHTML = opts.length ? opts.map(o=>{ const i=info(o.value)||{name:o.textContent,n:0}; return `<button class="setitem${o.value===sel.value?" on":""}" data-v="${esc(o.value)}"><span class="ktype ${i.quiz?"quiz":"words"}">${i.quiz?"Multiple choice":"Vocabulary"}</span><b>${esc(i.name)}</b><small>${i.n} ${i.quiz?"questions":"words"}</small>${o.value===sel.value?`<span class="cur">${ART.icon("check")}</span>`:""}</button>`; }).join("")
             : `<div class="hint">No sets yet. Make one in My Sets, then come back here.</div>`;
@@ -298,7 +328,7 @@ const GB = (() => {
       // no set yet: "Continue" opens the picker (or My Sets) instead of a lobby that can't start
       const cont=$("toLobby"); if (cont && !cont._setGuard){ cont._setGuard=true; cont.addEventListener("click",e=>{ if (!info(sel.value)){ e.preventDefault(); e.stopImmediatePropagation(); $("setChange").click(); } }, true); }
       // the teacher's home is My Sets: the GameBox logo on the big screen goes back there
-      const brand=document.querySelector(".gb-top .brand"); if (brand) brand.href=dirUrl+"kits.html";
+      const brand=document.querySelector(".gb-top .brand"); if (brand) brand.href=dirUrl+"sets.html";
       // practice: a QR code students scan to practise (4-choice quiz, cards.html) the selected list on their phones before the game
       if (!$("cardsBtn")){
         const b=document.createElement("button"); b.className="btn-soft"; b.id="cardsBtn"; b.innerHTML=ART.icon("qr")+" Practice";
@@ -372,6 +402,7 @@ const GB = (() => {
       P.name = store.get("tug.name")||"";
       P.av = store.get("tug.av"); if (!AVATARS.includes(P.av)) P.av = pick(AVATARS);
       $("pCodeLbl").textContent=opts.code;
+      watchTeams(opts.ref);
       if (!$("pName").value) $("pName").value=P.name; P.showAv();
       // monsters are dealt at random (no picking): keep this phone's last monster unless someone in the room already has it
       const deal=used=>{
@@ -464,5 +495,6 @@ const GB = (() => {
   const wrongMs = q => q && q.quiz ? 3200 : 1400;
 
   return { db, now, $, show, esc, store, rand, pick, shuffle, fmt, params, baseUrl, dirUrl, AVATARS, SETS, parseWords, account, kits,
+           tn, tnV, tnWin, tnPos, teamSubs, paintTeams,
            beep, unlockAudio, fanfare, buzzer, speak, voice, primeVoice, confetti, host, join, makeQuestion, renderQuestion, showWhy, wrongMs };
 })();

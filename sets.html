@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#3d4486">
+<title>My Sets · English GameBox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="gb.css?v=d76da141">
+<style>
+.gi{width:1.1em;height:1.1em;vertical-align:-.18em;flex:none} i[data-i]{font-style:normal;display:inline-flex;align-items:center}
+.kt-top{max-width:1240px;margin:0 auto;padding:14px 28px 6px}
+.kt-top .brand{font-size:32px;color:var(--on-bg)} .kt-top .brand .ic{width:50px;height:50px}
+.who{display:flex;align-items:center;gap:10px;color:var(--on-bg);font-weight:800;font-size:15px}
+.who .init{width:34px;height:34px;border-radius:50%;background:var(--mustard);color:var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:18px}
+.kt-main{max-width:1240px;margin:0 auto;padding:10px 28px 56px}
+.kt-main .panel{background:var(--panel);border-radius:28px;box-shadow:0 8px 0 var(--lift);padding:26px 28px 30px;overflow:visible}   /* visible: lets the Save bar stick */
+.sp{flex:1}
+.eyebrow{font-weight:900;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--orange)}
+.phead{display:flex;align-items:flex-end;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.phead h1{margin:0;font-family:var(--display);font-weight:700;font-size:48px;line-height:1.05}
+.phead .sub{font-weight:800;color:var(--sub);font-size:16px;margin-top:4px}
+.go.sm{font-size:21px;padding:10px 24px;border-radius:15px}
+.note{background:#fff3cd;color:#664d03;border-radius:14px;padding:12px 16px;font-weight:800;margin-bottom:16px;line-height:1.45}
+.note.ok{background:#e3f1e8;color:#255b3b}
+
+/* loading + login */
+.kt-load{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-family:var(--display);font-weight:600;font-size:26px;color:var(--on-bg)}
+.kt-load img{width:110px;height:110px;object-fit:contain;animation:gb-hop 1s infinite}
+.login{min-height:calc(100vh - 90px);display:flex;align-items:center;justify-content:center;padding:20px 16px 60px}
+.lcard{width:min(440px,100%);background:var(--paper);border-radius:26px;box-shadow:0 8px 0 var(--lift),0 30px 60px rgba(0,0,0,.25);padding:30px 32px 26px;text-align:center}
+.lmon{width:120px;height:120px;margin:-90px auto 4px;display:block;object-fit:contain}
+.lcard h1{margin:0;font-family:var(--display);font-weight:700;font-size:38px}
+.lcard .lsub{font-weight:800;color:var(--sub);font-size:16px;margin:4px 0 22px}
+.gbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:12px;background:#fff;border:2px solid var(--line-d);border-radius:14px;padding:13px 18px;font-weight:800;font-size:18px;box-shadow:0 4px 0 var(--line-d);transition:transform .1s}
+.gbtn:hover{border-color:#c3b9a2} .gbtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line-d)}
+.gbtn svg{width:22px;height:22px}
+.gbtn:disabled{opacity:.6;cursor:default}
+.lnote{margin:18px 0 0;font-weight:700;color:var(--sub);font-size:15px;line-height:1.5}
+.lerr{margin:12px 0 0;font-weight:800;color:var(--red);font-size:15px;line-height:1.45}
+.lerr:empty{display:none}
+.lback{display:inline-block;margin-top:16px;font-weight:800;font-size:15px;color:var(--sub)}
+
+/* kit grid */
+.kgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px}
+.kcard{position:relative;background:var(--paper);border-radius:20px;padding:16px 16px 14px;display:flex;flex-direction:column;gap:6px;box-shadow:0 4px 0 var(--panel-d);min-height:178px}
+.kc-top{display:flex;align-items:center;gap:8px}
+.ktype{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 11px 4px 8px;font-weight:900;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.ktype .gi{width:15px;height:15px}
+.ktype.words{background:#dcf1f1;color:#1d736e} .ktype.quiz{background:#e7e3f7;color:#5b4ca0}
+.kc-ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--sub)}
+.kc-ic:hover{background:var(--cream);color:var(--ink)}
+.kc-ic.del:hover{color:var(--red)}
+.kc-ic .gi{width:19px;height:19px}
+.kc-name{font-family:var(--display);font-weight:600;font-size:25px;line-height:1.15;margin-top:4px;word-break:break-word}
+.kc-meta{font-weight:800;color:var(--sub);font-size:14px}
+.kc-acts{display:flex;gap:8px;margin-top:auto;padding-top:10px;flex-wrap:wrap}
+.kbtn{display:inline-flex;align-items:center;gap:6px;border-radius:12px;padding:8px 13px;font-weight:900;font-size:15px;background:var(--cream);border:2px solid var(--line-d)}
+.kbtn:hover{background:#fff}
+.kbtn.play{background:var(--go);border-color:var(--go);color:#fff;box-shadow:0 3px 0 var(--go-d)}
+.kbtn.play:hover{background:#56a874}
+.kbtn .gi{width:16px;height:16px}
+.empty{text-align:center;padding:30px 10px 10px}
+.empty img{width:130px;height:130px;object-fit:contain}
+.empty h3{font-family:var(--display);font-weight:600;font-size:28px;margin:6px 0 4px}
+.empty p{margin:0 0 18px;font-weight:700;color:var(--sub)}
+
+/* editor */
+.edbar{display:flex;align-items:center;gap:12px;margin:-10px -12px 14px;padding:10px 12px;flex-wrap:wrap;position:sticky;top:0;z-index:5;background:var(--panel);border-radius:18px}   /* Save stays in reach on long kits */
+.status{font-weight:800;color:var(--sub);font-size:15px}
+.status.dirty{color:var(--orange)} .status.err{color:var(--red)}
+.edhead{background:var(--paper);border-radius:20px;padding:16px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.kname{flex:1;min-width:220px;font-family:var(--display);font-weight:600;font-size:32px;border:2px solid transparent;border-radius:12px;padding:4px 10px;background:transparent;color:var(--ink)}
+.kname:hover{border-color:var(--line)} .kname:focus{outline:none;border-color:var(--blue);background:#fff}
+.edcount{font-weight:900;color:var(--sub);font-size:16px;white-space:nowrap}
+.edtools{display:flex;gap:10px;margin:16px 0 12px;flex-wrap:wrap}
+.btn-soft .gi{width:17px;height:17px}
+
+/* vocabulary rows */
+.wlist{background:var(--paper);border-radius:20px;padding:10px 14px 14px}
+.whead,.wrow{display:grid;grid-template-columns:38px 1fr 1fr 40px;gap:10px;align-items:center}
+.whead{font-weight:900;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--sub);padding:6px 0 8px}
+.wrow{padding:5px 0;border-top:1px solid var(--line)}
+.wrow .n{font-weight:900;color:var(--sub);text-align:right;font-size:15px}
+.fld{width:100%;border:2px solid var(--line);border-radius:11px;padding:9px 12px;font-size:18px;font-weight:700;background:#fff;color:var(--ink)}
+.fld:focus{outline:none;border-color:var(--blue)}
+.fld.bad{border-color:var(--red);background:#fff5f3}
+.xbtn{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--sub)}
+.xbtn:hover{background:var(--red-l);color:var(--red)}
+.xbtn .gi{width:18px;height:18px}
+.addrow{margin-top:12px;width:100%;border:2px dashed var(--panel-d);border-radius:16px;padding:12px;font-weight:900;font-size:16px;color:#5b578a;display:flex;align-items:center;justify-content:center;gap:8px}
+.addrow:hover{background:rgba(255,255,255,.5)}
+
+/* multiple-choice items */
+.qitem{background:var(--paper);border-radius:20px;padding:14px 18px 16px;margin-bottom:14px;display:flex;flex-direction:column;gap:9px}
+.qitem.bad{box-shadow:0 0 0 3px var(--red)}
+.qi-head{display:flex;align-items:center;gap:10px}
+.qi-head b{font-family:var(--display);font-weight:600;font-size:21px}
+.qitem textarea.fld{resize:vertical;min-height:58px;line-height:1.45}
+.fld.small{font-size:16px;font-weight:700}
+.qopts{display:flex;flex-direction:column;gap:8px}
+.qo{display:flex;align-items:center;gap:10px}
+.qo .mark{flex:none;width:40px;height:40px;border-radius:50%;border:2px solid var(--line-d);background:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:19px;color:var(--sub)}
+.qo .mark:hover{border-color:var(--go);color:var(--go)}
+.qo.right .mark{background:var(--go);border-color:var(--go);color:#fff}
+.qo.right .fld{border-color:var(--go);background:#f1f8f3}
+.qhint{font-size:14px;font-weight:800;color:var(--sub)}
+.qhint.bad{color:var(--red)}
+.qadd{align-self:flex-start;font-weight:900;font-size:15px;color:#5b578a;display:inline-flex;align-items:center;gap:6px;padding:4px 2px}
+.lbl{font-weight:900;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--sub);margin-top:2px}
+
+/* modals */
+.mcard .mh .gi{width:26px;height:26px}
+.choice{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ch{text-align:left;background:#fff;border:2px solid var(--line-d);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:6px;box-shadow:0 4px 0 var(--line-d)}
+.ch:hover{border-color:var(--go)}
+.ch .ktype{align-self:flex-start}
+.ch b{font-family:var(--display);font-weight:600;font-size:24px}
+.ch span{font-weight:700;color:var(--sub);font-size:15px;line-height:1.4}
+.games{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.gcard{position:relative;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:var(--cream);border:4px solid transparent;box-shadow:0 2px 6px rgba(45,50,110,.15);display:block}
+.gcard:hover{border-color:var(--go)}
+.gcard img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.gcard .nm{position:absolute;left:10px;bottom:10px;font-family:var(--display);font-weight:600;font-size:20px;background:var(--paper);border-radius:10px;padding:1px 12px}
+.prow{display:flex;gap:18px;align-items:center}
+.prow .qrbox{flex:none;width:220px;height:220px;background:#fff;border-radius:16px;display:flex;align-items:center;justify-content:center;padding:10px}
+.prow .qrbox img{width:100%;height:100%;image-rendering:pixelated}
+.prow b{font-family:var(--display);font-weight:600;font-size:26px;display:block}
+.prow p{font-weight:700;color:var(--sub);margin:6px 0 12px;line-height:1.45}
+.plink{display:block;word-break:break-all;font-weight:800;font-size:14px;background:var(--cream);border-radius:10px;padding:8px 10px;margin-bottom:10px;color:var(--ink)}
+.mcard .row.spread{justify-content:space-between;align-items:center}
+.danger{display:inline-flex;align-items:center;gap:8px;font-family:var(--display);font-weight:600;font-size:22px;padding:10px 26px;border-radius:15px;background:var(--red);color:#fff;box-shadow:0 5px 0 var(--red-d)}
+.fmt{background:var(--cream);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:700;line-height:1.55;color:var(--sub)}
+.fmt b{color:var(--ink)}
+.fmt pre{margin:4px 0 0;font:inherit;color:var(--ink);white-space:pre-wrap}
+.imsg{font-weight:900;font-size:15px;color:var(--go-d)} .imsg.bad{color:var(--red)}
+.toast2{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:#fff;font-weight:800;border-radius:14px;padding:12px 20px;z-index:40;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+
+@media (max-width:760px){
+  .kt-top{padding:12px 16px 4px} .kt-top .brand{font-size:26px} .kt-top .brand .ic{width:42px;height:42px}
+  .who .nm{display:none}
+  .kt-main{padding:6px 12px 40px}
+  .kt-main .panel{padding:18px 14px 22px;border-radius:22px}
+  .phead h1{font-size:38px}
+  .kname{font-size:26px;min-width:0}
+  .whead,.wrow{grid-template-columns:24px 1fr 1fr 36px;gap:6px}
+  .fld{font-size:16px;padding:8px 9px}
+  .choice,.games{grid-template-columns:1fr}
+  .edbar{flex-wrap:nowrap;gap:8px} .edbar .status{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px} .edbar .pill{padding:8px 12px;font-size:15px}
+  .kc-acts{gap:6px;flex-wrap:nowrap} .kbtn{flex:1 1 auto;justify-content:center;padding:8px 8px;font-size:14px;gap:5px}
+  .prow{flex-direction:column;align-items:stretch} .prow .qrbox{align-self:center}
+}
+</style>
+</head>
+<body>
+<div class="doodles"></div>
+<header class="gb-top kt-top">
+  <a class="brand" href="./"><span class="ic" data-art="logo"></span>GameBox</a>
+  <div class="sp"></div>
+  <div class="who hidden" id="who"><span class="init" id="whoInit"></span><span class="nm">Signed in</span><button class="pill white" id="signOut">Sign out</button></div>
+</header>
+
+<div class="kt-load" id="vLoad"><img src="img/m/a5.webp" alt=""><div>Loading…</div></div>
+
+<!-- sign in (teachers only) -->
+<section class="login hidden" id="vLogin">
+  <div class="lcard">
+    <img class="lmon" src="img/m/a9.webp" alt="">
+    <h1>My Sets</h1>
+    <div class="lsub">Teacher sign in</div>
+    <button class="gbtn" id="gSignIn"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Continue with Google</button>
+    <p class="lnote">Make your own question sets, play them live, and share practice links.<br>Students never need an account.</p>
+    <p class="lerr" id="loginErr"></p>
+    <a class="lback" href="./">Back to games</a>
+  </div>
+</section>
+
+<!-- kit list -->
+<main class="kt-main hidden" id="vList">
+  <section class="panel">
+    <div class="phead">
+      <div><div class="eyebrow">Teacher</div><h1>My Sets</h1><div class="sub" id="listSub"></div></div>
+      <div class="sp"></div>
+      <button class="go sm" id="newKit"><i data-i="plus"></i> New Set</button>
+    </div>
+    <div class="note hidden" id="listNote"></div>
+    <div class="kgrid" id="kitGrid"></div>
+    <div class="empty hidden" id="empty"><img src="img/m/a1.webp" alt=""><h3>No sets yet</h3><p>A set is a list of words or questions you can play in any game.</p><button class="go sm" id="newKit2"><i data-i="plus"></i> New Set</button></div>
+  </section>
+</main>
+
+<!-- kit editor -->
+<main class="kt-main hidden" id="vEdit">
+  <section class="panel">
+    <div class="edbar">
+      <button class="pill white" id="edBack"><i data-i="back"></i> My Sets</button>
+      <div class="sp"></div>
+      <span class="status" id="edStatus"></span>
+      <button class="go sm" id="edSave"><i data-i="check"></i> Save</button>
+    </div>
+    <div class="edhead">
+      <span class="ktype" id="edType"></span>
+      <input class="kname" id="edName" maxlength="60" placeholder="Set name" autocomplete="off">
+      <span class="edcount" id="edCount"></span>
+    </div>
+    <div class="edtools">
+      <button class="btn-soft" id="edImport"><i data-i="paste"></i> Paste from Excel or Word</button>
+    </div>
+    <div id="edBody"></div>
+    <button class="addrow" id="edAdd"><i data-i="plus"></i> <span id="edAddTxt">Add word</span></button>
+  </section>
+</main>
+
+<!-- new kit: choose the type -->
+<div class="modal hidden" id="mNew"><div class="mcard"><div class="mh">New Set</div><div class="mb">
+  <div class="choice">
+    <button class="ch" data-type="words"><span class="ktype words"><i data-i="book"></i> Vocabulary</span><b>Word list</b><span>English words with their Chinese meaning. Students pick the right meaning or the right word.</span></button>
+    <button class="ch" data-type="quiz"><span class="ktype quiz"><i data-i="help"></i> Multiple choice</span><b>Questions</b><span>Your own questions with 2–4 options, the right answer, and an explanation.</span></button>
+  </div>
+  <div class="row"><button class="pill ghost" data-close>Cancel</button></div>
+</div></div></div>
+
+<!-- play live: choose the game -->
+<div class="modal hidden" id="mPlay"><div class="mcard"><div class="mh"><i data-i="play"></i> Play Live</div><div class="mb">
+  <div class="hint" id="playHint"></div>
+  <div class="games" id="playGames"></div>
+  <div class="row"><button class="pill ghost" data-close>Cancel</button></div>
+</div></div></div>
+
+<!-- practice QR -->
+<div class="modal hidden" id="mPrac"><div class="mcard cardsm"><div class="mh"><i data-i="qr"></i> Practice</div><div class="mb">
+  <div class="prow"><div class="qrbox" id="pracQR"></div><div><b id="pracName"></b><p>Students scan this code to practise on their phones. The link stays the same, and it always shows the latest version of the set.</p><a class="plink" id="pracLink" target="_blank" rel="noopener"></a><button class="btn-soft" id="pracCopy"><i data-i="copy"></i> Copy link</button></div></div>
+  <div class="row"><button class="go sm" data-close>Done</button></div>
+</div></div></div>
+
+<!-- confirm (delete / leave without saving) -->
+<div class="modal hidden" id="mAsk"><div class="mcard" style="width:min(480px,100%)"><div class="mh" id="askTitle"></div><div class="mb">
+  <div class="hint" id="askText"></div>
+  <div class="row"><button class="pill ghost" data-close>Cancel</button><button class="danger" id="askOk"></button></div>
+</div></div></div>
+
+<!-- paste import -->
+<div class="modal hidden" id="mImp"><div class="mcard" style="width:min(760px,100%)"><div class="mh"><i data-i="paste"></i> Paste from Excel or Word</div><div class="mb">
+  <div class="fmt" id="impFmt"></div>
+  <textarea id="impText" spellcheck="false"></textarea>
+  <div class="row spread"><span class="imsg" id="impMsg"></span><span style="display:flex;gap:10px"><button class="pill ghost" data-close>Cancel</button><button class="pill white" id="impReplace">Replace all</button><button class="go sm" id="impAdd">Add to set</button></span></div>
+</div></div></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="gb-art.js?v=6ae51ada"></script>
+<script src="gb.js?v=89517491"></script>
+<script>
+"use strict";
+const { $, show, esc, account, kits, host, parseWords, dirUrl } = GB;
+
+// page-only icons (24x24 line icons, same style as gb-art.js)
+const PI = {
+  plus:'<path d="M12 5v14M5 12h14"/>', back:'<path d="M15 5l-7 7 7 7"/>', trash:'<path d="M4.5 7h15M10 11v6M14 11v6M6.5 7l1 12.5a1.5 1.5 0 0 0 1.5 1.5h6a1.5 1.5 0 0 0 1.5-1.5L17.5 7M9.5 7V4.5h5V7"/>',
+  copy:'<rect x="8.5" y="8.5" width="11" height="11" rx="2"/><path d="M15.5 8.5V6a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5"/>',
+  paste:'<rect x="5" y="4.5" width="14" height="16" rx="2"/><path d="M9 4.5V3.5h6v1M9 10h6M9 14h6"/>'
+};
+const icon = n => PI[n] ? `<svg class="gi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PI[n]}</svg>` : ART.icon(n);
+// fill the page-only icons first (gb-art.js fills the rest and skips anything marked done)
+for (const el of document.querySelectorAll("i[data-i]")) if (PI[el.dataset.i]){ el.innerHTML=icon(el.dataset.i); el.dataset.done=1; }
+
+const GAMES = [ ["tug","Tug of War"], ["hoops","Hoops"], ["potato","Hot Potato"], ["grab","Color Grab"] ];
+const TYPE = { words:{ label:"Vocabulary", ic:"book", unit:"words" }, quiz:{ label:"Multiple choice", ic:"help", unit:"questions" } };
+const LETTERS = "ABCD";
+const views = ["vLoad","vLogin","vList","vEdit"];
+const view = v => { for (const id of views) show($(id), id===v); scrollTo({top:0}); };
+const modal = (id, on=true) => show($(id), on);
+for (const m of document.querySelectorAll(".modal")){ m.addEventListener("click", e=>{ if (e.target===m || e.target.closest("[data-close]")) modal(m.id,false); }); }
+let toastT; const toast = msg => { let t=$("toast2"); if(!t){ t=document.createElement("div"); t.id="toast2"; t.className="toast2"; document.body.appendChild(t); } t.textContent=msg; show(t,true); clearTimeout(toastT); toastT=setTimeout(()=>show(t,false),2600); };
+const when = t => t ? new Date(t).toLocaleDateString("en-US",{ month:"short", day:"numeric" }) : "";
+const friendly = e => {
+  const c=(e&&e.code)||"", m=(e&&e.message)||"";
+  if (/PERMISSION_DENIED|permission/i.test(c+m)) return "The database didn't allow this. The new database rules may not be in place yet.";
+  if (/unauthorized-domain/.test(c)) return "This website isn't allowed to sign in yet. In Firebase, add cozymonsters.github.io under Authentication → Settings → Authorized domains.";
+  if (/operation-not-allowed|configuration-not-found/.test(c)) return "Google sign-in isn't turned on yet. In Firebase, enable Google under Authentication → Sign-in method.";
+  if (/network/.test(c)) return "No connection. Check your internet and try again.";
+  return "Something went wrong. Please try again." + (c ? " ("+c+")" : "");
+};
+
+/* ---------------- sign in ---------------- */
+const App = {
+  list: [], kit: null, dirty: false,
+
+  start(){
+    if (!account.ready){ view("vLogin"); $("gSignIn").disabled=true; $("loginErr").textContent="Teacher sign-in isn't set up yet."; return; }
+    $("gSignIn").onclick=async()=>{
+      $("loginErr").textContent=""; $("gSignIn").disabled=true;
+      try{ await account.signIn(); }
+      catch(e){ if (!/popup-closed|cancelled-popup/.test(e.code||"")) $("loginErr").textContent=friendly(e); }
+      $("gSignIn").disabled=false;
+    };
+    $("signOut").onclick=async()=>{ if (App.dirty && !(await App.ask("Sign out without saving?","Your changes to this set will be lost.","Sign out"))) return; App.dirty=false; account.signOut(); };
+    account.onChange(u=>App.onUser(u));
+  },
+
+  async onUser(u){
+    show($("who"), !!u);
+    if (!u){ App.list=[]; view("vLogin"); return; }
+    $("whoInit").textContent=((u.displayName||u.email||"?").trim()[0]||"?").toUpperCase();
+    $("who").title=u.email||"";
+    view("vLoad");
+    try{
+      const n=await kits.starter();
+      if (n) toast("Your "+n+" starter sets are ready.");
+    }catch(e){ App.note(friendly(e)); }
+    await App.showList();
+  },
+
+  note(msg, ok){ const n=$("listNote"); n.textContent=msg||""; n.classList.toggle("ok",!!ok); show(n,!!msg); },
+
+  /* ---------------- list ---------------- */
+  async showList(){
+    view("vList");
+    try{ App.list=await kits.list(); }catch(e){ App.list=[]; App.note(friendly(e)); }
+    App.renderList();
+    // sets.html#edit=<id> (the "Edit" button in a game's settings) opens that set straight away
+    const m=location.hash.match(/^#edit=([-\w]+)$/); if (m){ history.replaceState(null,"",location.pathname); const k=App.list.find(x=>x.id===m[1]); if (k) App.edit(k); }
+  },
+  renderList(){
+    const L=App.list;
+    $("listSub").textContent = L.length ? L.length+(L.length===1?" set":" sets") : "";
+    show($("empty"), !L.length);
+    $("kitGrid").innerHTML = L.map(k=>{ const T=TYPE[k.type]||TYPE.words; return `
+      <div class="kcard" data-id="${esc(k.id)}">
+        <div class="kc-top"><span class="ktype ${k.type==="quiz"?"quiz":"words"}">${icon(T.ic)} ${T.label}</span><div class="sp"></div>
+          <button class="kc-ic" data-act="dup" title="Duplicate">${icon("copy")}</button><button class="kc-ic del" data-act="del" title="Delete">${icon("trash")}</button></div>
+        <div class="kc-name">${esc(k.name)}</div>
+        <div class="kc-meta">${k.count||0} ${T.unit}${k.updated?" · Edited "+when(k.updated):""}</div>
+        <div class="kc-acts"><button class="kbtn play" data-act="play">${icon("play")} Play Live</button><button class="kbtn" data-act="prac">${icon("qr")} Practice</button><button class="kbtn" data-act="edit">${icon("pencil")} Edit</button></div>
+      </div>`; }).join("");
+    for (const b of $("kitGrid").querySelectorAll("[data-act]")){
+      const id=b.closest(".kcard").dataset.id, k=App.list.find(x=>x.id===id);
+      b.onclick=()=>App[{play:"play",prac:"practice",edit:"edit",dup:"dup",del:"del"}[b.dataset.act]](k);
+    }
+  },
+  play(k){
+    const need = 4;                                   // the games always show 4 questions / choices before they repeat
+    $("playHint").textContent = (k.count||0) < need ? "This set needs at least "+need+" "+TYPE[k.type].unit+" before it can be played." : "Pick a game for “"+k.name+"”. It opens on this screen with the set already chosen.";
+    $("playGames").innerHTML = (k.count||0) < need ? "" : GAMES.map(([g,n])=>`<a class="gcard" href="${g}.html?host&kit=${encodeURIComponent(k.id)}"><img src="img/cover-${g}.webp" alt=""><span class="nm">${n}</span></a>`).join("");
+    modal("mPlay");
+  },
+  practice(k){
+    const url=dirUrl+"cards.html?k="+encodeURIComponent(k.id);
+    $("pracName").textContent=k.name; $("pracLink").textContent=url; $("pracLink").href=url;
+    $("pracQR").innerHTML='<div class="qrwait">Loading…</div>'; host.drawQR(url, $("pracQR"));
+    $("pracCopy").onclick=async()=>{ try{ await navigator.clipboard.writeText(url); toast("Link copied."); }catch(e){ toast("Copy didn't work. Select the link and copy it."); } };
+    modal("mPrac");
+  },
+  async dup(k){
+    try{ await kits.duplicate(k.id); toast("Duplicated “"+k.name+"”."); await App.showList(); }catch(e){ App.note(friendly(e)); }
+  },
+  async del(k){
+    if (!(await App.ask("Delete this set?","“"+k.name+"” will be deleted for good. Practice links for it will stop working.","Delete"))) return;
+    try{ await kits.remove(k.id); toast("Deleted."); await App.showList(); }catch(e){ App.note(friendly(e)); }
+  },
+  ask(title, text, ok){
+    return new Promise(res=>{
+      $("askTitle").textContent=title; $("askText").textContent=text; $("askOk").textContent=ok;
+      const m=$("mAsk"); let done=false; const fin=v=>{ if(done) return; done=true; modal("mAsk",false); m.removeEventListener("click",cancel); res(v); };
+      const cancel=e=>{ if (e.target===m || e.target.closest("[data-close]")) fin(false); };
+      m.addEventListener("click",cancel); $("askOk").onclick=()=>fin(true); modal("mAsk");
+    });
+  },
+
+  /* ---------------- editor ---------------- */
+  async edit(k){
+    view("vLoad");
+    let kit=null; try{ kit=await kits.get(k.id); }catch(e){}
+    if (!kit){ await App.showList(); App.note("That set couldn't be opened."); return; }
+    App.open(kit);
+  },
+  newKit(type){
+    modal("mNew",false);
+    App.open({ id:null, name:"", type, items: type==="quiz" ? [{ q:"", o:["","",""], a:-1 }] : [["",""],["",""],["",""],["",""]] });
+    $("edName").focus();
+  },
+  open(kit){
+    App.kit=kit; view("vEdit");
+    const T=TYPE[kit.type];
+    $("edType").className="ktype "+kit.type; $("edType").innerHTML=icon(T.ic)+" "+T.label;
+    $("edName").value=kit.name; $("edAddTxt").textContent = kit.type==="quiz" ? "Add question" : "Add word";
+    $("edBody").innerHTML = kit.type==="quiz" ? "" : `<div class="wlist" id="wlist"><div class="whead"><span></span><span>English</span><span>Chinese</span><span></span></div></div>`;
+    for (const it of kit.items) kit.type==="quiz" ? App.addQ(it) : App.addW(it);
+    App.setDirty(false); App.count();
+  },
+  setDirty(on){ App.dirty=on; const s=$("edStatus"); s.className="status"+(on?" dirty":""); s.textContent = on ? "Unsaved changes" : (App.kit && App.kit.id ? "All changes saved" : ""); },
+  changed(){ App.setDirty(true); App.count(); },
+  count(){
+    const n = App.kit.type==="quiz" ? $("edBody").querySelectorAll(".qitem").length : $("edBody").querySelectorAll(".wrow").length;
+    $("edCount").textContent = n+" "+TYPE[App.kit.type].unit;
+  },
+  renumber(){
+    [...$("edBody").querySelectorAll(".wrow .n")].forEach((el,i)=>el.textContent=i+1);
+    [...$("edBody").querySelectorAll(".qitem .qnum")].forEach((el,i)=>el.textContent="Question "+(i+1));
+  },
+
+  // vocabulary row
+  addW(p, focus){
+    const r=document.createElement("div"); r.className="wrow";
+    r.innerHTML=`<span class="n"></span><input class="fld en" maxlength="60" placeholder="English" autocomplete="off" spellcheck="false"><input class="fld zh" maxlength="60" placeholder="中文" autocomplete="off"><button class="xbtn" title="Delete word">${icon("trash")}</button>`;
+    const [en,zh]=r.querySelectorAll("input"); en.value=(p&&p[0])||""; zh.value=(p&&p[1])||"";
+    for (const f of [en,zh]) f.oninput=()=>{ f.classList.remove("bad"); App.changed(); };
+    en.onkeydown=e=>{ if (e.key==="Enter"){ e.preventDefault(); zh.focus(); } };
+    zh.onkeydown=e=>{ if (e.key==="Enter"){ e.preventDefault(); const nx=r.nextElementSibling; if (nx) nx.querySelector(".en").focus(); else App.addW(null,true); } };
+    r.querySelector(".xbtn").onclick=()=>{ r.remove(); App.renumber(); App.changed(); };
+    $("wlist").appendChild(r); App.renumber();
+    if (focus){ en.focus(); App.changed(); }
+  },
+
+  // multiple-choice question
+  addQ(it, focus){
+    it = it || { q:"", o:["","",""], a:-1 };
+    const d=document.createElement("div"); d.className="qitem";
+    d.innerHTML=`<div class="qi-head"><b class="qnum"></b><div class="sp"></div><button class="xbtn" title="Delete question">${icon("trash")}</button></div>
+      <textarea class="fld qq" rows="2" maxlength="400" placeholder="Question"></textarea>
+      <input class="fld small qs" maxlength="400" placeholder="Extra line, e.g. an English sentence or a title (optional)" autocomplete="off">
+      <div class="lbl">Options · tap a letter to mark the right answer</div>
+      <div class="qopts"></div>
+      <button class="qadd">${icon("plus")} Add option</button>
+      <input class="fld small qw" maxlength="300" placeholder="Explanation shown when students miss it (optional)" autocomplete="off">`;
+    d.querySelector(".qq").value=it.q||""; d.querySelector(".qs").value=it.s||""; d.querySelector(".qw").value=it.w||"";
+    d.dataset.a = it.a>=0 ? it.a : -1;
+    for (const f of d.querySelectorAll(".qq,.qs,.qw")) f.oninput=()=>{ d.classList.remove("bad"); App.changed(); };
+    const opts=d.querySelector(".qopts");
+    const draw=()=>{
+      const vals=[...opts.querySelectorAll(".ot")].map(x=>x.value); opts.innerHTML="";
+      vals.forEach((v,k)=>{
+        const o=document.createElement("div"); o.className="qo"+(+d.dataset.a===k?" right":"");
+        o.innerHTML=`<button class="mark" title="Mark as the right answer">${LETTERS[k]}</button><input class="fld small ot" maxlength="160" placeholder="Option ${LETTERS[k]}" autocomplete="off"><button class="xbtn" title="Remove option">${icon("x")}</button>`;
+        o.querySelector(".ot").value=v; o.querySelector(".ot").oninput=()=>{ d.classList.remove("bad"); App.changed(); };
+        o.querySelector(".mark").onclick=()=>{ d.dataset.a=k; d.classList.remove("bad"); draw(); App.changed(); };
+        o.querySelector(".xbtn").onclick=()=>{ if (vals.length<=2) return toast("A question needs at least 2 options."); vals.splice(k,1); const a=+d.dataset.a; d.dataset.a = a===k ? -1 : a>k ? a-1 : a; setVals(vals); App.changed(); };
+        opts.appendChild(o);
+      });
+      show(d.querySelector(".qadd"), vals.length<4);
+    };
+    const setVals=v=>{ opts.innerHTML=v.map(()=>`<input class="ot">`).join(""); [...opts.querySelectorAll(".ot")].forEach((x,i)=>x.value=v[i]); draw(); };
+    setVals((it.o||[]).length ? it.o.slice(0,4) : ["","",""]);
+    d.querySelector(".qadd").onclick=()=>{ const v=[...opts.querySelectorAll(".ot")].map(x=>x.value); if (v.length<4){ v.push(""); setVals(v); App.changed(); opts.querySelectorAll(".ot")[v.length-1].focus(); } };
+    d.querySelector(".qi-head .xbtn").onclick=()=>{ d.remove(); App.renumber(); App.changed(); };
+    $("edBody").appendChild(d); App.renumber();
+    if (focus){ d.querySelector(".qq").focus(); d.scrollIntoView({ block:"center", behavior:"smooth" }); App.changed(); }
+  },
+
+  // read the editor back into items; marks problems in red and returns null if something must be fixed
+  collect(){
+    const bad=[];
+    if (App.kit.type==="quiz"){
+      const items=[];
+      [...$("edBody").querySelectorAll(".qitem")].forEach((d,i)=>{
+        const q=d.querySelector(".qq").value.trim(), s=d.querySelector(".qs").value.trim(), w=d.querySelector(".qw").value.trim();
+        const raw=[...d.querySelectorAll(".ot")].map(x=>x.value.trim()); let a=+d.dataset.a;
+        if (!q && !raw.some(Boolean) && !s && !w) return;                 // a blank question is simply skipped
+        const o=[]; raw.forEach((v,k)=>{ if (v) o.push(v); else if (k<a) a--; else if (k===a) a=-1; });
+        let why="";
+        if (!q) why="needs the question"; else if (o.length<2) why="needs at least 2 options"; else if (a<0) why="needs the right answer marked";
+        if (why){ d.classList.add("bad"); bad.push("Question "+(i+1)+" "+why); return; }
+        const it={ q, o, a }; if (s) it.s=s; if (w) it.w=w; items.push(it);
+      });
+      if (!bad.length && !items.length) bad.push("Add at least 1 question");
+      return { items, bad };
+    }
+    const items=[], seen=new Set();
+    [...$("edBody").querySelectorAll(".wrow")].forEach((r,i)=>{
+      const en=r.querySelector(".en"), zh=r.querySelector(".zh"), e=en.value.trim(), z=zh.value.trim();
+      if (!e && !z) return;
+      if (!e || !z){ (e?zh:en).classList.add("bad"); bad.push("Word "+(i+1)+" needs both English and Chinese"); return; }
+      if (seen.has(e.toLowerCase())){ en.classList.add("bad"); bad.push("“"+e+"” is in the list twice"); return; }
+      seen.add(e.toLowerCase()); items.push([e,z]);
+    });
+    if (!bad.length && items.length<4) bad.push("Add at least 4 words (the games show 4 choices)");
+    return { items, bad };
+  },
+  async save(){
+    const name=$("edName").value.trim();
+    const { items, bad } = App.collect();
+    if (!name){ $("edName").focus(); bad.unshift("Give the set a name"); }
+    const s=$("edStatus");
+    if (bad.length){ s.className="status err"; s.textContent=bad[0]+(bad.length>1?" (+"+(bad.length-1)+" more)":""); const b=document.querySelector(".bad"); if (b) b.scrollIntoView({ block:"center", behavior:"smooth" }); return false; }
+    $("edSave").disabled=true; s.className="status"; s.textContent="Saving…";
+    try{
+      const id=await kits.save({ id:App.kit.id, name, type:App.kit.type, items });
+      App.kit.id=id; App.kit.name=name; App.setDirty(false); toast("Saved.");
+      return true;
+    }catch(e){ s.className="status err"; s.textContent=friendly(e); return false; }
+    finally{ $("edSave").disabled=false; }
+  },
+  async back(){
+    if (App.dirty && !(await App.ask("Leave without saving?","Your changes to this set will be lost.","Leave"))) return;
+    App.dirty=false; App.kit=null; await App.showList();
+  },
+
+  /* ---------------- paste import ---------------- */
+  importOpen(){
+    const quiz=App.kit.type==="quiz";
+    $("impFmt").innerHTML = quiz
+      ? `<b>From Excel:</b> one question per row: Question · Option A · Option B · (C) · (D) · Answer (A–D) · Explanation<br>
+         <b>From Word:</b> number each question, put options on lines starting with A. B. C. or (A) (B) (C), then an answer line.<pre>1. 研究問題寫在哪一段？
+(A) 前言  (B) 文獻探討  (C) 研究方法
+Answer: A
+Explanation: 前言寫研究背景、動機和研究問題。</pre>`
+      : `<b>From Excel:</b> copy two columns (English, Chinese) and paste.<br><b>Or type one word per line:</b><pre>coach 教練
+warm up 暖身
+look forward to 期待</pre>`;
+    $("impText").value=""; $("impMsg").textContent=""; $("impMsg").className="imsg";
+    $("impText").oninput=()=>{ const r=App.parse(); const m=$("impMsg"); m.className="imsg"+(r.items.length?"":" bad"); m.textContent = $("impText").value.trim() ? "Found "+r.items.length+" "+TYPE[App.kit.type].unit+(r.skipped?" · "+r.skipped+" couldn't be read":"") : ""; };
+    modal("mImp"); $("impText").focus();
+  },
+  parse(){
+    const t=$("impText").value;
+    if (App.kit.type!=="quiz"){ const items=parseWords(t); const lines=t.split(/\r?\n/).filter(l=>l.trim()).length; return { items, skipped:Math.max(0,lines-items.length) }; }
+    return parseQuiz(t);
+  },
+  importDo(replace){
+    const { items }=App.parse();
+    if (!items.length){ $("impMsg").className="imsg bad"; $("impMsg").textContent="Nothing found. Check the format above."; return; }
+    if (replace) App.kit.type==="quiz" ? $("edBody").innerHTML="" : $("wlist").querySelectorAll(".wrow").forEach(r=>r.remove());
+    else if (App.kit.type!=="quiz") $("wlist").querySelectorAll(".wrow").forEach(r=>{ if (!r.querySelector(".en").value.trim() && !r.querySelector(".zh").value.trim()) r.remove(); });
+    else $("edBody").querySelectorAll(".qitem").forEach(d=>{ if (!d.querySelector(".qq").value.trim() && ![...d.querySelectorAll(".ot")].some(x=>x.value.trim())) d.remove(); });
+    for (const it of items) App.kit.type==="quiz" ? App.addQ(it) : App.addW(it);
+    App.changed(); modal("mImp",false); toast("Added "+items.length+" "+TYPE[App.kit.type].unit+".");
+  }
+};
+
+// Multiple-choice text from Excel (tab-separated rows) or Word (numbered questions with lettered options)
+function parseQuiz(text){
+  const items=[]; let skipped=0;
+  const letter=x=>{ x=String(x||"").trim().replace(/[()（）.\s]/g,"").toUpperCase(); return /^[A-D]$/.test(x) ? x.charCodeAt(0)-65 : /^[1-4]$/.test(x) ? +x-1 : -1; };
+  const lines=String(text||"").replace(/\r/g,"").split("\n");
+  if (lines.some(l=>l.includes("\t"))){
+    for (const line of lines){
+      const c=line.split("\t").map(x=>x.trim()); if (!c.some(Boolean)) continue;
+      if (/^(question|題目|題幹)$/i.test(c[0])) continue;                 // header row
+      let ai=-1; for (let i=c.length-1;i>=3;i--){ if (letter(c[i])>=0){ ai=i; break; } }
+      const q=c[0], o=(ai>0?c.slice(1,ai):c.slice(1)).filter(Boolean).slice(0,4), a=ai>0?letter(c[ai]):-1, w=ai>0?c.slice(ai+1).filter(Boolean).join(" "):"";
+      if (!q || o.length<2 || a<0 || a>=o.length){ skipped++; continue; }
+      const it={ q, o, a }; if (w) it.w=w; items.push(it);
+    }
+    return { items, skipped };
+  }
+  // Word / plain text
+  const blocks=[]; let cur=null;
+  const startQ=/^\s*(?:Q\s*)?\d{1,3}\s*[.、．)）]\s*(.*)$/i;
+  for (const raw of lines){
+    const l=raw.trim();
+    if (!l){ if (cur && cur.o.length) cur.closed=true; continue; }
+    const mQ=l.match(startQ);
+    if (mQ || !cur || (cur.closed && !/^[(（]?[A-Da-d][)）.．、]/.test(l) && !/^(answer|ans|答案|正解|explanation|why|解說|解析|說明)/i.test(l))){ cur={ q:"", s:[], o:[], a:-1, w:"" }; blocks.push(cur); if (mQ){ cur.q=mQ[1]; continue; } }
+    const mA=l.match(/^(?:answer|ans|答案|正解)\s*[:：]?\s*[(（]?([A-Da-d1-4])[)）]?/i);
+    if (mA){ cur.a=letter(mA[1]); continue; }
+    const mW=l.match(/^(?:explanation|why|解說|解析|說明)\s*[:：]\s*(.+)$/i);
+    if (mW){ cur.w=mW[1]; continue; }
+    // one or more options on this line: "(A) xx (B) yy" or "A. xx"
+    const parts=l.split(/(?=[*＊]?[(（][A-Da-d][)）])|(?=(?:^|\s)[*＊]?[A-Da-d][.．、]\s)/).map(x=>x.trim()).filter(Boolean);
+    const opt=/^([*＊]?)[(（]?([A-Da-d])[)）.．、]\s*(.+)$/;
+    if (parts.length && parts.every(p=>opt.test(p))){
+      for (const p of parts){ const m=p.match(opt); if (m[1]) cur.a=cur.o.length; cur.o.push(m[3].trim()); }
+      continue;
+    }
+    if (!cur.q) cur.q=l; else if (!cur.o.length) cur.s.push(l); else cur.w = cur.w ? cur.w+" "+l : l;
+  }
+  for (const b of blocks){
+    const o=b.o.slice(0,4);
+    if (!b.q || o.length<2 || b.a<0 || b.a>=o.length){ skipped++; continue; }
+    const it={ q:b.q, o, a:b.a }; if (b.s.length) it.s=b.s.join("\n"); if (b.w) it.w=b.w; items.push(it);
+  }
+  return { items, skipped };
+}
+
+$("newKit").onclick=$("newKit2").onclick=()=>modal("mNew");
+for (const b of document.querySelectorAll("#mNew .ch")) b.onclick=()=>App.newKit(b.dataset.type);
+$("edBack").onclick=()=>App.back();
+$("edSave").onclick=()=>App.save();
+$("edName").oninput=()=>App.changed();
+$("edAdd").onclick=()=>App.kit.type==="quiz" ? App.addQ(null,true) : App.addW(null,true);
+$("edImport").onclick=()=>App.importOpen();
+$("impAdd").onclick=()=>App.importDo(false);
+$("impReplace").onclick=()=>App.importDo(true);
+addEventListener("keydown",e=>{ if ((e.metaKey||e.ctrlKey) && e.key==="s" && !$("vEdit").classList.contains("hidden")){ e.preventDefault(); App.save(); } });
+addEventListener("beforeunload",e=>{ if (App.dirty){ e.preventDefault(); e.returnValue=""; } });
+App.start();
+</script>
+</body>
+</html>
