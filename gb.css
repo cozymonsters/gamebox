@@ -252,7 +252,12 @@ canvas.confetti{position:absolute;inset:0;pointer-events:none;z-index:9}
 .opt:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.25)}
 .opt.ok{background:var(--go)!important;box-shadow:0 6px 0 var(--go-d)!important;animation:gb-pop .3s}
 .opt.no{background:#b9b1a1!important;box-shadow:0 6px 0 #8f8776!important;animation:gb-shake .35s}
-.opt.ans{background:var(--go)!important;box-shadow:inset 0 0 0 4px rgba(255,255,255,.85),0 6px 0 var(--go-d),0 12px 22px rgba(53,117,80,.35)!important;transform:translateY(-2px)}
+.opt.ans{background:var(--go)!important;box-shadow:0 6px 0 var(--go-d)!important}
+/* right answer (picked or revealed): plain green like the other buttons + a white check badge — no inner ring, no extra layers */
+.opt{position:relative}
+.opt.ok:after,.opt.ans:after{content:"";position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' fill='none' stroke='%234c9a68' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/18px no-repeat}
+.opts.long .opt.ok,.opts.long .opt.ans{padding-right:44px}
+.opts.long .opt.ok:after,.opts.long .opt.ans:after{top:50%;margin-top:-13px;right:12px}
 .toast{position:fixed;left:50%;top:36%;transform:translate(-50%,-50%);font-family:var(--display);font-weight:700;font-size:46px;white-space:nowrap;pointer-events:none;z-index:9;color:var(--go);animation:gb-toast .95s forwards;text-align:center;line-height:1.05;
   text-shadow:0 4px 0 #fff,4px 0 0 #fff,-4px 0 0 #fff,0 -4px 0 #fff,3px 3px 0 #fff,-3px 3px 0 #fff,3px -3px 0 #fff,-3px -3px 0 #fff,0 8px 0 rgba(29,29,31,.15)}
 .toast.bad{color:var(--red)}

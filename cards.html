@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="gb.css?v=f2e0fa00">
+<link rel="stylesheet" href="gb.css?v=78a42c07">
 <style>
 .hidden{display:none!important}
 body{background:var(--cream)}
@@ -50,6 +50,25 @@ body{background:var(--cream)}
 .nextbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:62px;border-radius:18px;background:var(--ink);color:#fff;font-family:var(--display);font-weight:600;font-size:23px;box-shadow:0 6px 0 rgba(0,0,0,.25)}
 .nextbtn .gi{width:22px;height:22px}
 .nextbtn:active{transform:translateY(4px)}
+/* wrong answer: a card pops up in the middle of the screen; tap anywhere to go on */
+.fb{position:fixed;inset:0;z-index:30;background:rgba(29,29,31,.42);display:flex;align-items:center;justify-content:center;padding:20px 18px;cursor:pointer;-webkit-tap-highlight-color:transparent;animation:fbFade .2s}
+@keyframes fbFade{from{background:rgba(29,29,31,0)}}
+.fbcard{width:min(500px,100%);min-height:min(58vh,480px);display:flex;flex-direction:column;background:#fff;border-radius:28px;box-shadow:0 24px 60px rgba(29,29,31,.35);padding:28px 24px 20px;animation:fbPop .32s cubic-bezier(.2,1.4,.4,1)}
+@keyframes fbPop{from{transform:scale(.82);opacity:0}}
+.fbtop{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:600;font-size:26px;color:var(--red)}
+.fbtop .gi{width:26px;height:26px}
+.fbtop{margin-bottom:20px}
+.fblbl{margin-top:auto;font-size:13px;font-weight:900;color:var(--sub);letter-spacing:.08em;text-transform:uppercase}
+.fbans{display:flex;align-items:center;gap:14px;margin-top:8px;background:#e3f1e8;border-radius:20px;padding:22px 20px;min-height:112px}
+.fbans .t{flex:1;min-width:0;font-weight:900;font-size:clamp(22px,6.6vw,28px);line-height:1.35;color:var(--go-d)}
+.fbans .en{font-family:var(--display);font-weight:600;font-size:clamp(34px,10.5vw,46px);line-height:1.1;color:var(--ink)}
+.fbans .zh{font-weight:900;font-size:clamp(24px,7vw,30px);color:var(--go-d);margin-top:6px}
+.fbans .say{position:static;flex:none;background:#fff}
+.fbwhy{margin-top:22px;font-size:19px;font-weight:800;line-height:1.7;color:var(--ink)}
+.fbgo{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:auto;padding-top:16px;border-top:2px solid var(--line);font-family:var(--display);font-weight:600;font-size:20px;color:var(--sub)}
+.fbgo .gi{width:20px;height:20px}
+.fbcard>:nth-last-child(2){margin-bottom:auto}
+.fbcard>.fbgo{margin-top:26px}
 /* done */
 .done{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:26px 0 10px}
 .done .mon{width:140px;height:140px}
@@ -84,8 +103,7 @@ body{background:var(--cream)}
   <div id="play">
     <div class="qbox" id="qbox"></div>
     <div class="opts" id="opts"></div>
-    <div id="whyBox"></div>
-    <div class="nextrow hidden" id="nextRow"><button class="nextbtn" id="bNext">Next <i data-i="play"></i></button></div>
+
   </div>
 
   <div class="done hidden" id="done">
@@ -100,11 +118,12 @@ body{background:var(--cream)}
     </div>
   </div>
   <div class="err hidden" id="err"></div>
+  <div class="fb hidden" id="fb"><div class="fbcard" id="fbcard"></div></div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="gb-quiz.js?v=0f47520e"></script>
+<script src="gb-quiz.js?v=44b94ba1"></script>
 <script src="gb-art.js?v=6ae51ada"></script>
 <script src="gb.js?v=8df24743"></script>
 <script>
@@ -135,7 +154,8 @@ const Practice = {
     $("tShuf").onclick=()=>this.start(null);
     $("bRestart").onclick=()=>this.start(null);
     $("bMissed").onclick=()=>this.start([...this.missed]);
-    $("bNext").onclick=()=>this.next();
+    $("fb").onclick=e=>{ if (!e.target.closest(".say")) this.next(); };
+    addEventListener("keydown",e=>{ if (!$("fb").classList.contains("hidden") && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); this.next(); } });
     this.start(null);
   },
   fail(msg){ show($("play"),false); show($("tools"),false); $("err").textContent=msg; show($("err"),true); },
@@ -150,7 +170,7 @@ const Practice = {
   },
 
   ask(){
-    this.locked=false; show($("nextRow"),false); $("whyBox").innerHTML=""; if (scrollY>0) scrollTo({top:0});
+    this.locked=false; show($("fb"),false); if (scrollY>0) scrollTo({top:0});
     if (!this.queue.length) return this.finish();
     const i=this.queue[0], it=this.items[i], mon=`<span class="mon">${ART.avatar(ART.AVATARS[i % ART.AVATARS.length],"",true)}</span>`;
     let html, opts, answer, long=false;
@@ -193,7 +213,8 @@ const Practice = {
       beep(880,.08,"triangle",.15); beep(1320,.12,"triangle",.12,.07);
       try{ navigator.vibrate && navigator.vibrate(15); }catch(e){}
       $("score").innerHTML=ART.icon("check")+" "+this.right;
-      Promise.all([said, new Promise(r=>setTimeout(r,800))]).then(()=>setTimeout(()=>this.ask(), 250));   // next word only after the voice has finished
+      const wait=ms=>new Promise(r=>setTimeout(r,ms));
+      Promise.race([Promise.all([said, wait(800)]), wait(1600)]).then(()=>setTimeout(()=>this.ask(), 250));   // next word after the voice has finished (never more than ~1.8 s)
     } else {
       btn.classList.add("no");
       btns.forEach((b,j)=>{ if (opts[j].ok) b.classList.add("ans"); });
@@ -201,13 +222,15 @@ const Practice = {
       this.queue.shift(); this.queue.splice(Math.min(this.queue.length, 3+Math.floor(Math.random()*3)), 0, i);   // comes back soon
       beep(160,.25,"sawtooth",.12);
       try{ navigator.vibrate && navigator.vibrate(120); }catch(e){}
-      if (this.quiz && it.w) $("whyBox").innerHTML=`<div class="why">${esc(it.w)}</div>`;
-      else if (!this.quiz) $("whyBox").innerHTML=`<div class="why">${esc(it[0])} ＝ ${esc(it[1])}</div>`;
-      show($("nextRow"),true);
-      setTimeout(()=>{ const r=$("bNext").getBoundingClientRect(); if (r.bottom>innerHeight-8) $("bNext").scrollIntoView({behavior:"smooth",block:"end"}); }, 60);   // keep Next on screen on small phones
+      const go=`<div class="fbgo">Tap to continue ${ART.icon("play")}</div>`, top=`<div class="fbtop">${ART.icon("x")} Oops!</div>`;
+      $("fbcard").innerHTML = this.quiz
+        ? `${top}<div class="fblbl">Correct answer</div><div class="fbans"><div class="t">${esc(it.o[it.a])}</div></div>${it.w?`<div class="fbwhy">${esc(it.w)}</div>`:""}${go}`
+        : `${top}<div class="fblbl">Correct answer</div><div class="fbans"><div class="t"><div class="en">${esc(it[0])}</div><div class="zh">${esc(it[1])}</div></div><button class="say" id="fbSay" aria-label="Listen">${ART.icon("volume")}</button></div>${go}`;
+      if ($("fbSay")) $("fbSay").onclick=e=>{ e.stopPropagation(); speak(it[0]); };
+      setTimeout(()=>show($("fb"),true), 450);              // let them see which answer was right first
     }
   },
-  next(){ if (!$("nextRow").classList.contains("hidden")) this.ask(); },
+  next(){ if (!$("fb").classList.contains("hidden")) this.ask(); },
 
   finish(){
     show($("play"),false); show($("tools"),false); show($("done"),true);
