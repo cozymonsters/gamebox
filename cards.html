@@ -90,6 +90,17 @@ body{background:var(--cream)}
 .done .soft{display:inline-flex;align-items:center;gap:8px;font-family:var(--display);font-weight:600;font-size:21px;padding:12px 24px;border-radius:18px;background:var(--mustard);color:var(--ink);box-shadow:0 5px 0 var(--mustard-d)}
 .done .soft .gi{width:22px;height:22px}
 @media (max-height:720px){ .qbox .mon{display:none} .qbox{padding-bottom:30px} }   /* small phones: keep the word clear */
+.isready .setname,.isready .bar{display:none}   /* the ready screen shows the set name itself */
+.ready{justify-content:center;gap:14px;padding-bottom:40px}
+.ready .mon{width:150px;height:150px}
+.ready .mon img{width:100%;height:100%;object-fit:contain}
+.ready h2{font-size:clamp(34px,10.5vw,46px);line-height:1.1}
+.ready .kicker{font-size:15px;font-weight:900;color:var(--go-d);letter-spacing:.14em;text-transform:uppercase;margin-bottom:-6px}
+.ready .info{font-size:19px;color:var(--ink)}
+.ready .snd{display:inline-flex;align-items:center;gap:8px;background:var(--paper);border-radius:999px;padding:8px 16px;box-shadow:0 3px 0 var(--line)}
+.ready .snd .gi{width:20px;height:20px}
+.ready .go{font-size:28px;padding:16px 56px;margin-top:10px}
+.ready .go .gi{width:24px;height:24px}
 .err{margin:40px 0;text-align:center;font-weight:800;color:var(--sub);font-size:17px}
 </style>
 </head>
@@ -107,6 +118,16 @@ body{background:var(--cream)}
     <div class="qbox" id="qbox"></div>
     <div class="opts" id="opts"></div>
 
+  </div>
+
+  <!-- ready screen: the Start tap also unlocks sound on phones, so the first word is read out too -->
+  <div class="done ready hidden" id="ready">
+    <div class="mon" id="readyMon"></div>
+    <div class="kicker" id="readyKicker"></div>
+    <h2 id="readyName"></h2>
+    <p class="info" id="readyInfo"></p>
+    <p class="snd" id="readySnd"><i data-i="volume"></i> Turn your sound on</p>
+    <button class="go" id="bStart"><i data-i="play"></i> Start</button>
   </div>
 
   <div class="done hidden" id="done">
@@ -128,10 +149,10 @@ body{background:var(--cream)}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="gb-quiz.js?v=44b94ba1"></script>
 <script src="gb-art.js?v=6ae51ada"></script>
-<script src="gb.js?v=8df24743"></script>
+<script src="gb.js?v=3f554d24"></script>
 <script>
 "use strict";
-const { $, show, esc, store, shuffle, params, SETS, parseWords, speak, db, beep } = GB;
+const { $, show, esc, store, shuffle, params, SETS, parseWords, speak, voice, primeVoice, db, beep } = GB;
 const DIRS = ["mix","en2zh","zh2en"], DIR_TXT = { mix:"Mixed", en2zh:"English → 中文", zh2en:"中文 → English" };
 const Practice = {
   key:"", name:"", items:[], quiz:false, dir:"mix", queue:[], total:0, done:0, right:0, missed:new Set(), cur:null, locked:false,
@@ -158,17 +179,31 @@ const Practice = {
     $("bRestart").onclick=()=>this.start(null);
     $("bMissed").onclick=()=>this.start([...this.missed]);
     $("fb").onclick=e=>{ if (!e.target.closest(".say")) this.next(); };
+    // phones only allow sound after the first tap: unlock it then, and read out the first word if it could not be played yet
+    document.addEventListener("pointerdown",()=>{ primeVoice(); if (voice.blocked && this.cur && this.cur.en2zh && !this.locked){ voice.blocked=false; this.voice=speak(this.cur.it[0]); } },true);
     addEventListener("keydown",e=>{ if (!$("fb").classList.contains("hidden") && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); this.next(); } });
-    this.start(null);
+    this.ready();
   },
-  fail(msg){ show($("play"),false); show($("tools"),false); $("err").textContent=msg; show($("err"),true); },
+  ready(){
+    show($("play"),false); show($("tools"),false); show($("done"),false); show($("ready"),true); $("fc").classList.add("isready");
+    $("readyMon").innerHTML=ART.avatar(ART.AVATARS[Math.floor(Math.random()*ART.AVATARS.length)],"",true);
+    // "Research Essay · Part 3–4" → big title "Research Essay", small line "Part 3–4 · 50 questions"
+    const [title, ...part]=this.name.split(" · "), n=this.items.length;
+    $("readyKicker").textContent = this.quiz ? "Quiz Practice" : "Vocabulary Practice";
+    $("readyName").textContent=title;
+    $("readyInfo").textContent = [...part, this.quiz ? n+" questions" : n+" words"].join(" · ");
+    show($("readySnd"), !this.quiz);
+    $("cnt").textContent="0 / "+n;
+    $("bStart").onclick=()=>{ primeVoice(); this.start(null); };
+  },
+  fail(msg){ show($("play"),false); show($("tools"),false); show($("ready"),false); $("err").textContent=msg; show($("err"),true); },
 
   // list = indices to practise (null = everything). Each item is asked once; a wrong one comes back a few questions later.
   start(list){
     const all=this.items.map((_,i)=>i);
     this.queue=shuffle((list&&list.length?list:all).slice()); this.total=this.queue.length;
     this.done=0; this.right=0; this.missed=new Set(); this.firstTry=new Set();
-    show($("done"),false); show($("play"),true); show($("tools"),true);
+    show($("done"),false); show($("ready"),false); $("fc").classList.remove("isready"); show($("play"),true); show($("tools"),true);
     this.ask();
   },
 
@@ -177,22 +212,24 @@ const Practice = {
     if (!this.queue.length) return this.finish();
     const i=this.queue[0], it=this.items[i], mon=`<span class="mon">${ART.avatar(ART.AVATARS[i % ART.AVATARS.length],"",true)}</span>`
       + (this.missed.has(i) ? `<span class="again">${ART.icon("flag")} Missed before</span>` : "");   // tag on questions they missed before
-    let html, opts, answer, long=false;
+    let html, opts, answer, long=false, en2zh=false;
     if (this.quiz){
       const sub = it.s ? `<div class="qsub${/[一-鿿]/.test(it.s.replace(/^原文[^：:]*[：:]/,""))?"":" en"}">${esc(it.s)}</div>` : "";
       html=`<span class="tag">Question</span><div class="qtext">${esc(it.q)}</div>${sub}${mon}`;
       opts=shuffle(it.o.map((t,k)=>({t,ok:k===it.a}))); long=true;
     } else {
-      const dir = this.dir==="mix" ? (Math.random()<.5?"en2zh":"zh2en") : this.dir, en2zh = dir==="en2zh";
+      const dir = this.dir==="mix" ? (Math.random()<.5?"en2zh":"zh2en") : this.dir; en2zh = dir==="en2zh";
       const pool=shuffle(this.items.map((_,k)=>k).filter(k=>k!==i)).slice(0,3);
       opts=shuffle([i,...pool].map(k=>({t:this.items[k][en2zh?1:0], ok:k===i})));
       html = en2zh
         ? `<span class="tag">What does it mean?</span><button class="say" id="say" aria-label="Listen">${ART.icon("volume")}</button><div class="big">${esc(it[0])}</div>${mon}`
         : `<span class="tag">Which English word?</span><div class="big zh">${esc(it[1])}</div>${mon}`;
     }
-    this.cur={i, it, opts};
+    this.cur={i, it, opts, en2zh};
     const Q=$("qbox"); Q.innerHTML=html; Q.classList.remove("pop"); void Q.offsetWidth; Q.classList.add("pop");
-    if ($("say")) $("say").onclick=()=>speak(it[0]);
+    if ($("say")) $("say").onclick=()=>{ this.voice=speak(it[0]); };
+    // an English word on the card is read out as soon as it appears (a Chinese prompt stays silent so the answer is not given away)
+    this.voice = en2zh ? speak(it[0]) : Promise.resolve();
     const O=$("opts"); O.classList.toggle("long",long);
     O.innerHTML=opts.map((o,k)=>`<button class="opt" data-k="${k}">${esc(o.t)}</button>`).join("");
     for (const b of O.children) b.onclick=()=>this.answer(+b.dataset.k, b);
@@ -209,7 +246,8 @@ const Practice = {
   answer(k, btn){
     if (this.locked) return; this.locked=true;
     const {i, it, opts}=this.cur, ok=opts[k].ok, btns=[...$("opts").children];
-    const said = this.quiz ? Promise.resolve() : speak(it[0]);    // hear the word every time (Ava Neural)
+    // English shown: it was already read out when the card appeared. Chinese shown: say the English word now, as the answer
+    const said = this.quiz ? Promise.resolve() : this.cur.en2zh ? this.voice : speak(it[0]);
     if (ok){
       btn.classList.add("ok");
       if (!this.missed.has(i)) this.right++;

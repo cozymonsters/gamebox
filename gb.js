@@ -153,27 +153,37 @@ math 數學` }
   // pronunciation: recorded Microsoft Ava Neural voice (audio/<slug>.mp3) for the built-in word lists; the browser voice for anything else
   const VOICED = new Set("answer athlete attack bag break captain catch champion classmate classroom coach court defense desk early eraser exam fan forget foul friend goal grade gym happy history holiday homework hungry injury jump kick late league library listen lose lunch match math medal muscle nervous notebook opponent player practice proud question race read record referee remember ruler schedule science score speak spectator speed sprint stadium stamina strength stretch subject substitute sweat swim teacher team teammate teamwork throw tie tired tournament train trophy uniform victory warm-up weekend whistle win write".split(" "));   // regenerate with gen_audio.py when word lists change
   const voiceSlug = t => String(t).toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
-  let voiceAudio = null;
+  // one shared <audio> element: once it has played inside a tap, phones (iOS too) let it play again later without a tap
+  let voiceAudio = null, voiceDone = null;
+  const voiceEl = () => voiceAudio || (voiceAudio = new Audio());
+  const voice = { blocked:false, primed:false };   // true when the browser refused to play before the first tap
   // both return a promise that settles when the word has been said (or after 3 s, whichever comes first)
   function browserVoice(text){
     return new Promise(res=>{
-      try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang="en-US"; u.rate=.85; u.onend=u.onerror=()=>res(); speechSynthesis.speak(u); }catch(e){ res(); }
+      try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang="en-US"; u.rate=.85; u.onend=()=>res(); u.onerror=e=>{ if (e && e.error==="not-allowed") voice.blocked=true; res(); }; speechSynthesis.speak(u); }catch(e){ res(); }
       setTimeout(res, 3000);
     });
   }
   function speak(text){
     const k=voiceSlug(text);
+    if (voiceDone) { voiceDone(); voiceDone=null; }
     if (VOICED.has(k)){
       try{
-        if (voiceAudio) voiceAudio.pause();
-        const a=voiceAudio=new Audio(dirUrl+"audio/"+k+".mp3");
+        const a=voiceEl(); a.pause(); a.muted=false; a.src=dirUrl+"audio/"+k+".mp3";
         return new Promise(res=>{
-          a.onended=()=>res(); setTimeout(res, 3000);
-          const p=a.play(); if (p && p.catch) p.catch(()=>browserVoice(text).then(res));
+          voiceDone=res; a.onended=()=>res(); setTimeout(res, 3000);
+          const p=a.play();
+          if (p && p.then) p.then(()=>{ voice.blocked=false; }, err=>{ if (err && err.name==="NotAllowedError") { voice.blocked=true; res(); } else browserVoice(text).then(res); });
         });
       }catch(e){}
     }
     return browserVoice(text);
+  }
+  // call inside a tap: unlocks the shared audio element and the browser voice for later automatic playback
+  function primeVoice(){
+    if (voice.primed) return; voice.primed=true;
+    try{ const a=voiceEl(); if (a.paused){ a.muted=true; if (!a.src) a.src=dirUrl+"audio/win.mp3"; const p=a.play(); if (p && p.then) p.then(()=>{ if (a.muted){ a.pause(); a.muted=false; } },()=>{ a.muted=false; }); } }catch(e){}
+    try{ const u=new SpeechSynthesisUtterance(" "); u.volume=0; speechSynthesis.speak(u); }catch(e){}
   }
 
   function confetti(canvas){
@@ -406,5 +416,5 @@ math 數學` }
   const wrongMs = q => q && q.quiz ? 3200 : 1400;
 
   return { db, now, $, show, esc, store, rand, pick, shuffle, fmt, params, baseUrl, dirUrl, AVATARS, SETS, parseWords,
-           beep, unlockAudio, fanfare, buzzer, speak, confetti, host, join, makeQuestion, renderQuestion, showWhy, wrongMs };
+           beep, unlockAudio, fanfare, buzzer, speak, voice, primeVoice, confetti, host, join, makeQuestion, renderQuestion, showWhy, wrongMs };
 })();
