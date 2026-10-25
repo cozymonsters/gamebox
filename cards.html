@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#faf6ec">
-<title>Flashcards · GameBox</title>
+<title>Practice · GameBox</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
@@ -18,6 +18,8 @@ body{background:var(--cream)}
 .fhead .brand .ic{width:36px;height:36px;display:inline-flex}
 .fhead .brand .ic img{width:100%;height:100%;object-fit:contain}
 .fhead .sp{flex:1}
+.fhead .score{display:inline-flex;align-items:center;gap:4px;font-weight:900;font-size:18px;background:var(--mustard);border-radius:12px;padding:2px 12px}
+.fhead .score .gi{width:18px;height:18px}
 .fhead .cnt{font-weight:900;font-size:18px;background:var(--paper);border:2px solid var(--line);border-radius:12px;padding:2px 12px;font-variant-numeric:tabular-nums}
 .setname{font-family:var(--display);font-weight:600;font-size:24px;line-height:1.15;margin:2px 0 8px}
 .bar{height:10px;border-radius:10px;background:#e9e2cf;overflow:hidden}
@@ -25,47 +27,42 @@ body{background:var(--cream)}
 .tools{display:flex;gap:8px;margin:10px 0 12px;flex-wrap:wrap}
 .tool{display:inline-flex;align-items:center;gap:6px;background:var(--paper);border:2px solid var(--line);border-radius:12px;padding:7px 13px;font-weight:900;font-size:15px;color:var(--ink)}
 .tool .gi{width:18px;height:18px}
-.tool.on{background:var(--ink);border-color:var(--ink);color:#fff}
-.tool.star.on{background:var(--mustard);border-color:var(--mustard);color:var(--ink)}
-/* the card: flips top to bottom; slides left/right between cards */
-.stage{flex:1;display:flex;align-items:stretch;perspective:1600px;min-height:320px;position:relative;overflow:visible}
-.slide{position:relative;flex:1;display:flex;transition:transform .26s ease,opacity .26s ease}
-.flip{position:relative;flex:1;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.3,1.25,.5,1);cursor:pointer;-webkit-tap-highlight-color:transparent}
-.flip.back{transform:rotateX(-180deg)}
-.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--paper);border-radius:28px;box-shadow:0 8px 0 var(--line),0 16px 30px rgba(61,68,134,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:58px 22px 64px;text-align:center;overflow:hidden}
-.face.b{transform:rotateX(180deg);background:#fff}
-.face .tag{position:absolute;top:18px;left:20px;font-size:15px;font-weight:900;color:var(--sub);letter-spacing:.08em;text-transform:uppercase}
-.face .mon{position:absolute;right:12px;bottom:10px;width:70px;height:70px}
-.face .mon img{width:100%;height:100%;object-fit:contain}
-.face .hint{position:absolute;bottom:22px;left:0;right:0;font-size:15px;font-weight:800;color:var(--sub)}
-.big{font-family:var(--display);font-weight:600;font-size:clamp(54px,17vw,88px);line-height:1.05;width:100%;overflow-wrap:normal;word-break:normal}
-.big.zh{font-family:var(--body);font-weight:900;font-size:clamp(48px,15vw,78px)}
-.qtext{font-weight:900;font-size:clamp(24px,6.8vw,30px);line-height:1.4;text-align:left;align-self:stretch}
-.qsub{align-self:stretch;text-align:left;background:var(--cream);border-radius:14px;padding:10px 13px;margin-top:12px;font-size:18px;font-weight:800;line-height:1.45;white-space:pre-line}
-.qsub.en{font-family:"Times New Roman",Georgia,serif;font-weight:400;font-size:20px}
-.ans{font-weight:900;font-size:clamp(26px,7.4vw,34px);line-height:1.35;color:var(--go-d)}
-.why{margin-top:16px;background:#e3f1e8;color:#2d5e40;border-radius:14px;padding:11px 14px;font-size:18px;font-weight:800;line-height:1.5;text-align:left;align-self:stretch}
-.say,.mark{position:absolute;top:12px;width:52px;height:52px;border-radius:50%;background:var(--cream);display:flex;align-items:center;justify-content:center;color:var(--ink);z-index:2}
-.say{right:14px} .say .gi{width:26px;height:26px}
-.mark{right:74px;color:#c9bfa8} .mark .gi{width:26px;height:26px}
-.mark.on{background:var(--mustard);color:var(--ink)}
-.face.quiz .mark{right:14px}
-/* buttons */
-.acts{display:grid;grid-template-columns:1fr 1.4fr;gap:12px;margin-top:18px}
-.act{display:flex;align-items:center;justify-content:center;gap:8px;min-height:66px;border-radius:18px;font-family:var(--display);font-weight:600;font-size:23px;transition:transform .06s}
-.act .gi{width:24px;height:24px}
-.act.prev{background:var(--paper);color:var(--ink);box-shadow:0 6px 0 var(--line)}
-.act.prev:disabled{opacity:.4}
-.act.next{background:var(--go);color:#fff;box-shadow:0 6px 0 var(--go-d)}
-.act:active{transform:translateY(4px)}
-.legend{text-align:center;font-size:14px;font-weight:800;color:var(--sub);margin-top:10px}
+/* question card */
+.qbox{position:relative;background:#fff;border-radius:26px;box-shadow:0 7px 0 var(--line),0 14px 28px rgba(61,68,134,.1);padding:46px 20px 26px;text-align:center;min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;overflow:hidden}
+.qbox .tag{position:absolute;top:16px;left:20px;font-size:14px;font-weight:900;color:var(--sub);letter-spacing:.08em;text-transform:uppercase}
+.qbox .mon{position:absolute;right:10px;bottom:6px;width:58px;height:58px;opacity:.95}
+.qbox .mon img{width:100%;height:100%;object-fit:contain}
+.say{position:absolute;right:14px;top:12px;width:52px;height:52px;border-radius:50%;background:var(--cream);display:flex;align-items:center;justify-content:center;color:var(--ink)}
+.say .gi{width:26px;height:26px}
+.big{font-family:var(--display);font-weight:600;font-size:clamp(48px,15vw,78px);line-height:1.05;width:100%;padding:0 26px}
+.big.zh{font-family:var(--body);font-weight:900;font-size:clamp(42px,13vw,66px)}
+.qtext{font-weight:900;font-size:clamp(21px,6vw,26px);line-height:1.4;text-align:left;align-self:stretch;padding-right:6px}
+.qsub{align-self:stretch;text-align:left;background:var(--cream);border-radius:14px;padding:10px 13px;font-size:17px;font-weight:800;line-height:1.45;white-space:pre-line}
+.qsub.en{font-family:"Times New Roman",Georgia,serif;font-weight:400;font-size:19px}
+.qbox.pop{animation:gb-pop .35s}
+/* options: reuse the game's four colours */
+#opts{margin-top:16px;max-height:none;flex:none}
+#opts:not(.long) .opt{min-height:96px;font-size:clamp(22px,6.6vw,30px)}
+#opts.long .opt{font-size:clamp(17px,4.8vw,20px);min-height:60px}
+.why{margin-top:12px;background:#e3f1e8;color:#2d5e40;border-radius:14px;padding:11px 14px;font-size:17px;font-weight:800;line-height:1.5}
+.nextrow{margin-top:14px}
+.nextbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:62px;border-radius:18px;background:var(--ink);color:#fff;font-family:var(--display);font-weight:600;font-size:23px;box-shadow:0 6px 0 rgba(0,0,0,.25)}
+.nextbtn .gi{width:22px;height:22px}
+.nextbtn:active{transform:translateY(4px)}
 /* done */
-.done{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;padding:20px 0}
-.done .mon{width:150px;height:150px}
+.done{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:26px 0 10px}
+.done .mon{width:140px;height:140px}
 .done .mon img{width:100%;height:100%;object-fit:contain}
-.done h2{font-family:var(--display);font-weight:700;font-size:42px;margin:0}
-.done p{margin:0;font-weight:800;color:var(--sub);font-size:18px}
-.done .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.done h2{font-family:var(--display);font-weight:700;font-size:40px;margin:0}
+.done .big2{font-family:var(--display);font-weight:700;font-size:56px;line-height:1;color:var(--go-d)}
+.done p{margin:0;font-weight:800;color:var(--sub);font-size:17px}
+.missed{width:100%;background:var(--paper);border-radius:18px;padding:12px 14px;text-align:left;box-shadow:0 4px 0 var(--line)}
+.missed h4{margin:0 0 8px;font-size:15px;color:var(--sub);text-transform:uppercase;letter-spacing:.06em}
+.missed li{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid var(--line);font-weight:900;font-size:17px}
+.missed li:first-child{border-top:0}
+.missed li span{color:var(--sub);text-align:right}
+.missed ul{list-style:none;margin:0;padding:0}
+.done .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px}
 .done .go{font-size:21px}
 .done .soft{display:inline-flex;align-items:center;gap:8px;font-family:var(--display);font-weight:600;font-size:21px;padding:12px 24px;border-radius:18px;background:var(--mustard);color:var(--ink);box-shadow:0 5px 0 var(--mustard-d)}
 .done .soft .gi{width:22px;height:22px}
@@ -74,37 +71,29 @@ body{background:var(--cream)}
 </head>
 <body>
 <div id="fc">
-  <div class="fhead"><a class="brand" href="./"><span class="ic" data-art="logo"></span>GameBox</a><div class="sp"></div><span class="cnt" id="cnt">0 / 0</span></div>
-  <div class="setname" id="setName">Flashcards</div>
+  <div class="fhead"><a class="brand" href="./"><span class="ic" data-art="logo"></span>GameBox</a><div class="sp"></div><span class="score" id="score"><i data-i="check"></i> 0</span><span class="cnt" id="cnt">0 / 0</span></div>
+  <div class="setname" id="setName">Practice</div>
   <div class="bar"><i id="bar" style="width:0"></i></div>
   <div class="tools" id="tools">
-    <button class="tool" id="tSide"><i data-i="swap"></i> <span id="tSideTxt">English first</span></button>
-    <button class="tool" id="tShuf"><i data-i="refresh"></i> Shuffle</button>
-    <button class="tool star hidden" id="tStar"><i data-i="star"></i> <span id="tStarTxt">Starred</span></button>
+    <button class="tool" id="tDir"><i data-i="swap"></i> <span id="tDirTxt">Mixed</span></button>
+    <button class="tool" id="tShuf"><i data-i="refresh"></i> Start over</button>
   </div>
 
-  <div class="stage" id="stage">
-    <div class="slide" id="slide">
-      <div class="flip" id="flip">
-        <div class="face f" id="faceF"></div>
-        <div class="face b" id="faceB"></div>
-      </div>
-    </div>
-  </div>
-  <div id="ctrl">
-    <div class="acts">
-      <button class="act prev" id="bPrev"><i data-i="play" style="transform:scaleX(-1)"></i> Back</button>
-      <button class="act next" id="bNext">Next <i data-i="play"></i></button>
-    </div>
-    <div class="legend">Tap the card to flip · swipe left for the next card</div>
+  <div id="play">
+    <div class="qbox" id="qbox"></div>
+    <div class="opts" id="opts"></div>
+    <div id="whyBox"></div>
+    <div class="nextrow hidden" id="nextRow"><button class="nextbtn" id="bNext">Next <i data-i="play"></i></button></div>
   </div>
 
   <div class="done hidden" id="done">
     <div class="mon" id="doneMon"></div>
     <h2>All done!</h2>
+    <div class="big2" id="doneScore"></div>
     <p id="doneTxt"></p>
+    <div class="missed hidden" id="missedBox"><h4>Practice these again</h4><ul id="missedList"></ul></div>
     <div class="row">
-      <button class="soft hidden" id="bStarred"><i data-i="star"></i> <span id="bStarredTxt"></span></button>
+      <button class="soft hidden" id="bMissed"><i data-i="refresh"></i> <span id="bMissedTxt"></span></button>
       <button class="go" id="bRestart"><i data-i="refresh"></i> Start over</button>
     </div>
   </div>
@@ -115,136 +104,122 @@ body{background:var(--cream)}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="gb-quiz.js?v=0f47520e"></script>
 <script src="gb-art.js?v=6ae51ada"></script>
-<script src="gb.js?v=db531856"></script>
+<script src="gb.js?v=6317e3b8"></script>
 <script>
 "use strict";
-const { $, show, esc, store, shuffle, params, SETS, parseWords, speak, db } = GB;
-const Cards = {
-  key:"", name:"", items:[], quiz:false, zhFirst:false, order:[], pos:0, stars:new Set(), onlyStars:false, busy:false,
+const { $, show, esc, store, shuffle, params, SETS, parseWords, speak, db, beep } = GB;
+const DIRS = ["mix","en2zh","zh2en"], DIR_TXT = { mix:"Mixed", en2zh:"English → 中文", zh2en:"中文 → English" };
+const Practice = {
+  key:"", name:"", items:[], quiz:false, dir:"mix", queue:[], total:0, done:0, right:0, missed:new Set(), cur:null, locked:false,
 
   async load(){
     const k=params.get("set")||"", r=(params.get("r")||"").replace(/\D/g,"");
     try{
       if (r.length===4){
         const d=(await db.ref("rooms/"+r+"/deck").get()).val();
-        if (!d || !d.words) return this.fail("This card set is not available. Ask your teacher for a new QR code.");
+        if (!d || !d.words) return this.fail("This practice set is not available. Ask your teacher for a new QR code.");
         this.key="r"+r; this.name=d.name||"My Words"; this.quiz=!!d.quiz; this.items=d.words;
       } else if (SETS[k]){
         this.key=k; this.name=SETS[k].name; this.quiz=!!SETS[k].quiz; this.items=this.quiz ? SETS[k].quiz : parseWords(SETS[k].words);
-      } else return this.fail("Card set not found. Scan the QR code on the big screen again.");
-    }catch(e){ return this.fail("Could not load the cards. Check your connection and try again."); }
-    if (this.items.length<1) return this.fail("This card set is empty.");
-    document.title=this.name+" · Flashcards";
+      } else return this.fail("Practice set not found. Scan the QR code on the big screen again.");
+    }catch(e){ return this.fail("Could not load the questions. Check your connection and try again."); }
+    if (this.items.length<(this.quiz?1:4)) return this.fail("This set needs at least 4 words.");
+    document.title=this.name+" · Practice";
     $("setName").textContent=this.name;
-    show($("tSide"), !this.quiz);
-    this.zhFirst = !this.quiz && store.get("fc.zh")==="1";
-    try{ this.stars=new Set(JSON.parse(store.get("fc.star."+this.key)||"[]").filter(i=>i<this.items.length)); }catch(e){}
-    this.sideLabel(); this.starLabel();
-    $("flip").onclick=e=>{ if (!e.target.closest(".say,.mark")) this.flip(); };
+    show($("tDir"), !this.quiz);
+    const d=store.get("fc.dir"); if (DIRS.includes(d)) this.dir=d;
+    $("tDirTxt").textContent=DIR_TXT[this.dir];
+    $("tDir").onclick=()=>{ this.dir=DIRS[(DIRS.indexOf(this.dir)+1)%3]; store.set("fc.dir",this.dir); $("tDirTxt").textContent=DIR_TXT[this.dir]; this.ask(); };
+    $("tShuf").onclick=()=>this.start(null);
+    $("bRestart").onclick=()=>this.start(null);
+    $("bMissed").onclick=()=>this.start([...this.missed]);
     $("bNext").onclick=()=>this.next();
-    $("bPrev").onclick=()=>this.prev();
-    $("tSide").onclick=()=>{ this.zhFirst=!this.zhFirst; store.set("fc.zh",this.zhFirst?"1":"0"); this.sideLabel(); this.draw(0); };
-    $("tShuf").onclick=()=>this.start(true);
-    $("tStar").onclick=()=>{ this.onlyStars=!this.onlyStars; this.start(false); };
-    $("bRestart").onclick=()=>{ this.onlyStars=false; this.start(true); };
-    $("bStarred").onclick=()=>{ this.onlyStars=true; this.start(false); };
-    this.swipe();
-    addEventListener("resize",()=>this.fit());
-    addEventListener("keydown",e=>{ if(e.key===" "){ e.preventDefault(); this.flip(); } if(e.key==="ArrowRight") this.next(); if(e.key==="ArrowLeft") this.prev(); if(e.key==="s") this.toggleStar(); });
-    this.start(false);
+    this.start(null);
   },
-  fail(msg){ show($("stage"),false); show($("ctrl"),false); show($("tools"),false); $("err").textContent=msg; show($("err"),true); },
-  sideLabel(){ $("tSideTxt").textContent=this.zhFirst?"中文 first":"English first"; $("tSide").classList.toggle("on",this.zhFirst); },
-  starLabel(){ show($("tStar"), this.stars.size>0 || this.onlyStars); $("tStarTxt").textContent="Starred ("+this.stars.size+")"; $("tStar").classList.toggle("on",this.onlyStars); },
+  fail(msg){ show($("play"),false); show($("tools"),false); $("err").textContent=msg; show($("err"),true); },
 
-  start(mix){
-    let list=this.items.map((_,i)=>i);
-    if (this.onlyStars){ list=list.filter(i=>this.stars.has(i)); if (!list.length){ this.onlyStars=false; list=this.items.map((_,i)=>i); } }
-    this.order = mix ? shuffle(list) : list; this.pos=0;
-    this.starLabel();
-    show($("done"),false); show($("stage"),true); show($("ctrl"),true);
-    this.draw(0);
+  // list = indices to practise (null = everything). Each item is asked once; a wrong one comes back a few questions later.
+  start(list){
+    const all=this.items.map((_,i)=>i);
+    this.queue=shuffle((list&&list.length?list:all).slice()); this.total=this.queue.length;
+    this.done=0; this.right=0; this.missed=new Set(); this.firstTry=new Set();
+    show($("done"),false); show($("play"),true); show($("tools"),true);
+    this.ask();
   },
 
-  render(){
-    const i=this.order[this.pos], it=this.items[i], mon=`<span class="mon">${ART.avatar(ART.AVATARS[i % ART.AVATARS.length],"",true)}</span>`;
-    const mark=`<button class="mark${this.stars.has(i)?" on":""}" data-mark="1" aria-label="Star this card">${ART.icon("star")}</button>`;
-    $("faceF").classList.toggle("quiz",this.quiz); $("faceB").classList.toggle("quiz",this.quiz);
+  ask(){
+    this.locked=false; show($("nextRow"),false); $("whyBox").innerHTML="";
+    if (!this.queue.length) return this.finish();
+    const i=this.queue[0], it=this.items[i], mon=`<span class="mon">${ART.avatar(ART.AVATARS[i % ART.AVATARS.length],"",true)}</span>`;
+    let html, opts, answer, long=false;
     if (this.quiz){
       const sub = it.s ? `<div class="qsub${/[一-鿿]/.test(it.s.replace(/^原文[^：:]*[：:]/,""))?"":" en"}">${esc(it.s)}</div>` : "";
-      $("faceF").innerHTML=`<span class="tag">Question</span>${mark}<div class="qtext">${esc(it.q)}</div>${sub}<span class="hint">Tap to see the answer</span>${mon}`;
-      $("faceB").innerHTML=`<span class="tag">Answer</span>${mark}<div class="ans">${esc(it.o[it.a])}</div>${it.w?`<div class="why">${esc(it.w)}</div>`:""}${mon}`;
+      html=`<span class="tag">Question</span><div class="qtext">${esc(it.q)}</div>${sub}${mon}`;
+      opts=shuffle(it.o.map((t,k)=>({t,ok:k===it.a}))); long=true;
     } else {
-      const [en,zh]=it, enSide=`<div class="big">${esc(en)}</div>`, zhSide=`<div class="big zh">${esc(zh)}</div>`;
-      const sayBtn=`<button class="say" data-say="1" aria-label="Listen">${ART.icon("volume")}</button>`;
-      $("faceF").innerHTML=`<span class="tag">${this.zhFirst?"中文":"English"}</span>${mark}${sayBtn}${this.zhFirst?zhSide:enSide}<span class="hint">Tap to flip</span>${mon}`;
-      $("faceB").innerHTML=`<span class="tag">${this.zhFirst?"English":"中文"}</span>${mark}${sayBtn}${this.zhFirst?enSide:zhSide}${mon}`;
-      for (const b of document.querySelectorAll("[data-say]")) b.onclick=e=>{ e.stopPropagation(); speak(en); };
+      const dir = this.dir==="mix" ? (Math.random()<.5?"en2zh":"zh2en") : this.dir, en2zh = dir==="en2zh";
+      const pool=shuffle(this.items.map((_,k)=>k).filter(k=>k!==i)).slice(0,3);
+      opts=shuffle([i,...pool].map(k=>({t:this.items[k][en2zh?1:0], ok:k===i})));
+      html = en2zh
+        ? `<span class="tag">What does it mean?</span><button class="say" id="say" aria-label="Listen">${ART.icon("volume")}</button><div class="big">${esc(it[0])}</div>${mon}`
+        : `<span class="tag">Which English word?</span><div class="big zh">${esc(it[1])}</div>${mon}`;
     }
-    for (const b of document.querySelectorAll("[data-mark]")) b.onclick=e=>{ e.stopPropagation(); this.toggleStar(); };
+    this.cur={i, it, opts};
+    const Q=$("qbox"); Q.innerHTML=html; Q.classList.remove("pop"); void Q.offsetWidth; Q.classList.add("pop");
+    if ($("say")) $("say").onclick=()=>speak(it[0]);
+    const O=$("opts"); O.classList.toggle("long",long);
+    O.innerHTML=opts.map((o,k)=>`<button class="opt" data-k="${k}">${esc(o.t)}</button>`).join("");
+    for (const b of O.children) b.onclick=()=>this.answer(+b.dataset.k, b);
     this.fit();
-    const n=this.order.length;
-    $("cnt").textContent=(this.pos+1)+" / "+n;
-    $("bar").style.width=((this.pos+1)/n*100)+"%";
-    $("bPrev").disabled = this.pos===0;
-    $("bNext").innerHTML = (this.pos===n-1 ? "Finish " : "Next ")+ART.icon(this.pos===n-1?"check":"play");
+    const n=this.total;
+    $("cnt").textContent=Math.min(this.done+1,n)+" / "+n;
+    $("bar").style.width=(this.done/n*100)+"%";
+    $("score").innerHTML=ART.icon("check")+" "+this.right;
   },
 
-  // big words shrink until they fit on one line (no "tourna-ment" breaks)
-  fit(){
-    for (const el of document.querySelectorAll(".big")){
-      el.style.fontSize=""; let f=parseFloat(getComputedStyle(el).fontSize);
-      while (el.scrollWidth>el.clientWidth+1 && f>28){ f-=3; el.style.fontSize=f+"px"; }
+  // big words shrink until they fit on one line
+  fit(){ for (const el of document.querySelectorAll(".big")){ el.style.fontSize=""; let f=parseFloat(getComputedStyle(el).fontSize); while (el.scrollWidth>el.clientWidth+1 && f>26){ f-=3; el.style.fontSize=f+"px"; } } },
+
+  answer(k, btn){
+    if (this.locked) return; this.locked=true;
+    const {i, it, opts}=this.cur, ok=opts[k].ok, btns=[...$("opts").children];
+    if (!this.quiz) speak(it[0]);                                    // hear the word every time (Ava Neural)
+    if (ok){
+      btn.classList.add("ok");
+      if (!this.missed.has(i)) this.right++;
+      this.done++; this.queue.shift();
+      beep(880,.08,"triangle",.15); beep(1320,.12,"triangle",.12,.07);
+      try{ navigator.vibrate && navigator.vibrate(15); }catch(e){}
+      $("score").innerHTML=ART.icon("check")+" "+this.right;
+      setTimeout(()=>this.ask(), 900);
+    } else {
+      btn.classList.add("no");
+      btns.forEach((b,j)=>{ if (opts[j].ok) b.classList.add("ans"); });
+      this.missed.add(i);
+      this.queue.shift(); this.queue.splice(Math.min(this.queue.length, 3+Math.floor(Math.random()*3)), 0, i);   // comes back soon
+      beep(160,.25,"sawtooth",.12);
+      try{ navigator.vibrate && navigator.vibrate(120); }catch(e){}
+      if (this.quiz && it.w) $("whyBox").innerHTML=`<div class="why">${esc(it.w)}</div>`;
+      else if (!this.quiz) $("whyBox").innerHTML=`<div class="why">${esc(it[0])} ＝ ${esc(it[1])}</div>`;
+      show($("nextRow"),true);
     }
   },
-  // dir: 1 = going forward (old card leaves to the left), -1 = going back, 0 = redraw in place
-  draw(dir){
-    const S=$("slide"), F=$("flip");
-    if (!dir){ F.classList.remove("back"); this.render(); return; }
-    this.busy=true;
-    S.style.transform=`translateX(${dir>0?-115:115}%) rotate(${dir>0?-6:6}deg)`; S.style.opacity="0";
-    setTimeout(()=>{
-      F.style.transition="none"; F.classList.remove("back"); void F.offsetWidth; F.style.transition="";
-      this.render();
-      S.style.transition="none"; S.style.transform=`translateX(${dir>0?115:-115}%) rotate(${dir>0?6:-6}deg)`; void S.offsetWidth;
-      S.style.transition=""; S.style.transform=""; S.style.opacity="";
-      setTimeout(()=>{ this.busy=false; }, 260);
-    }, 230);
-  },
-
-  flip(){ if (this.busy) return; $("flip").classList.toggle("back"); },
-  next(){ if (this.busy) return; if (this.pos>=this.order.length-1) return this.finish(); this.pos++; this.draw(1); try{ navigator.vibrate && navigator.vibrate(10); }catch(e){} },
-  prev(){ if (this.busy || this.pos===0) return; this.pos--; this.draw(-1); },
-
-  toggleStar(){
-    const i=this.order[this.pos]; if (i==null) return;
-    if (this.stars.has(i)) this.stars.delete(i); else this.stars.add(i);
-    store.set("fc.star."+this.key, JSON.stringify([...this.stars]));
-    for (const b of document.querySelectorAll("[data-mark]")) b.classList.toggle("on", this.stars.has(i));
-    this.starLabel();
-  },
+  next(){ if (!$("nextRow").classList.contains("hidden")) this.ask(); },
 
   finish(){
-    show($("stage"),false); show($("ctrl"),false); show($("done"),true);
+    show($("play"),false); show($("tools"),false); show($("done"),true);
     $("doneMon").innerHTML=ART.img("trophy");
-    const n=this.order.length, s=this.stars.size;
-    $("doneTxt").textContent=`You reviewed ${n} card${n===1?"":"s"}.`+(s?` ${s} starred for another look.`:" You're ready for the game!");
-    show($("bStarred"), s>0); $("bStarredTxt").textContent="Review starred ("+s+")";
+    const n=this.total, r=this.right, m=[...this.missed];
+    $("doneScore").textContent=r+" / "+n;
+    $("doneTxt").textContent = !m.length ? "Perfect! Every answer right on the first try." : "right on the first try. Every word is learned now!";
     $("cnt").textContent=n+" / "+n; $("bar").style.width="100%";
+    show($("missedBox"), m.length>0);
+    $("missedList").innerHTML=m.map(i=>{ const it=this.items[i]; return this.quiz ? `<li>${esc(it.q)}<span>${esc(it.o[it.a])}</span></li>` : `<li>${esc(it[0])}<span>${esc(it[1])}</span></li>`; }).join("");
+    show($("bMissed"), m.length>0); $("bMissedTxt").textContent="Practice missed ("+m.length+")";
     GB.fanfare && GB.fanfare();
-  },
-
-  swipe(){
-    let x0=null, y0=0;
-    const S=$("stage");
-    S.addEventListener("touchstart",e=>{ x0=e.touches[0].clientX; y0=e.touches[0].clientY; },{passive:true});
-    S.addEventListener("touchend",e=>{
-      if (x0===null) return; const dx=e.changedTouches[0].clientX-x0, dy=e.changedTouches[0].clientY-y0; x0=null;
-      if (Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)*1.2){ if (dx<0) this.next(); else this.prev(); }   // swipe left = next card, swipe right = previous card
-    },{passive:true});
   }
 };
-Cards.load();
+Practice.load();
 </script>
 </body>
 </html>

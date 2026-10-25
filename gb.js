@@ -221,14 +221,14 @@ math 數學` }
       const modeLock=()=>{ const m=$("sMode"); if(!m) return; const quiz=!!(SETS[sel.value]&&SETS[sel.value].quiz); m.disabled=quiz; const row=m.closest(".setrow"); if(row) row.style.opacity=quiz?.45:""; };
       fill(); modeLock();
       sel.onchange=()=>{ store.set("tug.set",sel.value); modeLock(); };
-      // flashcards: a QR code students scan to review the selected list on their phones before the game
+      // practice: a QR code students scan to practise (4-choice quiz, cards.html) the selected list on their phones before the game
       if (!$("cardsBtn")){
-        const b=document.createElement("button"); b.className="btn-soft"; b.id="cardsBtn"; b.innerHTML=ART.icon("qr")+" Flashcards";
+        const b=document.createElement("button"); b.className="btn-soft"; b.id="cardsBtn"; b.innerHTML=ART.icon("qr")+" Practice";
         $("editWords").insertAdjacentElement("afterend", b);
         const m=document.createElement("div"); m.className="modal hidden"; m.id="cardsModal";
-        m.innerHTML=`<div class="mcard cardsm"><div class="mh">${ART.icon("qr")} Flashcards</div><div class="mb">
+        m.innerHTML=`<div class="mcard cardsm"><div class="mh">${ART.icon("qr")} Practice before the game</div><div class="mb">
           <div class="cq"><div class="qrbox" id="cardsQR"></div><div class="ctext"><b id="cardsName"></b><span id="cardsCount"></span>
-          <p>Scan to review on your phone before the game. Flip each card, then tap <em>Got it</em> or <em>Again</em>.</p></div></div>
+          <p>Scan to practise on your phone. Four choices per question; missed ones come back until you get them right.</p></div></div>
           <div class="row"><button class="go" id="cardsDone">Done</button></div></div></div>`;
         document.body.appendChild(m);
         m.onclick=e=>{ if(e.target===m) show(m,false); };
