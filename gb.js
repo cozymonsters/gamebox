@@ -245,29 +245,64 @@ const GB = (() => {
       };
       const kitInfo=v=>{ const id=String(v||"").slice(4); return (host.myKits||[]).find(k=>k.id===id) || (host.extraKit&&host.extraKit.id===id?host.extraKit:null); };
       const isQuiz=v=> v.startsWith("kit:") ? !!(kitInfo(v)&&kitInfo(v).type==="quiz") : !!(SETS[v]&&SETS[v].quiz);
-      const modeLock=()=>{ const m=$("sMode"); if(!m) return; const quiz=isQuiz(sel.value); m.disabled=quiz; const row=m.closest(".setrow"); if(row) row.style.opacity=quiz?.45:""; };
       const prefetch=()=>{ const v=sel.value; if (!v.startsWith("kit:")) return; const id=v.slice(4); if (!host.kitCache[id]) kits.get(id).then(k=>{ if(k) host.kitCache[id]=k; }).catch(()=>{}); };
-      // "Edit" opens the chosen set in My Sets (or the list when nothing is chosen)
-      const editLink=()=>{ const a=$("kitsLink"); if (a) a.href = dirUrl+"kits.html"+(sel.value.startsWith("kit:") && kitInfo(sel.value) && (host.myKits||[]).some(k=>k.id===sel.value.slice(4)) ? "#edit="+sel.value.slice(4) : ""); };
-      const refresh=()=>{ fill(); modeLock(); prefetch(); editLink(); };
+      // The set is chosen in My Sets (Play Live), so the settings only SHOW it, with "Change" to swap sets without closing the room.
+      const info=v=>{
+        if (!v) return null;
+        if (v.startsWith("kit:")){ const k=kitInfo(v); return k ? { name:k.name, quiz:k.type==="quiz", n:k.count } : null; }
+        return SETS[v] ? { name:SETS[v].name, quiz:!!SETS[v].quiz, n:setSize(v) } : null;
+      };
+      const showSet=()=>{
+        const i=info(sel.value), nm=$("setShowName"), mt=$("setShowMeta"); if (!nm) return;
+        nm.textContent = i ? i.name : !account.loaded ? "Loading your sets…" : !account.user ? "No set chosen" : host.kitsErr ? "Couldn't load your sets" : "No set chosen";
+        mt.textContent = i ? i.n+(i.quiz?" questions · Multiple choice":" words · Vocabulary") : !account.loaded ? "" : !account.user ? "Sign in to My Sets to choose a set" : host.kitsErr ? "Reload the page and try again" : "Pick one of your sets";
+        $("setChange").innerHTML = ART.icon(i?"swap":"book")+(i?" Change":" Choose a set");
+        // the game's "Skill" chip and the lobby follow the set
+        for (const c of document.querySelectorAll(".hero .chip")){ const sm=c.querySelector("small"); if (sm && sm.textContent.trim()==="Skill") c.querySelector("b").textContent = i && i.quiz ? "Multiple choice" : "Vocabulary"; }
+        const ls=$("lobSet"); if (ls){ ls.innerHTML = i ? `<span>Set</span><b>${esc(i.name)}</b>` : ""; show(ls, !!i); }
+      };
+      const modeHide=()=>{ const m=$("sMode"); if(!m) return; const row=m.closest(".setrow"); if(row) show(row, !isQuiz(sel.value)); };
+      if (!$("setShow")){
+        sel.classList.add("hidden");
+        const d=document.createElement("div"); d.className="setshow"; d.id="setShow";
+        d.innerHTML=`<div class="ss-txt"><b id="setShowName"></b><span id="setShowMeta"></span></div><button class="btn-soft" id="setChange"></button>`;
+        sel.insertAdjacentElement("afterend", d);
+        const row=sel.closest(".setrow"); if (row){ const h=row.querySelector(".txt h4"), p=row.querySelector(".txt p"); if (h) h.textContent="Question Set"; if (p) p.textContent="Chosen in My Sets"; row.classList.add("setrow-set"); }
+        const lj=document.querySelector(".lob-join"); if (lj && !$("lobSet")){ const l=document.createElement("div"); l.className="l3 hidden"; l.id="lobSet"; lj.appendChild(l); }
+        // picker: the teacher's sets, one tap to switch (same room, students stay)
+        const m=document.createElement("div"); m.className="modal hidden"; m.id="setsModal";
+        m.innerHTML=`<div class="mcard setsm"><div class="mh">${ART.icon("book")} Choose a set</div><div class="mb"><div class="setlist" id="setList"></div>
+          <div class="row spread"><a class="btn-soft" href="${dirUrl}kits.html" target="_blank" rel="noopener">${ART.icon("pencil")} Make or edit sets in My Sets</a><button class="pill ghost" id="setsClose">Cancel</button></div></div></div>`;
+        document.body.appendChild(m);
+        m.onclick=e=>{ if (e.target===m) show(m,false); };
+        $("setsClose").onclick=()=>show(m,false);
+        $("setChange").onclick=()=>{
+          if (account.loaded && !account.user && !Object.keys(SETS).length){ location.href=dirUrl+"kits.html"; return; }
+          const opts=[...sel.querySelectorAll("option")].filter(o=>o.value && !o.disabled);
+          $("setList").innerHTML = opts.length ? opts.map(o=>{ const i=info(o.value)||{name:o.textContent,n:0}; return `<button class="setitem${o.value===sel.value?" on":""}" data-v="${esc(o.value)}"><span class="ktype ${i.quiz?"quiz":"words"}">${i.quiz?"Multiple choice":"Vocabulary"}</span><b>${esc(i.name)}</b><small>${i.n} ${i.quiz?"questions":"words"}</small>${o.value===sel.value?`<span class="cur">${ART.icon("check")}</span>`:""}</button>`; }).join("")
+            : `<div class="hint">No sets yet. Make one in My Sets, then come back here.</div>`;
+          for (const b of $("setList").querySelectorAll(".setitem")) b.onclick=()=>{ sel.value=b.dataset.v; sel.onchange(); show(m,false); };
+          show(m);
+        };
+      }
+      const refresh=()=>{ fill(); modeHide(); prefetch(); showSet(); };
       refresh();
-      sel.onchange=()=>{ store.set("tug.set",sel.value); modeLock(); prefetch(); editLink(); };
-      // signed-in teachers see their own kits
+      sel.onchange=()=>{ store.set("tug.set",sel.value); modeHide(); prefetch(); showSet(); };
+      // signed-in teachers see their own sets
       account.onChange(async u=>{
         host.kitsErr=false;
         try{ host.myKits = u ? await kits.list() : null; }catch(e){ host.myKits = u ? [] : null; host.kitsErr=!!u; }
         if (want && !host.extraKit){ const k=await kits.get(want).catch(()=>null); if (k){ host.kitCache[k.id]=k; host.extraKit={ id:k.id, name:k.name, type:k.type, count:k.items.length }; store.set("tug.set","kit:"+k.id); } }
         refresh();
       });
-      // "Edit" link next to the menu: sets are made and edited in My Sets (kits.html)
-      if (!$("kitsLink")){
-        const a=document.createElement("a"); a.className="btn-soft"; a.id="kitsLink"; a.href=dirUrl+"kits.html"; a.innerHTML=ART.icon("pencil")+" Edit"; a.title="Make and edit sets in My Sets";
-        sel.insertAdjacentElement("afterend", a); editLink();
-      }
+      // no set yet: "Continue" opens the picker (or My Sets) instead of a lobby that can't start
+      const cont=$("toLobby"); if (cont && !cont._setGuard){ cont._setGuard=true; cont.addEventListener("click",e=>{ if (!info(sel.value)){ e.preventDefault(); e.stopImmediatePropagation(); $("setChange").click(); } }, true); }
+      // the teacher's home is My Sets: the GameBox logo on the big screen goes back there
+      const brand=document.querySelector(".gb-top .brand"); if (brand) brand.href=dirUrl+"kits.html";
       // practice: a QR code students scan to practise (4-choice quiz, cards.html) the selected list on their phones before the game
       if (!$("cardsBtn")){
         const b=document.createElement("button"); b.className="btn-soft"; b.id="cardsBtn"; b.innerHTML=ART.icon("qr")+" Practice";
-        $("kitsLink").insertAdjacentElement("afterend", b);
+        $("setChange").insertAdjacentElement("afterend", b);
         const m=document.createElement("div"); m.className="modal hidden"; m.id="cardsModal";
         m.innerHTML=`<div class="mcard cardsm"><div class="mh">${ART.icon("qr")} Practice before the game</div><div class="mb">
           <div class="cq"><div class="qrbox" id="cardsQR"></div><div class="ctext"><b id="cardsName"></b><span id="cardsCount"></span>

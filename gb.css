@@ -322,3 +322,24 @@ body.quizq .toast{top:auto;bottom:9%;transform:translateX(-50%)}   /* keep "Oops
 /* phone pages: cream behind everything, so the bottom of the screen and Safari's toolbar match */
 html.phone,html:has(#player:not(.hidden)){background:var(--cream)}
 html.phone .doodles{display:none}
+
+/* ---------- Question Set row: shows the set chosen in My Sets (no menu), Change opens the picker ---------- */
+.setshow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.setshow .ss-txt{display:flex;flex-direction:column;align-items:flex-end;text-align:right;margin-right:6px;min-width:0}
+.setshow .ss-txt b{font-family:var(--display);font-weight:600;font-size:24px;line-height:1.15}
+.setshow .ss-txt span{font-size:14px;font-weight:800;color:var(--sub)}
+.mcard.setsm{width:min(720px,100%)}
+.setlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;max-height:56vh;overflow:auto;padding:4px}
+.setitem{position:relative;text-align:left;background:#fff;border:2px solid var(--line-d);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;box-shadow:0 3px 0 var(--line-d)}
+.setitem:hover{border-color:var(--go)}
+.setitem.on{border-color:var(--go);background:#f1f8f3}
+.setitem b{font-family:var(--display);font-weight:600;font-size:20px;line-height:1.2}
+.setitem small{font-weight:800;color:var(--sub);font-size:13px}
+.setitem .cur{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;background:var(--go);color:#fff;display:flex;align-items:center;justify-content:center}
+.setitem .cur .gi{width:16px;height:16px;stroke-width:3}
+.ktype{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;border-radius:999px;padding:3px 10px;font-weight:900;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.ktype.words{background:#dcf1f1;color:#1d736e} .ktype.quiz{background:#e7e3f7;color:#5b4ca0}
+.mcard .row.spread{justify-content:space-between;align-items:center}
+.lob-join .l3{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:18px}
+.lob-join .l3 span{font-weight:900;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--sub);background:var(--cream);border-radius:999px;padding:3px 10px}
+.lob-join .l3 b{font-family:var(--display);font-weight:600;font-size:24px}
