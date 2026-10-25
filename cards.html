@@ -147,9 +147,8 @@ body{background:var(--cream)}
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="gb-quiz.js?v=44b94ba1"></script>
 <script src="gb-art.js?v=6ae51ada"></script>
-<script src="gb.js?v=27c112ce"></script>
+<script src="gb.js?v=bfa97707"></script>
 <script>
 "use strict";
 const { $, show, esc, store, shuffle, params, SETS, parseWords, speak, voice, primeVoice, db, beep } = GB;
@@ -170,7 +169,7 @@ const Practice = {
         this.key="r"+r; this.name=d.name||"My Words"; this.quiz=!!d.quiz; this.items=d.words;
       } else if (SETS[k]){
         this.key=k; this.name=SETS[k].name; this.quiz=!!SETS[k].quiz; this.items=this.quiz ? SETS[k].quiz : parseWords(SETS[k].words);
-      } else return this.fail("Practice set not found. Scan the QR code on the big screen again.");
+      } else return this.fail(k ? "This practice link is no longer used. Ask your teacher for the new QR code." : "Practice set not found. Scan the QR code on the big screen again.");
     }catch(e){ return this.fail("Could not load the questions. Check your connection and try again."); }
     if (this.items.length<(this.quiz?1:4)) return this.fail("This set needs at least 4 words.");
     document.title=this.name+" · Practice";

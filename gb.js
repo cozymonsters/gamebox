@@ -29,97 +29,10 @@ const GB = (() => {
 
   const AVATARS = ART.AVATARS;
 
-  const SETS = {
-    sports: { name: "Sports", words: `coach 教練
-referee 裁判
-athlete 運動員
-team 隊伍
-player 選手
-captain 隊長
-teammate 隊友
-opponent 對手
-fan 球迷
-champion 冠軍
-medal 獎牌
-trophy 獎盃
-score 得分
-win 贏
-lose 輸
-match 比賽
-race 賽跑
-tournament 錦標賽
-practice 練習
-train 訓練
-warm up 暖身
-stretch 伸展
-sprint 衝刺
-jump 跳
-throw 丟；投擲
-catch 接住
-kick 踢
-swim 游泳
-injury 受傷
-muscle 肌肉
-sweat 汗水
-stamina 耐力
-strength 力量
-speed 速度
-whistle 哨子
-goal 球門；目標
-foul 犯規
-defense 防守
-gym 體育館
-stadium 體育場
-record 紀錄
-tie 平手
-attack 進攻
-league 聯盟
-court 球場
-substitute 替補球員
-victory 勝利
-spectator 觀眾
-uniform 制服
-teamwork 團隊合作` },
-    school: { name: "School Life", words: `teacher 老師
-classmate 同學
-classroom 教室
-homework 回家作業
-exam 考試
-grade 成績
-notebook 筆記本
-eraser 橡皮擦
-ruler 尺
-desk 書桌
-library 圖書館
-lunch 午餐
-break 下課休息
-uniform 制服
-bag 書包
-question 問題
-answer 答案
-listen 聽
-speak 說
-read 閱讀
-write 寫
-remember 記得
-forget 忘記
-late 遲到的
-early 早的
-tired 累的
-hungry 餓的
-happy 開心的
-nervous 緊張的
-proud 驕傲的
-friend 朋友
-weekend 週末
-holiday 假日
-schedule 時間表
-subject 科目
-history 歷史
-science 科學
-math 數學` }
-  };
-  if (window.GB_QUIZ) for (const k in window.GB_QUIZ) SETS[k]=window.GB_QUIZ[k];   // multiple-choice banks (gb-quiz.js)
+  // Question banks live in each teacher's My Kits (Firebase). There are no built-in banks on the site any more.
+  // window.GB_QUIZ is only set by local test fixtures (fixtures/banks.js).
+  const SETS = {};
+  if (window.GB_QUIZ) for (const k in window.GB_QUIZ) SETS[k]=window.GB_QUIZ[k];
   const setSize = k => SETS[k].quiz ? SETS[k].quiz.length : parseWords(SETS[k].words).length;
   function parseWords(text){
     const out=[]; const seenEn=new Set(), seenZh=new Set();
@@ -321,6 +234,7 @@ math 數學` }
         } else for (const k in SETS) opt(sel,k,SETS[k].name+" ("+setSize(k)+(SETS[k].quiz?" questions)":" words)"));
         const custom=parseWords(store.get("tug.custom")||"");
         if (custom.length>=4) opt(sel,"custom","My Words ("+custom.length+" words)");
+        if (!sel.options.length){ const o=opt(sel,"", account.loaded && !account.user ? "Sign in to My Kits to choose a kit" : "Loading your kits…"); o.disabled=true; }
         const saved=store.get("tug.set"); if (saved && [...sel.options].some(o=>o.value===saved)) sel.value=saved;
         if (!sel.value && sel.options.length) sel.selectedIndex=0;
       };
@@ -356,7 +270,8 @@ math 數學` }
         $("cardsDone").onclick=()=>show(m,false);
         b.onclick=async()=>{
           const k=sel.value, custom=k==="custom", kit=k.startsWith("kit:"), list=host.words(), quiz=isQuiz(k);
-          $("cardsName").textContent = custom ? "My Words" : kit ? (kitInfo(k)||{}).name||"Kit" : SETS[k].name;
+          if (!k){ $("cardsName").textContent="No question bank yet"; $("cardsCount").textContent="Sign in to My Kits and choose a kit first."; $("cardsQR").innerHTML=""; show(m); return; }
+          $("cardsName").textContent = custom ? "My Words" : kit ? (kitInfo(k)||{}).name||"Kit" : (SETS[k]||{}).name||"";
           $("cardsCount").textContent = (kit && kitInfo(k) ? kitInfo(k).count : list.length)+(quiz?" questions":" words");
           $("cardsQR").innerHTML='<div class="qrwait">Loading…</div>'; show(m);
           let url = kit ? dirUrl+"cards.html?k="+k.slice(4) : dirUrl+"cards.html?set="+k;

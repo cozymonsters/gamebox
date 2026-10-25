@@ -225,9 +225,8 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="gb-quiz.js?v=44b94ba1"></script>
 <script src="gb-art.js?v=6ae51ada"></script>
-<script src="gb.js?v=27c112ce"></script>
+<script src="gb.js?v=bfa97707"></script>
 <script>
 "use strict";
 const GAME="tug";
@@ -344,7 +343,7 @@ const Host = {
 
   async startRound(){
     const words=await GB.host.wordsReady();
-    if (words.length<4) return alert("Need at least 4 words.");
+    if (words.length<4) return alert(words.length ? "This question bank needs at least 4 words or questions." : "Choose a question bank first: sign in to My Kits, or type My Words.");
     const dur=+$("sTime").value, margin=+$("sMargin").value;
     const startAt=now()+4200;
     const upd={};
