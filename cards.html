@@ -28,20 +28,21 @@ body{background:var(--cream)}
 .tool{display:inline-flex;align-items:center;gap:6px;background:var(--paper);border:2px solid var(--line);border-radius:12px;padding:7px 13px;font-weight:900;font-size:15px;color:var(--ink)}
 .tool .gi{width:18px;height:18px}
 /* question card */
-.qbox{position:relative;background:#fff;border-radius:26px;box-shadow:0 7px 0 var(--line),0 14px 28px rgba(61,68,134,.1);padding:46px 20px 26px;text-align:center;min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;overflow:hidden}
+#play{flex:1;display:flex;flex-direction:column;min-height:0}
+.qbox{position:relative;background:#fff;border-radius:26px;box-shadow:0 7px 0 var(--line),0 14px 28px rgba(61,68,134,.1);padding:56px 20px 64px;text-align:center;flex:1;min-height:clamp(140px,24vh,240px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;overflow:hidden}
 .qbox .tag{position:absolute;top:16px;left:20px;font-size:14px;font-weight:900;color:var(--sub);letter-spacing:.08em;text-transform:uppercase}
-.qbox .mon{position:absolute;right:10px;bottom:6px;width:58px;height:58px;opacity:.95}
+.qbox .mon{position:absolute;right:12px;bottom:10px;width:70px;height:70px}
 .qbox .mon img{width:100%;height:100%;object-fit:contain}
 .say{position:absolute;right:14px;top:12px;width:52px;height:52px;border-radius:50%;background:var(--cream);display:flex;align-items:center;justify-content:center;color:var(--ink)}
 .say .gi{width:26px;height:26px}
-.big{font-family:var(--display);font-weight:600;font-size:clamp(48px,15vw,78px);line-height:1.05;width:100%;padding:0 26px}
-.big.zh{font-family:var(--body);font-weight:900;font-size:clamp(42px,13vw,66px)}
+.big{font-family:var(--display);font-weight:600;font-size:clamp(54px,17vw,88px);line-height:1.05;width:100%;padding:0 26px}
+.big.zh{font-family:var(--body);font-weight:900;font-size:clamp(48px,15vw,78px)}
 .qtext{font-weight:900;font-size:clamp(21px,6vw,26px);line-height:1.4;text-align:left;align-self:stretch;padding-right:6px}
 .qsub{align-self:stretch;text-align:left;background:var(--cream);border-radius:14px;padding:10px 13px;font-size:17px;font-weight:800;line-height:1.45;white-space:pre-line}
 .qsub.en{font-family:"Times New Roman",Georgia,serif;font-weight:400;font-size:19px}
 .qbox.pop{animation:gb-pop .35s}
 /* options: reuse the game's four colours */
-#opts{margin-top:16px;max-height:none;flex:none}
+#opts{margin-top:16px;max-height:none;flex:none;margin-bottom:4px}
 #opts:not(.long) .opt{min-height:96px;font-size:clamp(22px,6.6vw,30px)}
 #opts.long .opt{font-size:clamp(17px,4.8vw,20px);min-height:60px}
 .why{margin-top:12px;background:#e3f1e8;color:#2d5e40;border-radius:14px;padding:11px 14px;font-size:17px;font-weight:800;line-height:1.5}
@@ -66,6 +67,7 @@ body{background:var(--cream)}
 .done .go{font-size:21px}
 .done .soft{display:inline-flex;align-items:center;gap:8px;font-family:var(--display);font-weight:600;font-size:21px;padding:12px 24px;border-radius:18px;background:var(--mustard);color:var(--ink);box-shadow:0 5px 0 var(--mustard-d)}
 .done .soft .gi{width:22px;height:22px}
+@media (max-height:720px){ .qbox .mon{display:none} .qbox{padding-bottom:30px} }   /* small phones: keep the word clear */
 .err{margin:40px 0;text-align:center;font-weight:800;color:var(--sub);font-size:17px}
 </style>
 </head>
@@ -104,7 +106,7 @@ body{background:var(--cream)}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="gb-quiz.js?v=0f47520e"></script>
 <script src="gb-art.js?v=6ae51ada"></script>
-<script src="gb.js?v=6317e3b8"></script>
+<script src="gb.js?v=8df24743"></script>
 <script>
 "use strict";
 const { $, show, esc, store, shuffle, params, SETS, parseWords, speak, db, beep } = GB;
@@ -148,7 +150,7 @@ const Practice = {
   },
 
   ask(){
-    this.locked=false; show($("nextRow"),false); $("whyBox").innerHTML="";
+    this.locked=false; show($("nextRow"),false); $("whyBox").innerHTML=""; if (scrollY>0) scrollTo({top:0});
     if (!this.queue.length) return this.finish();
     const i=this.queue[0], it=this.items[i], mon=`<span class="mon">${ART.avatar(ART.AVATARS[i % ART.AVATARS.length],"",true)}</span>`;
     let html, opts, answer, long=false;
@@ -183,7 +185,7 @@ const Practice = {
   answer(k, btn){
     if (this.locked) return; this.locked=true;
     const {i, it, opts}=this.cur, ok=opts[k].ok, btns=[...$("opts").children];
-    if (!this.quiz) speak(it[0]);                                    // hear the word every time (Ava Neural)
+    const said = this.quiz ? Promise.resolve() : speak(it[0]);    // hear the word every time (Ava Neural)
     if (ok){
       btn.classList.add("ok");
       if (!this.missed.has(i)) this.right++;
@@ -191,7 +193,7 @@ const Practice = {
       beep(880,.08,"triangle",.15); beep(1320,.12,"triangle",.12,.07);
       try{ navigator.vibrate && navigator.vibrate(15); }catch(e){}
       $("score").innerHTML=ART.icon("check")+" "+this.right;
-      setTimeout(()=>this.ask(), 900);
+      Promise.all([said, new Promise(r=>setTimeout(r,800))]).then(()=>setTimeout(()=>this.ask(), 250));   // next word only after the voice has finished
     } else {
       btn.classList.add("no");
       btns.forEach((b,j)=>{ if (opts[j].ok) b.classList.add("ans"); });
@@ -202,6 +204,7 @@ const Practice = {
       if (this.quiz && it.w) $("whyBox").innerHTML=`<div class="why">${esc(it.w)}</div>`;
       else if (!this.quiz) $("whyBox").innerHTML=`<div class="why">${esc(it[0])} ＝ ${esc(it[1])}</div>`;
       show($("nextRow"),true);
+      setTimeout(()=>{ const r=$("bNext").getBoundingClientRect(); if (r.bottom>innerHeight-8) $("bNext").scrollIntoView({behavior:"smooth",block:"end"}); }, 60);   // keep Next on screen on small phones
     }
   },
   next(){ if (!$("nextRow").classList.contains("hidden")) this.ask(); },

@@ -154,13 +154,26 @@ math 數學` }
   const VOICED = new Set("answer athlete attack bag break captain catch champion classmate classroom coach court defense desk early eraser exam fan forget foul friend goal grade gym happy history holiday homework hungry injury jump kick late league library listen lose lunch match math medal muscle nervous notebook opponent player practice proud question race read record referee remember ruler schedule science score speak spectator speed sprint stadium stamina strength stretch subject substitute sweat swim teacher team teammate teamwork throw tie tired tournament train trophy uniform victory warm-up weekend whistle win write".split(" "));   // regenerate with gen_audio.py when word lists change
   const voiceSlug = t => String(t).toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
   let voiceAudio = null;
-  function browserVoice(text){ try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang="en-US"; u.rate=.85; speechSynthesis.speak(u);}catch(e){} }
+  // both return a promise that settles when the word has been said (or after 3 s, whichever comes first)
+  function browserVoice(text){
+    return new Promise(res=>{
+      try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang="en-US"; u.rate=.85; u.onend=u.onerror=()=>res(); speechSynthesis.speak(u); }catch(e){ res(); }
+      setTimeout(res, 3000);
+    });
+  }
   function speak(text){
     const k=voiceSlug(text);
     if (VOICED.has(k)){
-      try{ if (voiceAudio) voiceAudio.pause(); voiceAudio=new Audio(dirUrl+"audio/"+k+".mp3"); const p=voiceAudio.play(); if (p && p.catch) p.catch(()=>browserVoice(text)); return; }catch(e){}
+      try{
+        if (voiceAudio) voiceAudio.pause();
+        const a=voiceAudio=new Audio(dirUrl+"audio/"+k+".mp3");
+        return new Promise(res=>{
+          a.onended=()=>res(); setTimeout(res, 3000);
+          const p=a.play(); if (p && p.catch) p.catch(()=>browserVoice(text).then(res));
+        });
+      }catch(e){}
     }
-    browserVoice(text);
+    return browserVoice(text);
   }
 
   function confetti(canvas){
