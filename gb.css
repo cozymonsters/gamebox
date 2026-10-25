@@ -362,3 +362,17 @@ html.phone .doodles{display:none}
 .lob-teams.denser .pchip .av{width:24px;height:24px}
 .lob-teams.denser .pchip button{width:19px;height:19px;border-radius:6px}
 .lob-teams.denser .pchip button .gi{width:11px;height:11px}
+
+/* big screen: "Join" button next to the room code → QR overlay during the game */
+.joinpeek{padding:7px 14px;font-size:15px}
+.joinpeek .gi{width:18px;height:18px}
+.mcard.joinm{width:min(820px,100%);display:flex;align-items:center;gap:30px;padding:28px}
+.joinm .jq{flex:none;width:340px;height:340px;background:#fff;border-radius:20px;display:flex;align-items:center;justify-content:center;padding:14px;box-shadow:0 4px 0 var(--line)}
+.joinm .jq img{width:100%;height:100%;image-rendering:pixelated}
+.joinm .jt{display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.joinm .j1{font-family:var(--display);font-weight:600;font-size:40px;line-height:1.05}
+.joinm .j2{font-weight:800;color:var(--sub);font-size:18px;line-height:1.45}
+.joinm .j3{display:flex;align-items:center;gap:12px}
+.joinm .j3 span{font-weight:800;color:var(--sub)}
+.joinm .j3 b{font-family:var(--display);font-weight:600;font-size:56px;letter-spacing:.12em;background:var(--ink);color:#fff;border-radius:16px;padding:0 18px}
+@media (max-width:760px){ .mcard.joinm{flex-direction:column} .joinm .jq{width:260px;height:260px} }

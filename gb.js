@@ -238,6 +238,19 @@ const GB = (() => {
       const rref=db.ref("rooms/"+code);
       if (!(await rref.child("meta/teams").get()).val()) await rref.child("meta/teams").set(randomTeams());   // older rooms
       watchTeams(rref);
+      // during the game the lobby QR is gone: a "Join" button (and the room code) on the big screen shows it again, for late or dropped students
+      const top=document.querySelector(".gb-top"), tag=top && top.querySelector(".codetag");
+      if (tag && !$("joinPeek")){
+        const b=document.createElement("button"); b.className="pill white joinpeek"; b.id="joinPeek"; b.innerHTML=ART.icon("qr")+" Join"; b.title="Show the QR code to join or rejoin";
+        tag.insertAdjacentElement("beforebegin", b); tag.style.cursor="pointer"; tag.title="Show the QR code";
+        const m=document.createElement("div"); m.className="modal hidden"; m.id="joinModal";
+        m.innerHTML=`<div class="mcard joinm"><div class="jq" id="joinQR"></div><div class="jt"><div class="j1">Scan to join</div><div class="j2">Dropped out? Scan again with the same phone to pick up where you left off.</div><div class="j3"><span>Room code</span><b>${code}</b></div><button class="go" id="joinClose">Back to the game</button></div></div>`;
+        document.body.appendChild(m);
+        const open=()=>{ if (!$("joinQR").firstChild) host.drawQR(baseUrl+"?r="+code, $("joinQR")); show(m,true); };
+        b.onclick=open; tag.onclick=open;
+        m.onclick=e=>{ if (e.target===m) show(m,false); }; $("joinClose").onclick=()=>show(m,false);
+        addEventListener("keydown",e=>{ if (e.key==="Escape") show(m,false); });
+      }
       return code;
     },
 
