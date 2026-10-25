@@ -56,6 +56,7 @@ img{-webkit-user-drag:none;user-select:none}
 .chip b{font-size:15px;font-weight:900}
 .act{display:flex;align-items:center;gap:16px;margin-top:20px;flex-wrap:wrap}
 .go{display:inline-flex;align-items:center;gap:10px;font-family:var(--display);font-weight:600;font-size:28px;padding:12px 40px;border-radius:18px;background:var(--go);color:#fff;box-shadow:0 5px 0 var(--go-d);white-space:nowrap;transition:transform .1s}
+.go{text-decoration:none}
 .go:hover{transform:translateY(-1px)} .go:active{transform:translateY(4px);box-shadow:0 1px 0 var(--go-d)}
 .go .gi{width:.85em;height:.85em;stroke-width:2.6}
 .howlink{font-weight:800;font-size:15px;color:var(--sub);text-decoration:underline;text-underline-offset:3px}
@@ -117,7 +118,7 @@ footer{text-align:center;font-weight:700;font-size:14px;color:var(--on-bg-sub)}
   <div class="brand"><span class="ic" data-art="logo"></span>GameBox</div>
   <div class="sp"></div>
   <span class="tag">English games for the whole class</span>
-  <a class="kitsbtn" href="kits.html"><i data-i="book"></i> My Kits</a>
+  <a class="kitsbtn" href="kits.html"><i data-i="book"></i> My Sets</a>
 </header>
 
 <main class="main">
@@ -127,30 +128,30 @@ footer{text-align:center;font-weight:700;font-size:14px;color:var(--on-bg-sub)}
     <div class="hero">
       <div class="cover"><img id="hCover" src="img/cover-tug.webp" alt=""></div>
       <div class="info">
-        <div class="eyebrow">Selected game</div>
+        <div class="eyebrow">Game guide</div>
         <h2 id="hName">Tug of War</h2>
         <div class="tagline" id="hTag"></div>
         <div class="chips" id="hChips"></div>
         <div class="act">
-          <button class="go" id="start">Start <i data-i="play"></i></button>
+          <a class="go" id="start" href="kits.html"><i data-i="book"></i> Go to My Sets</a>
           <button class="howlink" id="how">How to play…</button>
         </div>
         <div class="rules hidden" id="hRules"></div>
       </div>
     </div>
     <div class="gamesec">
-      <h3 class="sectitle">Choose a game</h3>
+      <h3 class="sectitle">The games</h3>
       <div class="grid" id="grid"></div>
     </div>
   </section>
 
   <section class="steps">
-    <div class="step"><img src="img/m/a9.webp" alt=""><b><i>1</i>Pick a game</b><span>Teacher chooses a game and shows it on the big screen.</span></div>
+    <div class="step"><img src="img/m/a9.webp" alt=""><b><i>1</i>Pick a set</b><span>In My Sets, choose a set, press Play Live, and pick a game for the big screen.</span></div>
     <div class="step"><img src="img/m/a1.webp" alt=""><b><i>2</i>Join on phones</b><span>Students scan the QR code and get a monster.</span></div>
     <div class="step"><img src="img/m/a2.webp" alt=""><b><i>3</i>Play &amp; win!</b><span>Pick a team, answer fast, and win together.</span></div>
   </section>
 
-  <footer>English GameBox · works on any phone browser · no app or account needed</footer>
+  <footer>English GameBox · works on any phone browser · students need no app or account</footer>
 </main>
 
 <script src="gb-art.js?v=6ae51ada"></script>
@@ -196,10 +197,7 @@ function showSel(){
 for (const c of document.querySelectorAll(".card[data-g]")){
   c.onclick=()=>{ sel=GAMES.find(g=>g.id===c.dataset.g); store.set("gb.sel",sel.id); showSel();
     if (window.innerWidth<=820) document.querySelector(".hero").scrollIntoView({behavior:"smooth"}); };
-  c.ondblclick=()=>start();
 }
-function start(){ location.href = dir + sel.id + ".html?host"; }
-$("start").onclick=start;
 $("how").onclick=()=>{ const r=$("hRules"); r.classList.toggle("hidden"); $("how").textContent=r.classList.contains("hidden")?"How to play…":"Hide rules"; };
 showSel();
 

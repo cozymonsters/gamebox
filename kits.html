@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3d4486">
-<title>My Kits · English GameBox</title>
+<title>My Sets · English GameBox</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
@@ -168,10 +168,10 @@
 <section class="login hidden" id="vLogin">
   <div class="lcard">
     <img class="lmon" src="img/m/a9.webp" alt="">
-    <h1>My Kits</h1>
+    <h1>My Sets</h1>
     <div class="lsub">Teacher sign in</div>
     <button class="gbtn" id="gSignIn"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Continue with Google</button>
-    <p class="lnote">Make your own question kits, play them live, and share practice links.<br>Students never need an account.</p>
+    <p class="lnote">Make your own question sets, play them live, and share practice links.<br>Students never need an account.</p>
     <p class="lerr" id="loginErr"></p>
     <a class="lback" href="./">Back to games</a>
   </div>
@@ -181,13 +181,13 @@
 <main class="kt-main hidden" id="vList">
   <section class="panel">
     <div class="phead">
-      <div><div class="eyebrow">Teacher</div><h1>My Kits</h1><div class="sub" id="listSub"></div></div>
+      <div><div class="eyebrow">Teacher</div><h1>My Sets</h1><div class="sub" id="listSub"></div></div>
       <div class="sp"></div>
-      <button class="go sm" id="newKit"><i data-i="plus"></i> New Kit</button>
+      <button class="go sm" id="newKit"><i data-i="plus"></i> New Set</button>
     </div>
     <div class="note hidden" id="listNote"></div>
     <div class="kgrid" id="kitGrid"></div>
-    <div class="empty hidden" id="empty"><img src="img/m/a1.webp" alt=""><h3>No kits yet</h3><p>A kit is a set of words or questions you can play in any game.</p><button class="go sm" id="newKit2"><i data-i="plus"></i> New Kit</button></div>
+    <div class="empty hidden" id="empty"><img src="img/m/a1.webp" alt=""><h3>No sets yet</h3><p>A set is a list of words or questions you can play in any game.</p><button class="go sm" id="newKit2"><i data-i="plus"></i> New Set</button></div>
   </section>
 </main>
 
@@ -195,14 +195,14 @@
 <main class="kt-main hidden" id="vEdit">
   <section class="panel">
     <div class="edbar">
-      <button class="pill white" id="edBack"><i data-i="back"></i> My Kits</button>
+      <button class="pill white" id="edBack"><i data-i="back"></i> My Sets</button>
       <div class="sp"></div>
       <span class="status" id="edStatus"></span>
       <button class="go sm" id="edSave"><i data-i="check"></i> Save</button>
     </div>
     <div class="edhead">
       <span class="ktype" id="edType"></span>
-      <input class="kname" id="edName" maxlength="60" placeholder="Kit name" autocomplete="off">
+      <input class="kname" id="edName" maxlength="60" placeholder="Set name" autocomplete="off">
       <span class="edcount" id="edCount"></span>
     </div>
     <div class="edtools">
@@ -214,7 +214,7 @@
 </main>
 
 <!-- new kit: choose the type -->
-<div class="modal hidden" id="mNew"><div class="mcard"><div class="mh">New Kit</div><div class="mb">
+<div class="modal hidden" id="mNew"><div class="mcard"><div class="mh">New Set</div><div class="mb">
   <div class="choice">
     <button class="ch" data-type="words"><span class="ktype words"><i data-i="book"></i> Vocabulary</span><b>Word list</b><span>English words with their Chinese meaning. Students pick the right meaning or the right word.</span></button>
     <button class="ch" data-type="quiz"><span class="ktype quiz"><i data-i="help"></i> Multiple choice</span><b>Questions</b><span>Your own questions with 2–4 options, the right answer, and an explanation.</span></button>
@@ -231,7 +231,7 @@
 
 <!-- practice QR -->
 <div class="modal hidden" id="mPrac"><div class="mcard cardsm"><div class="mh"><i data-i="qr"></i> Practice</div><div class="mb">
-  <div class="prow"><div class="qrbox" id="pracQR"></div><div><b id="pracName"></b><p>Students scan this code to practise on their phones. The link stays the same, and it always shows the latest version of the kit.</p><a class="plink" id="pracLink" target="_blank" rel="noopener"></a><button class="btn-soft" id="pracCopy"><i data-i="copy"></i> Copy link</button></div></div>
+  <div class="prow"><div class="qrbox" id="pracQR"></div><div><b id="pracName"></b><p>Students scan this code to practise on their phones. The link stays the same, and it always shows the latest version of the set.</p><a class="plink" id="pracLink" target="_blank" rel="noopener"></a><button class="btn-soft" id="pracCopy"><i data-i="copy"></i> Copy link</button></div></div>
   <div class="row"><button class="go sm" data-close>Done</button></div>
 </div></div></div>
 
@@ -245,14 +245,14 @@
 <div class="modal hidden" id="mImp"><div class="mcard" style="width:min(760px,100%)"><div class="mh"><i data-i="paste"></i> Paste from Excel or Word</div><div class="mb">
   <div class="fmt" id="impFmt"></div>
   <textarea id="impText" spellcheck="false"></textarea>
-  <div class="row spread"><span class="imsg" id="impMsg"></span><span style="display:flex;gap:10px"><button class="pill ghost" data-close>Cancel</button><button class="pill white" id="impReplace">Replace all</button><button class="go sm" id="impAdd">Add to kit</button></span></div>
+  <div class="row spread"><span class="imsg" id="impMsg"></span><span style="display:flex;gap:10px"><button class="pill ghost" data-close>Cancel</button><button class="pill white" id="impReplace">Replace all</button><button class="go sm" id="impAdd">Add to set</button></span></div>
 </div></div></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="gb-art.js?v=6ae51ada"></script>
-<script src="gb.js?v=bfa97707"></script>
+<script src="gb.js?v=75ce2c89"></script>
 <script>
 "use strict";
 const { $, show, esc, account, kits, host, parseWords, dirUrl } = GB;
@@ -297,7 +297,7 @@ const App = {
       catch(e){ if (!/popup-closed|cancelled-popup/.test(e.code||"")) $("loginErr").textContent=friendly(e); }
       $("gSignIn").disabled=false;
     };
-    $("signOut").onclick=async()=>{ if (App.dirty && !(await App.ask("Sign out without saving?","Your changes to this kit will be lost.","Sign out"))) return; App.dirty=false; account.signOut(); };
+    $("signOut").onclick=async()=>{ if (App.dirty && !(await App.ask("Sign out without saving?","Your changes to this set will be lost.","Sign out"))) return; App.dirty=false; account.signOut(); };
     account.onChange(u=>App.onUser(u));
   },
 
@@ -309,7 +309,7 @@ const App = {
     view("vLoad");
     try{
       const n=await kits.starter();
-      if (n) toast("Your "+n+" starter kits are ready.");
+      if (n) toast("Your "+n+" starter sets are ready.");
     }catch(e){ App.note(friendly(e)); }
     await App.showList();
   },
@@ -321,10 +321,12 @@ const App = {
     view("vList");
     try{ App.list=await kits.list(); }catch(e){ App.list=[]; App.note(friendly(e)); }
     App.renderList();
+    // kits.html#edit=<id> (the "Edit" button in a game's settings) opens that set straight away
+    const m=location.hash.match(/^#edit=([-\w]+)$/); if (m){ history.replaceState(null,"",location.pathname); const k=App.list.find(x=>x.id===m[1]); if (k) App.edit(k); }
   },
   renderList(){
     const L=App.list;
-    $("listSub").textContent = L.length ? L.length+(L.length===1?" kit":" kits") : "";
+    $("listSub").textContent = L.length ? L.length+(L.length===1?" set":" sets") : "";
     show($("empty"), !L.length);
     $("kitGrid").innerHTML = L.map(k=>{ const T=TYPE[k.type]||TYPE.words; return `
       <div class="kcard" data-id="${esc(k.id)}">
@@ -341,7 +343,7 @@ const App = {
   },
   play(k){
     const need = 4;                                   // the games always show 4 questions / choices before they repeat
-    $("playHint").textContent = (k.count||0) < need ? "This kit needs at least "+need+" "+TYPE[k.type].unit+" before it can be played." : "Pick a game for “"+k.name+"”. It opens on this screen with the kit already chosen.";
+    $("playHint").textContent = (k.count||0) < need ? "This set needs at least "+need+" "+TYPE[k.type].unit+" before it can be played." : "Pick a game for “"+k.name+"”. It opens on this screen with the set already chosen.";
     $("playGames").innerHTML = (k.count||0) < need ? "" : GAMES.map(([g,n])=>`<a class="gcard" href="${g}.html?host&kit=${encodeURIComponent(k.id)}"><img src="img/cover-${g}.webp" alt=""><span class="nm">${n}</span></a>`).join("");
     modal("mPlay");
   },
@@ -356,7 +358,7 @@ const App = {
     try{ await kits.duplicate(k.id); toast("Duplicated “"+k.name+"”."); await App.showList(); }catch(e){ App.note(friendly(e)); }
   },
   async del(k){
-    if (!(await App.ask("Delete this kit?","“"+k.name+"” will be deleted for good. Practice links for it will stop working.","Delete"))) return;
+    if (!(await App.ask("Delete this set?","“"+k.name+"” will be deleted for good. Practice links for it will stop working.","Delete"))) return;
     try{ await kits.remove(k.id); toast("Deleted."); await App.showList(); }catch(e){ App.note(friendly(e)); }
   },
   ask(title, text, ok){
@@ -372,7 +374,7 @@ const App = {
   async edit(k){
     view("vLoad");
     let kit=null; try{ kit=await kits.get(k.id); }catch(e){}
-    if (!kit){ await App.showList(); App.note("That kit couldn't be opened."); return; }
+    if (!kit){ await App.showList(); App.note("That set couldn't be opened."); return; }
     App.open(kit);
   },
   newKit(type){
@@ -480,7 +482,7 @@ const App = {
   async save(){
     const name=$("edName").value.trim();
     const { items, bad } = App.collect();
-    if (!name){ $("edName").focus(); bad.unshift("Give the kit a name"); }
+    if (!name){ $("edName").focus(); bad.unshift("Give the set a name"); }
     const s=$("edStatus");
     if (bad.length){ s.className="status err"; s.textContent=bad[0]+(bad.length>1?" (+"+(bad.length-1)+" more)":""); const b=document.querySelector(".bad"); if (b) b.scrollIntoView({ block:"center", behavior:"smooth" }); return false; }
     $("edSave").disabled=true; s.className="status"; s.textContent="Saving…";
@@ -492,7 +494,7 @@ const App = {
     finally{ $("edSave").disabled=false; }
   },
   async back(){
-    if (App.dirty && !(await App.ask("Leave without saving?","Your changes to this kit will be lost.","Leave"))) return;
+    if (App.dirty && !(await App.ask("Leave without saving?","Your changes to this set will be lost.","Leave"))) return;
     App.dirty=false; App.kit=null; await App.showList();
   },
 

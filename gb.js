@@ -29,7 +29,7 @@ const GB = (() => {
 
   const AVATARS = ART.AVATARS;
 
-  // Question banks live in each teacher's My Kits (Firebase). There are no built-in banks on the site any more.
+  // Question sets live in each teacher's My Sets (kits.html, Firebase). There are no built-in banks on the site any more.
   // window.GB_QUIZ is only set by local test fixtures (fixtures/banks.js).
   const SETS = {};
   if (window.GB_QUIZ) for (const k in window.GB_QUIZ) SETS[k]=window.GB_QUIZ[k];
@@ -152,32 +152,39 @@ const GB = (() => {
     }).filter(q=>q.q && q.o.length>=2);
     return items.map(p=>{ p=arr(p); return [txt(p[0],60), txt(p[1],60)]; }).filter(p=>p[0] && p[1]);
   }
+  // Right after sign-in the database may not have the new login yet, so a first read/write can be refused: try again a few times.
+  async function authed(fn){
+    for (let i=0;;i++){
+      try{ return await fn(); }
+      catch(e){ if (i>=4 || !/permission/i.test((e&&(e.code||e.message))||"")) throw e; await new Promise(r=>setTimeout(r,400*(i+1))); }
+    }
+  }
   const kits = {
     MAX: 300,
     async list(){
       const u=account.user; if (!u) return [];
-      const v=(await db.ref("users/"+u.uid+"/kits").get()).val()||{};
+      const v=(await authed(()=>db.ref("users/"+u.uid+"/kits").get())).val()||{};
       return Object.entries(v).map(([id,k])=>Object.assign({id},k)).sort((a,b)=>(b.updated||0)-(a.updated||0));
     },
     async get(id){
       if (!/^[-\w]{6,40}$/.test(String(id||""))) return null;
       const v=(await db.ref("kits/"+id).get()).val(); if (!v) return null;
-      return { id, owner:v.owner, name:v.name||"Untitled kit", type:v.type==="quiz"?"quiz":"words", items:cleanItems(v.type, v.items), updated:v.updated };
+      return { id, owner:v.owner, name:v.name||"Untitled set", type:v.type==="quiz"?"quiz":"words", items:cleanItems(v.type, v.items), updated:v.updated };
     },
     async save(kit){
       const u=account.user; if (!u) throw new Error("Please sign in again.");
-      const type=kit.type==="quiz"?"quiz":"words", items=cleanItems(type, kit.items).slice(0,kits.MAX), name=txt(kit.name,60)||"Untitled kit";
+      const type=kit.type==="quiz"?"quiz":"words", items=cleanItems(type, kit.items).slice(0,kits.MAX), name=txt(kit.name,60)||"Untitled set";
       const id=kit.id || db.ref("kits").push().key, T=firebase.database.ServerValue.TIMESTAMP;
-      await db.ref().update({ ["kits/"+id]:{ owner:u.uid, name, type, items, count:items.length, updated:T },
-                              ["users/"+u.uid+"/kits/"+id]:{ name, type, count:items.length, updated:T } });
+      await authed(()=>db.ref().update({ ["kits/"+id]:{ owner:u.uid, name, type, items, count:items.length, updated:T },
+                                         ["users/"+u.uid+"/kits/"+id]:{ name, type, count:items.length, updated:T } }));
       return id;
     },
-    async remove(id){ const u=account.user; await db.ref().update({ ["kits/"+id]:null, ["users/"+u.uid+"/kits/"+id]:null }); },
+    async remove(id){ const u=account.user; await authed(()=>db.ref().update({ ["kits/"+id]:null, ["users/"+u.uid+"/kits/"+id]:null })); },
     async duplicate(id){ const k=await kits.get(id); return kits.save({ name:(k.name+" (copy)").slice(0,60), type:k.type, items:k.items }); },
     // first sign-in: copy the built-in banks into the account (saved last-to-first so the list shows them in the usual order)
     async starter(){
       const u=account.user; if (!u) return 0;
-      const ref=db.ref("users/"+u.uid+"/starter"); if ((await ref.get()).val()) return 0;
+      const ref=db.ref("users/"+u.uid+"/starter"); if ((await authed(()=>ref.get())).val()) return 0;
       const keys=Object.keys(SETS).reverse();
       for (const k of keys){ const S=SETS[k]; await kits.save({ name:S.name, type:S.quiz?"quiz":"words", items:S.quiz?S.quiz:parseWords(S.words) }); await new Promise(r=>setTimeout(r,30)); }
       await ref.set(true); return keys.length;
@@ -219,22 +226,20 @@ const GB = (() => {
     },
 
     // settings: <select id=sSet>, plus any selects listed in ids (remembered per teacher)
-    // Question Bank: the signed-in teacher's kits (or the built-in banks when signed out), plus "My Words" typed on this computer
+    // Question Set: the signed-in teacher's sets from My Sets (kits.html). Internally a set is still called a "kit".
     myKits: null, kitCache: {}, extraKit: null,
     initSettings(ids){
-      const sel=$("sSet"), want=(params.get("kit")||"").trim();   // ?kit=<id> comes from "Play Live" on the My Kits page
+      const sel=$("sSet"), want=(params.get("kit")||"").trim();   // ?kit=<id> comes from "Play Live" on the My Sets page
       const opt=(parent,v,t)=>{ const o=document.createElement("option"); o.value=v; o.textContent=t; parent.appendChild(o); return o; };
       const label=k=>k.name+" ("+k.count+(k.type==="quiz"?" questions)":" words)");
       const fill=()=>{
         sel.innerHTML="";
-        if (host.extraKit && !(host.myKits||[]).some(k=>k.id===host.extraKit.id)){ const g=document.createElement("optgroup"); g.label="Shared kit"; sel.appendChild(g); opt(g,"kit:"+host.extraKit.id,label(host.extraKit)); }
+        if (host.extraKit && !(host.myKits||[]).some(k=>k.id===host.extraKit.id)){ const g=document.createElement("optgroup"); g.label="Shared set"; sel.appendChild(g); opt(g,"kit:"+host.extraKit.id,label(host.extraKit)); }
         if (host.myKits){
-          const g=document.createElement("optgroup"); g.label="My Kits"; sel.appendChild(g);
+          const g=document.createElement("optgroup"); g.label="My Sets"; sel.appendChild(g);
           for (const k of host.myKits) opt(g,"kit:"+k.id,label(k));
         } else for (const k in SETS) opt(sel,k,SETS[k].name+" ("+setSize(k)+(SETS[k].quiz?" questions)":" words)"));
-        const custom=parseWords(store.get("tug.custom")||"");
-        if (custom.length>=4) opt(sel,"custom","My Words ("+custom.length+" words)");
-        if (!sel.options.length){ const o=opt(sel,"", account.loaded && !account.user ? "Sign in to My Kits to choose a kit" : "Loading your kits…"); o.disabled=true; }
+        if (!sel.options.length){ const o=opt(sel,"", !account.loaded ? "Loading your sets…" : !account.user ? "Sign in to My Sets to choose a set" : host.kitsErr ? "Couldn't load your sets. Reload the page." : "No sets yet. Make one in My Sets."); o.disabled=true; }
         const saved=store.get("tug.set"); if (saved && [...sel.options].some(o=>o.value===saved)) sel.value=saved;
         if (!sel.value && sel.options.length) sel.selectedIndex=0;
       };
@@ -242,19 +247,22 @@ const GB = (() => {
       const isQuiz=v=> v.startsWith("kit:") ? !!(kitInfo(v)&&kitInfo(v).type==="quiz") : !!(SETS[v]&&SETS[v].quiz);
       const modeLock=()=>{ const m=$("sMode"); if(!m) return; const quiz=isQuiz(sel.value); m.disabled=quiz; const row=m.closest(".setrow"); if(row) row.style.opacity=quiz?.45:""; };
       const prefetch=()=>{ const v=sel.value; if (!v.startsWith("kit:")) return; const id=v.slice(4); if (!host.kitCache[id]) kits.get(id).then(k=>{ if(k) host.kitCache[id]=k; }).catch(()=>{}); };
-      const refresh=()=>{ fill(); modeLock(); prefetch(); };
+      // "Edit" opens the chosen set in My Sets (or the list when nothing is chosen)
+      const editLink=()=>{ const a=$("kitsLink"); if (a) a.href = dirUrl+"kits.html"+(sel.value.startsWith("kit:") && kitInfo(sel.value) && (host.myKits||[]).some(k=>k.id===sel.value.slice(4)) ? "#edit="+sel.value.slice(4) : ""); };
+      const refresh=()=>{ fill(); modeLock(); prefetch(); editLink(); };
       refresh();
-      sel.onchange=()=>{ store.set("tug.set",sel.value); modeLock(); prefetch(); };
+      sel.onchange=()=>{ store.set("tug.set",sel.value); modeLock(); prefetch(); editLink(); };
       // signed-in teachers see their own kits
       account.onChange(async u=>{
-        try{ host.myKits = u ? await kits.list() : null; }catch(e){ host.myKits=null; }
+        host.kitsErr=false;
+        try{ host.myKits = u ? await kits.list() : null; }catch(e){ host.myKits = u ? [] : null; host.kitsErr=!!u; }
         if (want && !host.extraKit){ const k=await kits.get(want).catch(()=>null); if (k){ host.kitCache[k.id]=k; host.extraKit={ id:k.id, name:k.name, type:k.type, count:k.items.length }; store.set("tug.set","kit:"+k.id); } }
         refresh();
       });
-      // "My Kits" link next to My Words: where kits are made and edited
+      // "Edit" link next to the menu: sets are made and edited in My Sets (kits.html)
       if (!$("kitsLink")){
-        const a=document.createElement("a"); a.className="btn-soft"; a.id="kitsLink"; a.href=dirUrl+"kits.html"; a.innerHTML=ART.icon("book")+" My Kits";
-        $("editWords").insertAdjacentElement("afterend", a);
+        const a=document.createElement("a"); a.className="btn-soft"; a.id="kitsLink"; a.href=dirUrl+"kits.html"; a.innerHTML=ART.icon("pencil")+" Edit"; a.title="Make and edit sets in My Sets";
+        sel.insertAdjacentElement("afterend", a); editLink();
       }
       // practice: a QR code students scan to practise (4-choice quiz, cards.html) the selected list on their phones before the game
       if (!$("cardsBtn")){
@@ -269,36 +277,21 @@ const GB = (() => {
         m.onclick=e=>{ if(e.target===m) show(m,false); };
         $("cardsDone").onclick=()=>show(m,false);
         b.onclick=async()=>{
-          const k=sel.value, custom=k==="custom", kit=k.startsWith("kit:"), list=host.words(), quiz=isQuiz(k);
-          if (!k){ $("cardsName").textContent="No question bank yet"; $("cardsCount").textContent="Sign in to My Kits and choose a kit first."; $("cardsQR").innerHTML=""; show(m); return; }
-          $("cardsName").textContent = custom ? "My Words" : kit ? (kitInfo(k)||{}).name||"Kit" : (SETS[k]||{}).name||"";
+          const k=sel.value, kit=k.startsWith("kit:"), list=host.words(), quiz=isQuiz(k);
+          if (!k){ $("cardsName").textContent="No question set yet"; $("cardsCount").textContent="Sign in to My Sets and choose a set first."; $("cardsQR").innerHTML=""; show(m); return; }
+          $("cardsName").textContent = kit ? (kitInfo(k)||{}).name||"Set" : (SETS[k]||{}).name||"";
           $("cardsCount").textContent = (kit && kitInfo(k) ? kitInfo(k).count : list.length)+(quiz?" questions":" words");
           $("cardsQR").innerHTML='<div class="qrwait">Loading…</div>'; show(m);
-          let url = kit ? dirUrl+"cards.html?k="+k.slice(4) : dirUrl+"cards.html?set="+k;
-          if (custom){                                  // teacher's own list lives on this computer: share it through the room
-            for (let i=0;i<40 && !host.code;i++) await new Promise(r=>setTimeout(r,150));
-            if (!host.code){ $("cardsQR").innerHTML='<div class="qrwait">Not connected yet. Try again.</div>'; return; }
-            await db.ref("rooms/"+host.code+"/deck").set({ name:"My Words", words:list });
-            url = dirUrl+"cards.html?r="+host.code;
-          }
+          const url = kit ? dirUrl+"cards.html?k="+k.slice(4) : dirUrl+"cards.html?set="+k;
           host.drawQR(url, $("cardsQR"));
         };
       }
       for (const id of ids){ const el=$(id); const v=store.get("tug."+id); if(v && [...el.options].some(o=>o.value===v)) el.value=v; el.onchange=()=>store.set("tug."+id,el.value); }
-      // word editor modal
-      $("editWords").onclick=()=>{ $("wordText").value=store.get("tug.custom")||""; $("wordErr").textContent=""; show($("wordModal")); $("wordText").focus(); };
-      $("wordCancel").onclick=()=>show($("wordModal"),false);
-      $("wordSave").onclick=()=>{
-        const list=parseWords($("wordText").value);
-        if (list.length<4){ $("wordErr").textContent="Found "+list.length+" words. Need at least 4 (format: English 中文)."; return; }
-        store.set("tug.custom",$("wordText").value); store.set("tug.set","custom");
-        refresh(); sel.value="custom"; modeLock(); show($("wordModal"),false);
-      };
     },
     words(){
       const k=$("sSet").value;
       if (k.startsWith("kit:")){ const c=host.kitCache[k.slice(4)]; return c ? c.items : []; }
-      return k==="custom" ? parseWords(store.get("tug.custom")||"") : SETS[k] ? (SETS[k].quiz ? SETS[k].quiz : parseWords(SETS[k].words)) : [];
+      return SETS[k] ? (SETS[k].quiz ? SETS[k].quiz : parseWords(SETS[k].words)) : [];
     },
     // the selected bank's questions, waiting for a kit to finish loading if needed
     async wordsReady(){
