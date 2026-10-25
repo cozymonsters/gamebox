@@ -474,6 +474,14 @@ const GB = (() => {
       }
       return me;
     },
+    // a phone that reloads (or is reopened) in the middle of a round keeps its points: take the saved values once
+    resume(P){
+      if (!P._canResume || !P.meV) return;
+      P._canResume=false;
+      for (const k of ["score","pts","threes","best","combo","tricks"]) if (typeof P.meV[k]==="number" && k in P && P.meV[k]>P[k]) P[k]=P.meV[k];
+      try{ P.setBar && P.setBar(); P.renderMeter && P.renderMeter(); }catch(e){}
+      const sc=$("pSc"); if (sc && typeof P.pts==="number" && P.pts>0) sc.textContent=P.pts+" pts";
+    },
     kicked(P, ref, me, v){
       P.joined=false; me.off(); ref.child("meta").off();
       me.child("online").onDisconnect().cancel(); if (v) me.remove();

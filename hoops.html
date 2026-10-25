@@ -287,7 +287,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="gb-art.js?v=6ae51ada"></script>
-<script src="gb.js?v=2572a1c8"></script>
+<script src="gb.js?v=10c5da0e"></script>
 <script>
 "use strict";
 const GAME="hoops";
@@ -599,6 +599,7 @@ const Player = {
     const me=GB.join.presence(this, this.ref);
     me.on("value",s=>{
       const v=s.val();
+      this.meV=v||null; GB.join.resume(this);             // my saved score etc. (picked up again after a refresh)
       if (!v || !v.name){ if (this.joined){ GB.join.kicked(this, this.ref, me, v); this.setBar(); } return; }
       this.team=v.team; this.name=v.name;
       if (typeof v.pts==="number" && v.pts<this.pts){ this.pts=v.pts; this.score=v.score||0; this.threes=v.threes||0; }
@@ -686,7 +687,8 @@ const Player = {
     clearInterval(this.timerInt);
     if (st==="lobby"){ this.clearFx(); $("player").classList.remove("crunch"); show($("pWait"),true); show($("pPlay"),false); show($("pEnd"),false); show($("pCount"),false); this.pts=0; this.score=0; this.setBar(); return; }
     if (st==="play"){
-      if (m.round!==this.round){ this.round=m.round; this.score=0; this.pts=0; this.threes=0; this.combo=0; this.best=0; this.tricks=0; this.recent=[]; this.clearFx(); this.setBar(); this.renderMeter(); this.nextQ(); }
+      if (m.round!==this.round){ this._canResume = this.round===-1 && m.state==="play"; this.round=m.round; this.score=0; this.pts=0; this.threes=0; this.combo=0; this.best=0; this.tricks=0; this.recent=[]; this.clearFx(); GB.join.resume(this);   // refreshed mid-game: keep my points
+        this.setBar(); this.renderMeter(); this.nextQ(); }
       show($("pWait"),false); show($("pEnd"),false); show($("pPlay"),true);
       let lastN=null;
       const tick=()=>{
