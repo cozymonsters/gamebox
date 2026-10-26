@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="gb.css?v=374bfc16">
+<link rel="stylesheet" href="gb.css?v=4132ba2d">
 <style>
 .hidden{display:none!important}  /* works even before gb.css arrives */
 .setup-wrap{flex:1;padding:6px 24px 28px;overflow:auto}
@@ -71,6 +71,10 @@
 .mt.mine-now{opacity:1;animation:tpop .4s}
 #player.crunch .pinfo .t{background:var(--mustard);border-color:var(--mustard)}
 .mhint{font-size:14px;font-weight:800;color:var(--sub);text-align:center}
+/* land bar: red / blue share of the points */
+.landbar{flex:1;display:flex;height:34px;border-radius:12px;overflow:hidden;margin:0 6px;background:var(--line)}
+.landbar b{display:flex;align-items:center;font-family:var(--display);font-weight:600;font-size:18px;color:#fff;padding:0 12px;flex:1 1 0;min-width:44px;transition:flex-grow .4s}
+.landbar .r{background:var(--red)} .landbar .b{background:var(--blue);justify-content:flex-end}
 </style>
 </head>
 <body>
@@ -199,7 +203,8 @@
   </div>
 
   <div class="p-body hidden" id="pPlay">
-    <div class="pinfo"><span class="t" id="pTimeBox"><i data-i="timer"></i> <span id="pTime">--</span></span><span class="pscore"><b class="r" id="pR">0</b><b class="b" id="pB">0</b></span></div>
+    <div class="pinfo"><span class="t" id="pTimeBox"><i data-i="timer"></i> <span id="pTime">--</span></span></div>
+    <div class="pstrip"><div class="landbar"><b class="r" id="pR">0</b><b class="b" id="pB">0</b></div></div>
     <div class="qwrap">
       <div class="qcard">
         <div class="ask" id="pAsk">What does it mean?</div>
@@ -242,7 +247,7 @@
 const GAME="grab";
 const { $, show, esc, store, rand, pick, fmt, beep } = GB;
 const now = GB.now;
-const CHEERS_NO = ["Oops!","Almost!","Try again!","Not quite!"];
+const CHEERS_NO = ["Oops!"];   // same word as Practice
 const DOUBLE_MS = 20000;      // last 20 s: each right answer paints 2 tiles
 const PICK_MS = 6000;         // phone auto-picks a tile after 6 s
 const MAX_CAP = 6;            // surround up to 6 tiles to grab them
@@ -522,7 +527,7 @@ const Player = {
     this.showAv();
   },
 
-  drawScore(){ const {N}=dims(this.meta), p=Map_.points(this.grid,this.meta.stars||[],N); $("pR").textContent=p.red; $("pB").textContent=p.blue; },
+  drawScore(){ const {N}=dims(this.meta), p=Map_.points(this.grid,this.meta.stars||[],N); $("pR").textContent=p.red; $("pB").textContent=p.blue; $("pR").style.flexGrow=Math.max(1,p.red); $("pB").style.flexGrow=Math.max(1,p.blue); },
 
   /* ---- the paint map ---- */
   openMap(){

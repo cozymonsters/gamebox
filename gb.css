@@ -32,6 +32,8 @@ img{-webkit-user-drag:none;user-select:none}
 @keyframes gb-hop{0%,100%{transform:translateY(0) rotate(0)}30%{transform:translateY(-12px) rotate(-4deg)}60%{transform:translateY(0) rotate(3deg)}}
 @keyframes gb-shake{25%{transform:translateX(-9px)}75%{transform:translateX(9px)}}
 @keyframes gb-wiggle{25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
+@keyframes gb-pulse{50%{transform:scale(1.06)}}
+@keyframes gb-glow{50%{filter:brightness(1.1) saturate(1.15)}}   /* wide phone bars: glow instead of tilting */   /* straight "look here" pulse (no tilting) for phone badges */
 @keyframes gb-spin{to{transform:rotate(360deg)}}
 
 /* ---------- top bar ---------- */
@@ -238,7 +240,7 @@ canvas.confetti{position:absolute;inset:0;pointer-events:none;z-index:9}
 .pinfo{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:900;font-size:17px}
 .pinfo .t{display:flex;align-items:center;gap:5px;background:var(--paper);border:2px solid var(--line);border-radius:100px;padding:3px 14px;white-space:nowrap}
 .pinfo .t .gi{width:17px;height:17px}
-.pinfo .t.warn{background:var(--mustard);border-color:var(--mustard);animation:gb-wiggle .5s infinite}
+.pinfo .t.warn{background:var(--mustard);border-color:var(--mustard);animation:gb-pulse .6s infinite}
 .qcard{background:#fff;color:var(--ink);border:2px solid var(--line);border-radius:22px;padding:16px 14px;text-align:center;position:relative;min-height:128px;display:flex;flex-direction:column;justify-content:center;gap:4px;box-shadow:0 5px 0 var(--line)}
 .qcard .ask{font-size:14px;font-weight:900;color:var(--sub);text-transform:uppercase;letter-spacing:.08em}
 .qcard .q{font-family:var(--display);font-size:clamp(34px,11vw,52px);font-weight:600;line-height:1.08;word-break:break-word}
@@ -334,10 +336,11 @@ html.phone .doodles{display:none}
 .setitem:hover{border-color:var(--go)}
 .setitem.on{border-color:var(--go);background:#f1f8f3}
 .setitem b{font-family:var(--display);font-weight:600;font-size:20px;line-height:1.2}
+.setitem .ktype{align-self:flex-start}
 .setitem small{font-weight:800;color:var(--sub);font-size:13px}
 .setitem .cur{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;background:var(--go);color:#fff;display:flex;align-items:center;justify-content:center}
 .setitem .cur .gi{width:16px;height:16px;stroke-width:3}
-.ktype{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;border-radius:999px;padding:3px 10px;font-weight:900;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.ktype{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-weight:900;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
 .ktype.words{background:#dcf1f1;color:#1d736e} .ktype.quiz{background:#e7e3f7;color:#5b4ca0}
 .mcard .row.spread{justify-content:space-between;align-items:center}
 .lob-join .l3{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:18px}
@@ -379,3 +382,21 @@ html.phone .doodles{display:none}
 
 .tosets{padding:7px 14px;font-size:15px;text-decoration:none}
 .tosets .gi{width:18px;height:18px}
+
+/* phones during a game: same layout as Practice — the question card fills the free space, big answer buttons sit at the bottom */
+#player.screen{min-height:100vh;min-height:100dvh}
+#pPlay{padding-bottom:calc(14px + env(safe-area-inset-bottom))}
+#pPlay .qwrap{flex:1;min-height:0}
+#pPlay .qcard{flex:1;min-height:clamp(140px,24vh,240px);border-radius:26px}
+#pPlay .qcard .q:not(.long){font-size:clamp(46px,15vw,78px)}
+#pPlay .qcard .q.zh:not(.long){font-size:clamp(38px,12vw,60px)}
+#pPlay .opts{flex:none;max-height:none}
+#pPlay .opts:not(.long) .opt{min-height:96px;font-size:clamp(22px,6.6vw,30px)}
+#pPlay .qcard.quiz{justify-content:center}
+#pPlay .opts.long .opt{min-height:60px;font-size:clamp(17px,4.8vw,20px)}
+
+/* phones during a game: every game has the same two bars on top — the timer row, then one status strip of the same height */
+#pPlay .pinfo{min-height:38px}
+.pstrip{position:relative;flex:none;height:64px;display:flex;align-items:center;background:var(--paper);border:2px solid var(--line);border-radius:18px;padding:6px}
+/* the card shows only the word / question (no "What does it mean?" line) */
+#pPlay .qcard .ask{display:none}

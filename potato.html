@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="gb.css?v=374bfc16">
+<link rel="stylesheet" href="gb.css?v=4132ba2d">
 <style>
 .hidden{display:none!important}  /* works even before gb.css arrives */
 /* ---- Hot Potato scene ---- */
@@ -78,6 +78,13 @@
 .plives span{display:flex;align-items:center;gap:2px}
 .plives svg{width:18px;height:18px}
 .qwrap{display:flex;flex-direction:column;gap:12px;flex:1}
+/* bomb status fits the shared strip height */
+.pst-bomb{padding:0;border:0;background:none}
+.pst-bomb .pstatus{width:100%;height:100%;padding:4px 12px 4px 6px;border-radius:16px;gap:10px}
+.pst-bomb .pstatus .pb{width:46px;height:54px}
+.pst-bomb .pstatus b{font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pst-bomb .pstatus small{font-size:13px;margin-top:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pst-bomb .pstatus > span:last-child{min-width:0;flex:1}
 </style>
 </head>
 <body>
@@ -212,7 +219,7 @@
 
   <div class="p-body hidden" id="pPlay">
     <div class="pinfo"><span class="t" id="pTimeBox"><i data-i="timer"></i> <span id="pTime">--</span></span><span class="plives" id="pLives"></span></div>
-    <div class="pstatus" id="pStatus"></div>
+    <div class="pstrip pst-bomb"><div class="pstatus" id="pStatus"></div></div>
     <div class="qwrap">
       <div class="qcard">
         <div class="ask" id="pAsk">What does it mean?</div>
@@ -249,7 +256,7 @@ const GAME="potato";
 const { $, show, esc, store, rand, pick, fmt, beep } = GB;
 const now = GB.now;
 const CHEERS_OK = ["Nice!","Great!","Yes!","Quick!","Super!","Cool!"];
-const CHEERS_NO = ["Oops!","Almost!","Try again!","Not quite!"];
+const CHEERS_NO = ["Oops!"];   // same word as Practice
 const EXTRA_MAX = 3;                         // the other team can add up to +3 answers
 const BOOM_PAUSE = 3800;                     // ms between a blast and the next bomb
 const fuseMs = sudden => sudden ? 10000 + rand(8000) : 18000 + rand(14000);
