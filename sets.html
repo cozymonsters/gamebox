@@ -86,7 +86,9 @@
 /* editor */
 .edbar{display:flex;align-items:center;gap:12px;margin:-10px -12px 14px;padding:10px 12px;flex-wrap:wrap;position:sticky;top:0;z-index:5;background:var(--panel);border-radius:18px}   /* Save stays in reach on long kits */
 .status{font-weight:800;color:var(--sub);font-size:15px}
-.status.dirty{color:var(--orange)} .status.err{color:var(--red)}
+.status.err{color:var(--red)}
+#edSave{min-width:150px;justify-content:center}
+#edSave.saved,#edSave.saved:disabled{background:#e2f0e6;color:var(--go-d);box-shadow:0 5px 0 #c5dccb;cursor:default;transform:none}
 .edhead{background:var(--paper);border-radius:20px;padding:16px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .kname{flex:1;min-width:220px;font-family:var(--display);font-weight:600;font-size:32px;border:2px solid transparent;border-radius:12px;padding:4px 10px;background:transparent;color:var(--ink)}
 .kname:hover{border-color:var(--line)} .kname:focus{outline:none;border-color:var(--blue);background:#fff}
@@ -433,7 +435,13 @@ const App = {
     for (const it of kit.items) kit.type==="quiz" ? App.addQ(it) : App.addW(it);
     App.setDirty(false); App.count();
   },
-  setDirty(on){ App.dirty=on; const s=$("edStatus"); s.className="status"+(on?" dirty":""); s.textContent = on ? "Unsaved changes" : (App.kit && App.kit.id ? "All changes saved" : ""); },
+  // Save button shows the state: green "Save" = there is something to save; soft "Saved" = nothing to do. The status text is only for problems.
+  saveBtn(state){
+    const b=$("edSave"), saved=state==="saved";
+    b.classList.toggle("saved", saved); b.disabled = state!=="save";
+    b.innerHTML = ART.icon("check") + (state==="saving" ? " Saving…" : saved ? " Saved" : " Save");
+  },
+  setDirty(on){ App.dirty=on; const s=$("edStatus"); s.className="status"; s.textContent=""; App.saveBtn(on || !(App.kit && App.kit.id) ? "save" : "saved"); },
   changed(){ App.setDirty(true); App.count(); },
   count(){
     const n = App.kit.type==="quiz" ? $("edBody").querySelectorAll(".qitem").length : $("edBody").querySelectorAll(".wrow").length;
@@ -527,13 +535,12 @@ const App = {
     if (!name){ $("edName").focus(); bad.unshift("Give the set a name"); }
     const s=$("edStatus");
     if (bad.length){ s.className="status err"; s.textContent=bad[0]+(bad.length>1?" (+"+(bad.length-1)+" more)":""); const b=document.querySelector(".bad"); if (b) b.scrollIntoView({ block:"center", behavior:"smooth" }); return false; }
-    $("edSave").disabled=true; s.className="status"; s.textContent="Saving…";
+    s.className="status"; s.textContent=""; App.saveBtn("saving");
     try{
       const id=await kits.save({ id:App.kit.id, name, type:App.kit.type, items });
-      App.kit.id=id; App.kit.name=name; App.setDirty(false); toast("Saved.");
+      App.kit.id=id; App.kit.name=name; App.setDirty(false);
       return true;
-    }catch(e){ s.className="status err"; s.textContent=friendly(e); return false; }
-    finally{ $("edSave").disabled=false; }
+    }catch(e){ s.className="status err"; s.textContent=friendly(e); App.saveBtn("save"); return false; }
   },
   async back(){
     if (App.dirty && !(await App.ask("Leave without saving?","Your changes to this set will be lost.","Leave"))) return;
@@ -621,6 +628,7 @@ $("newKit").onclick=$("newKit2").onclick=()=>modal("mNew");
 for (const b of document.querySelectorAll("#mNew .ch")) b.onclick=()=>App.newKit(b.dataset.type);
 $("edBack").onclick=()=>App.back();
 $("edSave").onclick=()=>App.save();
+document.addEventListener("keydown",e=>{ if ((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==="s" && !$("vEdit").classList.contains("hidden")){ e.preventDefault(); if (!$("edSave").disabled) App.save(); } });   // Cmd/Ctrl+S
 $("edName").oninput=()=>App.changed();
 $("edAdd").onclick=()=>App.kit.type==="quiz" ? App.addQ(null,true) : App.addW(null,true);
 $("edImport").onclick=()=>App.importOpen();
@@ -628,6 +636,8 @@ $("impAdd").onclick=()=>App.importDo(false);
 $("impReplace").onclick=()=>App.importDo(true);
 addEventListener("keydown",e=>{ if ((e.metaKey||e.ctrlKey) && e.key==="s" && !$("vEdit").classList.contains("hidden")){ e.preventDefault(); App.save(); } });
 addEventListener("beforeunload",e=>{ if (App.dirty){ e.preventDefault(); e.returnValue=""; } });
+// the Cozy Monsters link: same friendly question as "My Sets" instead of the browser's own warning
+document.querySelector(".kt-top .brand").addEventListener("click",async e=>{ if (!App.dirty) return; e.preventDefault(); if (await App.ask("Leave without saving?","Your changes to this set will be lost.","Leave")){ App.dirty=false; location.href=e.currentTarget.href; } });
 App.start();
 </script>
 </body>
