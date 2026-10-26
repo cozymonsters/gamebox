@@ -13,8 +13,24 @@
 .gi{width:1.1em;height:1.1em;vertical-align:-.18em;flex:none} i[data-i]{font-style:normal;display:inline-flex;align-items:center}
 .kt-top{max-width:1240px;margin:0 auto;padding:14px 28px 6px}
 .kt-top .brand{font-size:32px;color:var(--on-bg)} .kt-top .brand .ic{width:50px;height:50px}
-.who{display:flex;align-items:center;gap:10px;color:var(--on-bg);font-weight:800;font-size:15px}
-.who .init{width:34px;height:34px;border-radius:50%;background:var(--mustard);color:var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:18px}
+.who{position:relative;display:flex;align-items:center}
+.acct{display:flex;align-items:center;gap:4px;background:none;border:0;padding:4px 6px 4px 4px;border-radius:100px;cursor:pointer;color:var(--on-bg)}
+.acct:hover,.acct[aria-expanded="true"]{background:rgba(255,255,255,.14)}
+.acct .gi{width:18px;height:18px;transition:transform .15s} .acct[aria-expanded="true"] .gi{transform:rotate(180deg)}
+.acctm{position:absolute;top:calc(100% + 8px);right:0;z-index:30;min-width:240px;max-width:300px;background:var(--paper);border:2px solid var(--line);border-radius:18px;box-shadow:0 10px 30px rgba(20,20,60,.25);padding:8px;color:var(--ink)}
+.am-id{display:flex;align-items:center;gap:10px;padding:8px 8px 12px;border-bottom:2px solid var(--line);margin-bottom:6px}
+.am-id>div{min-width:0}
+.am-nm{font-weight:900;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.am-em{font-weight:700;font-size:13px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.am-out{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;border-radius:12px;padding:10px;font:inherit;font-weight:800;font-size:15px;color:var(--ink);cursor:pointer;text-align:left}
+.am-out:hover{background:var(--cream)} .am-out .gi{width:18px;height:18px}
+.am-edit{padding:4px 6px 10px;border-bottom:2px solid var(--line);margin-bottom:6px}
+.am-edit label{display:block;font-weight:800;font-size:13px;color:var(--sub);margin:2px 2px 6px}
+.am-edit input{width:100%;box-sizing:border-box;font:inherit;font-weight:800;font-size:16px;padding:9px 12px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+.am-edit input:focus{outline:none;border-color:var(--blue)}
+.am-btns{display:flex;justify-content:flex-end;gap:8px;margin-top:8px} .am-btns .pill{padding:7px 14px;font-size:14px}
+.am-cancel{background:#fff;border:2px solid var(--line);cursor:pointer} .am-save{background:var(--go);color:#fff;border:0;box-shadow:0 3px 0 var(--go-d);cursor:pointer} .am-save:disabled{opacity:.6}
+.who .init{width:40px;height:40px;border-radius:50%;background:var(--mustard);color:var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:18px}
 .kt-main{max-width:1240px;margin:0 auto;padding:10px 28px 56px}
 .kt-main .panel{background:var(--panel);border-radius:28px;box-shadow:0 8px 0 var(--lift);padding:26px 28px 30px;overflow:visible}   /* visible: lets the Save bar stick */
 .sp{flex:1}
@@ -140,7 +156,6 @@
 
 @media (max-width:760px){
   .kt-top{padding:12px 16px 4px} .kt-top .brand{font-size:26px} .kt-top .brand .ic{width:42px;height:42px}
-  .who .nm{display:none}
   .kt-main{padding:6px 12px 40px}
   .kt-main .panel{padding:18px 14px 22px;border-radius:22px}
   .phead h1{font-size:38px}
@@ -157,9 +172,17 @@
 <body>
 <div class="doodles"></div>
 <header class="gb-top kt-top">
-  <a class="brand" href="./"><span class="ic" data-art="logo"></span>GameBox</a>
+  <a class="brand" href="./"><span class="ic" data-art="logo"></span>Cozy Monsters</a>
   <div class="sp"></div>
-  <div class="who hidden" id="who"><span class="init" id="whoInit"></span><span class="nm">Signed in</span><button class="pill white" id="signOut">Sign out</button></div>
+  <div class="who hidden" id="who">
+    <button class="acct" id="acctBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Account"><span class="init" id="whoInit"></span><i data-i="chev"></i></button>
+    <div class="acctm hidden" id="acctMenu" role="menu">
+      <div class="am-id"><span class="init" id="whoInit2"></span><div><div class="am-nm" id="whoName"></div><div class="am-em" id="whoEmail"></div></div></div>
+      <form class="am-edit hidden" id="nameForm"><label for="nameIn">Display name</label><input id="nameIn" maxlength="40" autocomplete="off" placeholder="e.g. Mr. Su"><div class="am-btns"><button type="button" class="pill am-cancel" id="nameCancel">Cancel</button><button type="submit" class="pill am-save" id="nameSave">Save</button></div></form>
+      <button class="am-out" id="nameEdit" role="menuitem"><i data-i="pencil"></i> Edit display name</button>
+      <button class="am-out" id="signOut" role="menuitem"><i data-i="logout"></i> Sign out</button>
+    </div>
+  </div>
 </header>
 
 <div class="kt-load" id="vLoad"><img src="img/m/a5.webp" alt=""><div>Loading…</div></div>
@@ -255,7 +278,7 @@
 <script src="gb.js?v=0399ebb3"></script>
 <script>
 "use strict";
-const { $, show, esc, account, kits, host, parseWords, dirUrl } = GB;
+const { $, show, esc, account, kits, profile, host, parseWords, dirUrl } = GB;
 
 // page-only icons (24x24 line icons, same style as gb-art.js)
 const PI = {
@@ -297,21 +320,40 @@ const App = {
       catch(e){ if (!/popup-closed|cancelled-popup/.test(e.code||"")) $("loginErr").textContent=friendly(e); }
       $("gSignIn").disabled=false;
     };
-    $("signOut").onclick=async()=>{ if (App.dirty && !(await App.ask("Sign out without saving?","Your changes to this set will be lost.","Sign out"))) return; App.dirty=false; account.signOut(); };
+    const menu=$("acctMenu"), btn=$("acctBtn");
+    const setMenu=open=>{ menu.classList.toggle("hidden",!open); btn.setAttribute("aria-expanded",open?"true":"false"); };
+    btn.onclick=e=>{ e.stopPropagation(); setMenu(menu.classList.contains("hidden")); };
+    document.addEventListener("click",e=>{ if (!menu.contains(e.target)) setMenu(false); });
+    document.addEventListener("keydown",e=>{ if (e.key==="Escape") setMenu(false); });
+    const editing=on=>{ show($("nameForm"),on); show($("nameEdit"),!on); if (on){ $("nameIn").value=$("whoName").textContent; setTimeout(()=>$("nameIn").focus(),0); } };
+    $("nameEdit").onclick=e=>{ e.stopPropagation(); editing(true); };
+    $("nameCancel").onclick=()=>editing(false);
+    $("nameForm").onsubmit=async e=>{ e.preventDefault(); $("nameSave").disabled=true;
+      try{ const n=await profile.setName($("nameIn").value); App.showName(n); editing(false); toast("Name saved."); }
+      catch(err){ toast(friendly(err)); }
+      $("nameSave").disabled=false; };
+    btn.addEventListener("click",()=>editing(false));
+    $("signOut").onclick=async()=>{ setMenu(false); if (App.dirty && !(await App.ask("Sign out without saving?","Your changes to this set will be lost.","Sign out"))) return; App.dirty=false; account.signOut(); };
     account.onChange(u=>App.onUser(u));
   },
 
   async onUser(u){
     show($("who"), !!u);
     if (!u){ App.list=[]; view("vLogin"); return; }
-    $("whoInit").textContent=((u.displayName||u.email||"?").trim()[0]||"?").toUpperCase();
-    $("who").title=u.email||"";
+    $("whoEmail").textContent=u.email||""; App.showName("");
+    profile.name().then(n=>{ if (n) App.showName(n); }).catch(()=>{});
     view("vLoad");
     try{
       const n=await kits.starter();
       if (n) toast("Your "+n+" starter sets are ready.");
     }catch(e){ App.note(friendly(e)); }
     await App.showList();
+  },
+
+  showName(n){
+    const u=account.user||{}; n=n||u.displayName||"Teacher";
+    $("whoName").textContent=n;
+    $("whoInit").textContent=$("whoInit2").textContent=((n||u.email||"?").trim()[0]||"?").toUpperCase();
   },
 
   note(msg, ok){ const n=$("listNote"); n.textContent=msg||""; n.classList.toggle("ok",!!ok); show(n,!!msg); },

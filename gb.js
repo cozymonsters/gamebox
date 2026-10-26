@@ -191,6 +191,12 @@ const GB = (() => {
     }
   };
 
+  // the teacher's own display name (only shown to them, in the account menu); falls back to the Google name
+  const profile = {
+    async name(){ const u=account.user; if (!u) return ""; return txt((await authed(()=>db.ref("users/"+u.uid+"/name").get())).val(),40); },
+    async setName(n){ const u=account.user; if (!u) throw new Error("Please sign in again."); n=txt(n,40); await authed(()=>db.ref("users/"+u.uid+"/name").set(n||null)); return n; }
+  };
+
   /* ---- team names: every new room gets two random names; the team colour (red / blue) shows which is which, so the names don't say it ---- */
   const TEAM_POOL = {                                    // monster crews (red side a bit fiery, blue side a bit splashy)
     red:  ["Chompers","Stompers","Fireballs","Rumblers","Spikers","Grumblers","Munchers","Roarers","Sizzlers","Fangsters","Hotheads","Gobblers"],
@@ -551,7 +557,7 @@ const GB = (() => {
   }
   const wrongMs = q => q && q.quiz ? 3200 : 1400;
 
-  return { db, now, $, show, esc, store, rand, pick, shuffle, fmt, params, baseUrl, dirUrl, AVATARS, SETS, parseWords, account, kits,
+  return { db, now, $, show, esc, store, rand, pick, shuffle, fmt, params, baseUrl, dirUrl, AVATARS, SETS, parseWords, account, kits, profile,
            tn, tnV, tnWin, tnPos, teamSubs, paintTeams,
            beep, unlockAudio, fanfare, buzzer, speak, voice, primeVoice, confetti, host, join, makeQuestion, renderQuestion, showWhy, wrongMs };
 })();
