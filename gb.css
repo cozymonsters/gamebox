@@ -423,3 +423,11 @@ html.phone .doodles{display:none}
   .lobby{flex:none} .lob-teams{flex:none} .tcol .names{min-height:96px;overflow:visible}   /* the page scrolls instead of squeezing the team lists */
   .setshow{justify-content:flex-start} .setshow .ss-txt{align-items:flex-start;text-align:left;width:100%;margin:0 0 4px}
 }
+
+/* page translation turned on (student screens): cover the game until it is off */
+.trblock{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(250,246,236,.97)}
+.trcard{max-width:340px;text-align:center;background:var(--paper);border:2px solid var(--line);border-radius:24px;padding:22px 20px;box-shadow:0 6px 0 var(--lift)}
+.trcard .gi{width:44px;height:44px;color:#fff;background:var(--red);border-radius:50%;padding:9px;box-sizing:border-box}
+.trcard b{display:block;margin-top:10px;font-family:var(--display);font-weight:600;font-size:28px}
+.trcard p{margin:6px 0 10px;font-weight:800;font-size:17px}
+.trcard small{display:block;font-weight:700;font-size:14px;color:var(--sub);line-height:1.5}

@@ -1,14 +1,15 @@
 <!doctype html>
-<html lang="en" class="phone">
+<html lang="en" translate="no" class="phone notranslate">
 <head>
 <meta charset="utf-8">
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#faf6ec">
 <title>Practice · GameBox</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="gb.css?v=52bcab66">
+<link rel="stylesheet" href="gb.css?v=ba0efca6">
 <style>
 .hidden{display:none!important}
 body{background:var(--cream)}
@@ -148,7 +149,7 @@ body{background:var(--cream)}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="gb-art.js?v=d654df6b"></script>
-<script src="gb.js?v=4e5e8099"></script>
+<script src="gb.js?v=c408992e"></script>
 <script>
 "use strict";
 const { $, show, esc, store, shuffle, params, SETS, parseWords, speak, voice, primeVoice, db, beep } = GB;
@@ -220,15 +221,15 @@ const Practice = {
     let html, opts, answer, long=false, en2zh=false;
     if (this.quiz){
       const sub = it.s ? `<div class="qsub${/[一-鿿]/.test(it.s.replace(/^原文[^：:]*[：:]/,""))?"":" en"}">${esc(it.s)}</div>` : "";
-      html=`<span class="tag">Question</span><div class="qtext">${esc(it.q)}</div>${sub}${mon}`;
+      html=`<span class="tag">Question</span><div class="qtext" data-t="${esc(it.q)}">${esc(it.q)}</div>${sub}${mon}`;
       opts=shuffle(it.o.map((t,k)=>({t,ok:k===it.a}))); long=true;
     } else {
       const dir = this.dir==="mix" ? (Math.random()<.5?"en2zh":"zh2en") : this.dir; en2zh = dir==="en2zh";
       const pool=shuffle(this.items.map((_,k)=>k).filter(k=>k!==i)).slice(0,3);
       opts=shuffle([i,...pool].map(k=>({t:this.items[k][en2zh?1:0], ok:k===i})));
       html = en2zh
-        ? `<span class="tag">What does it mean?</span><button class="say" id="say" aria-label="Listen">${ART.icon("volume")}</button><div class="big">${esc(it[0])}</div>${mon}`
-        : `<span class="tag">Which English word?</span><div class="big zh">${esc(it[1])}</div>${mon}`;
+        ? `<span class="tag">What does it mean?</span><button class="say" id="say" aria-label="Listen">${ART.icon("volume")}</button><div class="big" data-t="${esc(it[0])}">${esc(it[0])}</div>${mon}`
+        : `<span class="tag">Which English word?</span><div class="big zh" data-t="${esc(it[1])}">${esc(it[1])}</div>${mon}`;
     }
     this.cur={i, it, opts, en2zh};
     const Q=$("qbox"); Q.innerHTML=html; Q.classList.remove("pop"); void Q.offsetWidth; Q.classList.add("pop");
@@ -236,7 +237,7 @@ const Practice = {
     // an English word on the card is read out as soon as it appears (a Chinese prompt stays silent so the answer is not given away)
     this.voice = en2zh ? speak(it[0]) : Promise.resolve();
     const O=$("opts"); O.classList.toggle("long",long);
-    O.innerHTML=opts.map((o,k)=>`<button class="opt" data-k="${k}">${esc(o.t)}</button>`).join("");
+    O.innerHTML=opts.map((o,k)=>`<button class="opt" data-k="${k}" data-t="${esc(o.t)}">${esc(o.t)}</button>`).join("");
     for (const b of O.children) b.onclick=()=>this.answer(+b.dataset.k, b);
     this.fit();
     const n=this.total;
@@ -292,6 +293,7 @@ const Practice = {
     GB.fanfare && GB.fanfare();
   }
 };
+GB.noTranslate.start();
 Practice.load();
 </script>
 </body>

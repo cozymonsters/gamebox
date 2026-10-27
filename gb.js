@@ -471,6 +471,7 @@ const GB = (() => {
       }catch(e){ return { exists: true }; }
     },
     setup(P, opts){
+      noTranslate.start();
       document.documentElement.classList.add("phone");      // phone pages: cream all the way down (Safari tints its toolbar with the page background)
       P.pid = store.get("tug.pid") || ("p"+Date.now().toString(36)+rand(1e6).toString(36));
       store.set("tug.pid",P.pid);
@@ -554,17 +555,17 @@ const GB = (() => {
     $("pQ").classList.toggle("long", !!q.quiz); $("pOpts").classList.toggle("long", !!q.quiz); card.classList.toggle("quiz", !!q.quiz); document.body.classList.toggle("quizq", !!q.quiz);
     if (q.quiz){
       $("pAsk").textContent = "Choose the best answer";
-      $("pQ").textContent = q.text; $("pQ").classList.remove("zh");
+      $("pQ").textContent = q.text; $("pQ").dataset.t = q.text; $("pQ").classList.remove("zh");
       if (q.sub){ const d=document.createElement("div"); d.className="qsub"+(/[\u4e00-\u9fff]/.test(q.sub.replace(/^原文[^：:]*[：:]/,""))?"":" en"); d.textContent=q.sub; card.appendChild(d); }
       show($("pSay"), false);
-      $("pOpts").innerHTML = q.opts.map(k=>`<button class="opt" data-k="${k}">${esc(q.choices[k])}</button>`).join("");
+      $("pOpts").innerHTML = q.opts.map(k=>`<button class="opt" data-k="${k}" data-t="${esc(q.choices[k])}">${esc(q.choices[k])}</button>`).join("");
     } else {
       const isEn = q.dir==="en2zh";
       $("pAsk").textContent = isEn ? "What does it mean?" : "Which English word?";
-      $("pQ").textContent = isEn ? q.en : q.zh;
+      $("pQ").textContent = isEn ? q.en : q.zh; $("pQ").dataset.t = $("pQ").textContent;
       $("pQ").classList.toggle("zh",!isEn);
       show($("pSay"), isEn);
-      $("pOpts").innerHTML = q.opts.map(k=>`<button class="opt" data-k="${k}">${esc(isEn?W[k][1]:W[k][0])}</button>`).join("");
+      $("pOpts").innerHTML = q.opts.map(k=>`<button class="opt" data-k="${k}" data-t="${esc(isEn?W[k][1]:W[k][0])}">${esc(isEn?W[k][1]:W[k][0])}</button>`).join("");
     }
     for (const b of $("pOpts").children) b.onclick=()=>P.answer(+b.dataset.k,b);
   }
@@ -576,7 +577,37 @@ const GB = (() => {
   }
   const wrongMs = q => q && q.quiz ? 3200 : 1400;
 
+  /* ---- no page translation on student screens ----
+     1) the pages say translate="no" (Chrome, Edge, Safari then don't offer to translate them);
+     2) if a translator does it anyway (an app or extension that ignores that), the words we put on screen
+        no longer match what we wrote (data-t), so the screen is covered until translation is turned off. */
+  const norm = t => String(t||"").replace(/\s+/g," ").trim();
+  const noTranslate = {
+    on:false, started:false,
+    start(){
+      if (this.started) return; this.started=true;
+      const h=document.documentElement; h.setAttribute("translate","no"); h.classList.add("notranslate");
+      setInterval(()=>this.check(), 700);
+    },
+    isOn(){
+      const h=document.documentElement;
+      if (/\btranslated-(ltr|rtl)\b/.test(h.className)) return true;                 // Chrome / Edge
+      if (document.querySelector('font[style*="vertical-align"]')) return true;      // Google Translate markup
+      if ((h.getAttribute("lang")||"en").slice(0,2).toLowerCase()!=="en") return true;
+      for (const el of document.querySelectorAll("[data-t]")) if (el.offsetParent!==null && norm(el.textContent)!==norm(el.dataset.t)) return true;
+      return false;
+    },
+    check(){
+      const on=this.isOn(); if (on===this.on) return; this.on=on;
+      let o=$("trBlock");
+      if (on && !o){ o=document.createElement("div"); o.id="trBlock"; o.className="trblock"; o.setAttribute("translate","no");
+        o.innerHTML=`<div class="trcard">${ART.icon("x")}<b>Translation is on</b><p>Turn off page translation to keep playing.</p><small>Chrome: tap the translate icon, then English.<br>Safari: tap aA, then Show Original.</small></div>`;
+        document.body.appendChild(o); }
+      if (o) show(o, on);
+    }
+  };
+
   return { db, now, $, show, esc, store, rand, pick, shuffle, fmt, params, baseUrl, dirUrl, AVATARS, SETS, parseWords, account, kits, profile,
            tn, tnV, tnWin, tnPos, teamSubs, paintTeams,
-           beep, unlockAudio, fanfare, buzzer, speak, voice, primeVoice, confetti, host, join, makeQuestion, renderQuestion, showWhy, wrongMs };
+           beep, unlockAudio, fanfare, buzzer, speak, voice, primeVoice, confetti, host, join, makeQuestion, renderQuestion, showWhy, wrongMs, noTranslate };
 })();
