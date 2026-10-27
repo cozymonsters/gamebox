@@ -435,11 +435,30 @@ const GB = (() => {
       // big classes: smaller name tags so every name fits on the big screen without scrolling
       const most=Math.max(r.length,b.length), lt=$("rNames").closest(".lob-teams");
       if (lt){ lt.classList.toggle("dense", most>12 && most<=22); lt.classList.toggle("denser", most>22); }
-      for (const el of document.querySelectorAll("[data-sw]")) el.onclick=()=>{ const p=players[el.dataset.sw]; if(p) ref.child("players/"+el.dataset.sw+"/team").set(p.team==="blue"?"red":"blue"); };
-      for (const el of document.querySelectorAll("[data-x]")) el.onclick=()=>{ ref.child("players/"+el.dataset.x).remove(); };
+      // the teacher moved / removed someone: give the join tally the real counts so new players keep balancing
+      // (only here, not on every lobby update, so it never races with phones that are joining)
+      const retally=(dr,db)=>ref.child("meta/tally").set({red:r.length+dr, blue:b.length+db}).catch(()=>{});
+      for (const el of document.querySelectorAll("[data-sw]")) el.onclick=()=>{ const p=players[el.dataset.sw]; if(!p) return; const to=p.team==="blue"?"red":"blue";
+        ref.child("players/"+el.dataset.sw+"/team").set(to); retally(to==="red"?1:-1, to==="red"?-1:1); };
+      for (const el of document.querySelectorAll("[data-x]")) el.onclick=()=>{ const p=players[el.dataset.x]; ref.child("players/"+el.dataset.x).remove(); if (p) retally(p.team==="blue"?0:-1, p.team==="blue"?-1:0); };
       return {r,b};
     }
   };
+
+  /* ---- automatic teams: each new player goes to the smaller team (a tie is a coin flip).
+     rooms/{code}/meta/tally = {red, blue}; the join is a transaction, so phones joining at the same moment
+     still alternate; the host rewrites the tally with the real counts whenever the lobby changes. ---- */
+  async function assignTeam(ref){
+    try{
+      const res=await ref.child("meta/tally").transaction(t=>{
+        t=t||{}; const red=+t.red||0, blue=+t.blue||0;
+        const team = red<blue ? "red" : blue<red ? "blue" : (Math.random()<.5?"red":"blue");
+        return { red:red+(team==="red"?1:0), blue:blue+(team==="blue"?1:0), last:team };
+      });
+      const v=res && res.snapshot && res.snapshot.val(); if (v && (v.last==="red"||v.last==="blue")) return v.last;
+    }catch(e){}
+    return Math.random()<.5?"red":"blue";
+  }
 
   /* ---- player join helper ----
      opts: { game, ref, code, extra:{...fields reset on join}, onEnter() } */
@@ -467,23 +486,22 @@ const GB = (() => {
       };
       deal(new Set());
       opts.ref.child("players").get().then(s=>{ const all=s.val()||{}; deal(new Set(Object.keys(all).filter(id=>id!==P.pid && all[id] && all[id].av).map(id=>all[id].av))); }).catch(()=>{});
-      const check=()=>{ $("pGo").disabled=!($("pName").value.trim() && P.team); };
-      const pickTeam=t=>{ P.team=t; document.querySelectorAll(".tbtn").forEach(b=>b.classList.toggle("sel",b.dataset.team===t)); check(); };
-      document.querySelectorAll(".tbtn").forEach(b=>b.onclick=()=>pickTeam(b.dataset.team));
-      const lastTeam=store.get("tug.team"); if (lastTeam) pickTeam(lastTeam);
+      // teams are dealt by the room (no picking): see assignTeam()
+      const check=()=>{ $("pGo").disabled=!$("pName").value.trim(); };
       $("pName").oninput=check; check();
       opts.ref.child("players/"+P.pid).get().then(s=>{ const v=s.val(); if (v && v.name){ P.name=v.name; P.team=v.team; if(v.av) P.av=v.av; opts.onEnter(); } }).catch(()=>{});
       $("pGo").onclick=async()=>{
         const name=$("pName").value.trim().slice(0,8);
-        if(!name||!P.team) return;
-        $("pGo").disabled=true; $("pErr").textContent="";
+        if(!name) return;
+        $("pGo").disabled=true; $("pErr").textContent=""; const goTxt=$("pGo").textContent; $("pGo").textContent="Joining…";
         try{
           const s=await opts.ref.child("meta/state").get();
-          if(!s.exists()){ $("pErr").textContent="Room not found. Check the code on the big screen."; $("pGo").disabled=false; return; }
-          P.name=name; store.set("tug.name",name); store.set("tug.team",P.team);
+          if(!s.exists()){ $("pErr").textContent="Room not found. Check the code on the big screen."; $("pGo").disabled=false; $("pGo").textContent=goTxt; return; }
+          P.name=name; store.set("tug.name",name);
+          if (P.team!=="red" && P.team!=="blue") P.team=await assignTeam(opts.ref);
           await opts.ref.child("players/"+P.pid).update(Object.assign({name, team:P.team, av:P.av, online:true, joined:firebase.database.ServerValue.TIMESTAMP}, opts.extra||{}));
-          opts.onEnter();
-        }catch(e){ $("pErr").textContent="No connection. Check your internet and try again."; $("pGo").disabled=false; }
+          $("pGo").textContent=goTxt; opts.onEnter();
+        }catch(e){ $("pErr").textContent="No connection. Check your internet and try again."; $("pGo").disabled=false; $("pGo").textContent=goTxt; }
       };
       document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible" && P.joined) opts.ref.child("players/"+P.pid+"/online").set(true); });
     },
