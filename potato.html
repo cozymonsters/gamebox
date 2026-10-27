@@ -514,7 +514,7 @@ const Player = {
 
   setBar(){
     const P=$("player"); P.classList.toggle("red",this.team==="red"&&this.joined); P.classList.toggle("blue",this.team==="blue"&&this.joined);
-    $("pMe").textContent=this.joined ? this.name : "GameBox";
+    $("pMe").textContent=this.joined ? this.name : "Cozy Monsters";
     $("pSc").innerHTML=ART.icon("check")+" "+this.score; show($("pSc"),this.joined);
     $("pTeamBig").innerHTML=this.team==="blue"?ART.mascot("blue")+`<span data-tn="blue">${GB.esc(GB.tn("blue"))}</span>`:ART.mascot("red")+`<span data-tn="red">${GB.esc(GB.tn("red"))}</span>`;
     this.showAv();

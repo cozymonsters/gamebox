@@ -148,7 +148,7 @@ footer{text-align:center;font-weight:700;font-size:14px;color:var(--on-bg-sub)}
   <section class="steps">
     <div class="step"><img src="img/m/a9.webp" alt=""><b><i>1</i>Pick a set</b><span>In My Sets, choose a set, press Play Live, and pick a game for the big screen.</span></div>
     <div class="step"><img src="img/m/a1.webp" alt=""><b><i>2</i>Join on phones</b><span>Students scan the QR code and get a monster.</span></div>
-    <div class="step"><img src="img/m/a2.webp" alt=""><b><i>3</i>Play &amp; win!</b><span>Pick a team, answer fast, and win together.</span></div>
+    <div class="step"><img src="img/m/a2.webp" alt=""><b><i>3</i>Play &amp; win!</b><span>Get put on a team, answer fast, and win together.</span></div>
   </section>
 
   <footer>English GameBox · works on any phone browser · students need no app or account</footer>
@@ -172,10 +172,14 @@ const GAMES = [
     chips:[["clock","Duration","5–10 min"],["users","Teams","Red vs Blue"],["heart","Lives","Last team standing"]],
     rules:["Your team has the bomb? Answer 3–6 right together to throw it to the other side.","The other team fights back: each right answer makes you need +1 more.","The fuse is secret. If it blows up in your hands, you lose a life!"],
     cover:"cover-potato" },
-  { id:"grab", name:"Color Grab", icon:"grid", tagline:"Paint the map. Grab the most land!", isNew:true,
+  { id:"grab", name:"Color Grab", icon:"grid", tagline:"Paint the map. Grab the most land!",
     chips:[["clock","Duration","5–10 min"],["users","Teams","Red vs Blue"],["grid","Twist","Steal & surround"]],
     rules:["Every right answer lets you paint one tile in your team's color.","Empty tiles anywhere. The other team's tiles only if they touch yours. Close in a small area to grab it all at once!","Gold tiles are worth 3. Last 20 seconds: each right answer paints 2 tiles."],
-    cover:"cover-grab" }
+    cover:"cover-grab" },
+  { id:"hockey", name:"Goal Rush", icon:"ball", tagline:"Field hockey! Answer to drive the ball into the goal.", isNew:true,
+    chips:[["clock","Duration","5–10 min"],["users","Teams","Red vs Blue"],["target","Goal","Score the most"]],
+    rules:["Every right answer drives the ball toward the other team's goal.","Get the ball into the net to score. Then it's back to the centre for a face-off.","Most goals when time is up wins. A tie goes to golden goal: next goal wins!"],
+    cover:"cover-hockey" }
 ];
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
