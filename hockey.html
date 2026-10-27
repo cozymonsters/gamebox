@@ -24,7 +24,7 @@
 .dcircle{position:absolute;top:60%;height:44%;width:30%;border:5px solid rgba(255,255,255,.85);border-radius:50%}
 .dcircle.l{left:-15%} .dcircle.r{right:-15%}
 /* goals (side view) */
-.goal{position:absolute;bottom:calc(100% - var(--ground) - 1%);width:9.5%;height:38%;z-index:1}
+.goal{position:absolute;bottom:calc(100% - var(--ground) - 1%);width:9.5%;height:38%}   /* no z-index: the keeper must be able to stand in front of the players */
 .goal.l{left:1.5%} .goal.r{right:1.5%}
 .goal .net{position:absolute;inset:0;border-radius:10px;background:
   repeating-linear-gradient(45deg,rgba(255,255,255,.75) 0 2px,transparent 2px 13px),
@@ -36,11 +36,11 @@
 .goal.l .tag{background:var(--red)} .goal.r .tag{background:var(--blue)}
 .goal.shake{animation:netshake .6s}
 @keyframes netshake{20%{transform:translateX(-6px) scaleY(1.04)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
-.keeper{position:absolute;bottom:-4px;width:var(--kh,96px);height:var(--kh,96px);z-index:2}
+.keeper{position:absolute;bottom:-4px;width:var(--kh,96px);height:var(--kh,96px);z-index:4}
 .goal.l .keeper{left:72%} .goal.r .keeper{right:72%}
 .keeper img{width:100%;height:100%;object-fit:contain}
 /* ball + players, positioned by JS along the ground line */
-.ball{position:absolute;top:calc(var(--ground) - 26px);left:50%;width:34px;height:34px;margin-left:-17px;z-index:4;transition:left .4s cubic-bezier(.3,1.4,.5,1)}
+.ball{position:absolute;top:calc(var(--ground) - 26px);left:50%;width:34px;height:34px;margin-left:-17px;z-index:5;transition:left .4s cubic-bezier(.3,1.4,.5,1)}
 .ball i{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 34% 30%,#fff 0 30%,#f1ede4 62%,#d9d2c3);box-shadow:0 3px 0 rgba(0,0,0,.12)}
 .ball i:after{content:"";position:absolute;inset:7px;border-radius:50%;border:2px dotted rgba(0,0,0,.18)}
 .ball:after{content:"";position:absolute;left:4px;right:4px;bottom:-6px;height:7px;border-radius:50%;background:rgba(29,29,31,.16);z-index:-1}
@@ -69,6 +69,34 @@
 .goalfx span{margin-top:6px;font-family:var(--display);font-weight:600;font-size:34px;color:#fff;padding:4px 22px;border-radius:16px;animation:goalpop 2.4s .1s both}
 .goalfx.r b{color:var(--red)} .goalfx.b b{color:var(--blue)} .goalfx.r span{background:var(--red)} .goalfx.b span{background:var(--blue)}
 @keyframes goalpop{0%{transform:scale(.2) rotate(-6deg);opacity:0}15%{transform:scale(1.15) rotate(2deg);opacity:1}25%{transform:scale(1)}85%{opacity:1}100%{transform:translateY(-20px);opacity:0}}
+/* shoot-or-save duel */
+.duel{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:5;width:min(560px,70%);background:var(--paper);border:3px solid var(--ink);border-radius:20px;padding:10px 16px 12px;box-shadow:0 6px 0 var(--ink);animation:gb-pop .35s}
+.duel .dh{display:flex;align-items:center;justify-content:center;gap:14px}
+.duel .dh b{font-family:var(--display);font-weight:700;font-size:40px;line-height:1}
+.duel.ar .dh b{color:var(--red)} .duel.ab .dh b{color:var(--blue)}
+.duel .dt{font-family:var(--display);font-weight:600;font-size:30px;background:var(--ink);color:#fff;border-radius:12px;min-width:44px;text-align:center;padding:0 8px}
+.duel .dbar{height:22px;border-radius:11px;margin-top:8px;overflow:hidden;display:flex}
+.duel.ar .dbar{background:var(--blue)} .duel.ab .dbar{background:var(--red)}
+.duel .dbar i{display:block;height:100%;transition:width .3s}
+.duel.ar .dbar i{background:var(--red)} .duel.ab .dbar i{background:var(--blue);margin-left:auto}
+.duel .dl{display:flex;justify-content:space-between;margin-top:6px;font-weight:900;font-size:17px}
+.duel.ab .dl{flex-direction:row-reverse}
+.keeper.ready{animation:gb-pulse .5s infinite}
+.keeper.dive{animation:dive 1.1s}
+.goal.l .keeper.dive{--dx:-30px} .goal.r .keeper.dive{--dx:30px}
+@keyframes dive{25%{transform:translate(calc(var(--dx) * -1),-40px) rotate(calc(var(--dx) * -1deg))}60%{transform:translate(calc(var(--dx) * -1.4),-10px) rotate(calc(var(--dx) * -1.5deg))}}
+/* power shot (5 in a row) */
+.pshot{position:absolute;left:50%;top:30%;transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:10px;background:#fff;border:4px solid;border-radius:20px;padding:6px 18px 6px 8px;animation:gb-shout 1.8s forwards;pointer-events:none}
+.pshot.r{border-color:var(--red);left:27%} .pshot.b{border-color:var(--blue);left:73%}   /* on the scoring team's side, clear of GOAL!/SAVE! */
+.pshot .pav{width:58px;height:58px;display:inline-block}
+.pshot b{display:block;font-family:var(--display);font-weight:700;font-size:34px;line-height:1}
+.pshot.r b{color:var(--red)} .pshot.b b{color:var(--blue)}
+.pshot small{display:block;font-weight:900;font-size:18px;color:var(--ink)}
+/* phone: shoot / save banner over the mini pitch */
+.pduel{position:absolute;inset:0;z-index:2;border-radius:16px;display:flex;align-items:center;gap:10px;padding:0 14px;color:#fff;animation:gb-pulse .6s infinite}
+.pduel.r{background:var(--red)} .pduel.b{background:var(--blue)}
+.pduel b{font-family:var(--display);font-weight:700;font-size:26px} .pduel span{font-weight:900;font-size:15px;flex:1}
+.pduel i{font-style:normal;font-family:var(--display);font-weight:600;font-size:26px;background:rgba(255,255,255,.25);border-radius:10px;min-width:38px;text-align:center}
 .otbadge{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:5;font-family:var(--display);font-weight:600;font-size:22px;background:var(--mustard);color:var(--ink);padding:4px 18px;border-radius:14px;white-space:nowrap}
 .hfoot{position:absolute;right:34px;bottom:30px;z-index:5}
 .scorebar .tscore .pts{min-width:96px;font-size:52px}
@@ -132,6 +160,7 @@
             <div class="ctl"><select class="sel" id="sTime"><option value="180">3 minutes</option><option value="300" selected>5 minutes</option><option value="420">7 minutes</option><option value="600">10 minutes</option></select></div></div>
           <div class="setrow"><span class="emo" data-i="ball"></span><div class="txt"><h4>Field Size</h4><p>Smaller field = more goals</p></div>
             <div class="ctl"><select class="sel" id="sMargin"><option value="3">Small · lots of goals</option><option value="4" selected>Normal</option><option value="5.5">Big · hard to score</option></select></div></div>
+          <div class="setrow"><span class="emo" data-i="bolt"></span><div class="txt"><h4>How it works</h4><p>Ball at the goal: <b>shoot or save</b> for 6 seconds · 5 in a row = <b>power shot</b> · tie = <b>golden goal</b></p></div></div>
           <div class="setnote">Students can already join with the code at the top right.</div>
         </div>
       </div>
@@ -173,6 +202,7 @@
       <div class="ball" id="ball"><i></i></div>
       <div class="otbadge hidden" id="otBadge">Golden goal · next goal wins!</div>
       <div class="goalfx hidden" id="goalFx"><b>GOAL!</b><span id="goalWho"></span></div>
+      <div class="duel hidden" id="duel"><div class="dh"><b>SHOT!</b><span class="dt" id="duelT">6</span></div><div class="dbar"><i id="duelA"></i></div><div class="dl"><span id="duelAtk">Shoot</span><span id="duelDef">Save</span></div></div>
       <div class="feed r" id="feedR"></div>
       <div class="feed b" id="feedB"></div>
       <div class="countdown hidden" id="hCount"><span>3</span></div>
@@ -221,7 +251,7 @@
 
   <div class="p-body hidden" id="pPlay">
     <div class="pinfo"><span class="t" id="pTimeBox"><i data-i="timer"></i> <span id="pTime">--</span></span><span class="combo" id="pCombo"></span></div>
-    <div class="pstrip"><div class="hk"><span class="gs r" id="pGR">0</span><div class="mpitch"><i class="mg l"></i><i class="mg r"></i><div class="k" id="pBall"></div></div><span class="gs b" id="pGB">0</span></div></div>
+    <div class="pstrip"><div class="pduel hidden" id="pDuel"></div><div class="hk"><span class="gs r" id="pGR">0</span><div class="mpitch"><i class="mg l"></i><i class="mg r"></i><div class="k" id="pBall"></div></div><span class="gs b" id="pGB">0</span></div></div>
     <div class="qwrap">
       <div class="qcard">
         <div class="ask" id="pAsk">What does it mean?</div>
@@ -246,7 +276,7 @@
     </div>
   </div>
 
-  <div class="pgoal hidden" id="pGoal"><b>GOAL!</b><span id="pGoalWho"></span></div>
+  <div class="pgoal hidden" id="pGoal"><b id="pGoalB">GOAL!</b><span id="pGoalWho"></span></div>
   <div class="pcount hidden" id="pCount"><b id="pCountN">3</b><span id="pCountT">Get ready!</span></div>
 </section>
 
@@ -264,6 +294,10 @@ const CHEERS_NO = ["Oops!"];   // same word as Practice
 const SHOUTS = ["Go go go!","Pass! Pass!","Defend!","Who will score?!","Keep going!"];
 const GOAL_MS = 2600;          // the ball stays in the net this long, then a face-off at the centre line
 const OT_MS = 60000;           // golden goal: one extra minute when the score is tied
+const SHOT_MS = 6000;          // the ball reaches a goal → 6-second shoot-or-save duel
+const SAVE_MS = 1800;          // after a save the ball is cleared, then a face-off
+const POWER = 0.4;             // a power shot (5 in a row) drives the ball this far (1 = from the centre to the goal)
+const POWER_DUEL = 1.5;        // … or counts this much for its side during a shoot-or-save duel
 // a simple field hockey stick (J shape) held by each player
 const STICK = `<svg class="stick" viewBox="0 0 40 90" aria-hidden="true"><path d="M30 4 L22 70 Q20 84 8 84 Q2 84 2 78" fill="none" stroke="#7a4b23" stroke-width="7" stroke-linecap="round"/><path d="M30 4 L27 26" stroke="#2b2440" stroke-width="8" stroke-linecap="round"/></svg>`;
 
@@ -281,6 +315,7 @@ function boot(){
 const Host = {
   code:null, ref:null, meta:{}, players:{}, raf:0, view:"setup", ended:false, tickSec:-1, lastShout:0,
   base:{r:0,b:0}, goals:{red:0,blue:0}, resumeAt:0, needBase:false, lastPos:0, lastPosWrite:0, lastPosSent:null, shownGoal:0,
+  shot:null, bonus:{r:0,b:0}, shownSave:0,
 
   async start(existing){
     show($("host")); GB.unlockAudio(); GB.host.netStatus($("hNet"));
@@ -306,13 +341,15 @@ const Host = {
   syncFromMeta(){
     const m=this.meta; if (m.state!=="play" || this._synced===m.round) return; this._synced=m.round;
     this.goals=Object.assign({red:0,blue:0}, m.goals||{}); this.base=Object.assign({r:0,b:0}, m.base||{});
-    this.resumeAt=m.resumeAt||0; this.needBase=!!(m.resumeAt && now()<m.resumeAt); this.shownGoal=m.goalNo||0;
+    this.resumeAt=m.resumeAt||0; this.needBase=!!(m.resumeAt && now()<m.resumeAt); this.shownGoal=m.goalNo||0; this.shownSave=m.saveNo||0;
+    this.shot = m.shot && m.shot.end>now() ? {by:m.shot.by, end:m.shot.end, base:Object.assign({r:0,b:0}, m.shot.base||{}), bonus:{r:0,b:0}} : null;
   },
 
   onPlayers(p){
     const prev=this.players; this.players=p;
     if (this.meta.state==="play" && now()>=this.meta.startAt){
       for (const id in p){ const a=(p[id].score||0), b=(prev[id]&&prev[id].score)||0; if (a>b) this.popFeed(p[id], a-b); }
+      for (const id in p){ if (!prev[id]) continue; if ((p[id].ps||0)>(prev[id].ps||0)) this.powerShot(p[id]); }   // 5 in a row
     }
     this.renderTeams();
     if (this.meta.state==="play") this.crew();
@@ -350,13 +387,14 @@ const Host = {
     if (t<this.meta.startAt){ this.place(0); return; }
     if (t<this.resumeAt) return;                                   // ball still in the net
     if (this.needBase){                                           // face-off: answers count again from here
-      this.needBase=false; this.base={r:c.rA,b:c.bA};
+      this.needBase=false; this.base={r:c.rA,b:c.bA}; this.bonus={r:0,b:0};
       this.ref.child("meta").update({base:this.base, pos:0}); this.lastPosSent=0;
       this.place(0); this.shout("Face-off!"); return;
     }
-    const pos=Math.max(-1,Math.min(1,this.drive(c)));
+    if (this.shot) return this.duelTick(c);
+    const pos=Math.max(-1,Math.min(1,this.drive(c)+this.bonus.r-this.bonus.b));
     this.place(pos);
-    if (pos>=1) this.goal("red"); else if (pos<=-1) this.goal("blue");
+    if (pos>=1) this.startShot("red",c); else if (pos<=-1) this.startShot("blue",c);
     else {
       const tt=Date.now(), rp=Math.round(pos*100)/100;
       if (tt-this.lastPosWrite>350 && rp!==this.lastPosSent){ this.lastPosWrite=tt; this.lastPosSent=rp; this.ref.child("meta/pos").set(rp); }
@@ -384,13 +422,61 @@ const Host = {
     $("fieldWrap").style.setProperty("--kh",Math.round(Math.min(H*.28,130))+"px");
   },
 
+  /* ---- shoot or save: the ball is at the goal mouth; for 6 seconds both teams answer.
+     Attackers score if they get more right (average × √size, like the drive) than the defenders; otherwise SAVE! ---- */
+  startShot(team, c){
+    const t=now();
+    this.shot={by:team, end:t+SHOT_MS, base:{r:c.rA,b:c.bA}, bonus:{r:0,b:0}};
+    this.place(team==="red"?0.9:-0.9);
+    this.ref.child("meta").update({shot:{by:team, end:this.shot.end, base:this.shot.base}, pos:team==="red"?0.9:-0.9}); this.lastPosSent=null;
+    (team==="red"?$("keepB"):$("keepR")).classList.add("ready");
+    beep(392,.12,"square",.12); beep(523,.12,"square",.12,.12); beep(784,.25,"square",.12,.24);
+  },
+
+  duelTick(c){
+    const s=this.shot, red=s.by==="red";
+    const rv=(c.rA-s.base.r)*c.k+s.bonus.r, bv=(c.bA-s.base.b)*c.k+s.bonus.b;
+    const atk=red?rv:bv, def=red?bv:rv, left=Math.max(0,s.end-now());
+    const D=$("duel"); D.className="duel "+(red?"ar":"ab"); show(D,true);
+    $("duelT").textContent=Math.ceil(left/1000);
+    $("duelAtk").textContent=GB.tn(s.by)+" shoot"; $("duelDef").textContent=GB.tn(red?"blue":"red")+" save";
+    const share = atk+def>0 ? atk/(atk+def) : .5;
+    $("duelA").style.width=Math.round(8+share*84)+"%";
+    if (left<=0){ show(D,false); if (atk>def) this.goal(s.by); else this.save(s.by); }
+  },
+
+  save(by){
+    const def=by==="red"?"blue":"red", t=now(), no=(this.meta.saveNo||0)+1;
+    this.shot=null; this.resumeAt=t+SAVE_MS; this.needBase=true;
+    const K=by==="red"?$("keepB"):$("keepR"); K.classList.remove("ready","dive"); void K.offsetWidth; K.classList.add("dive"); setTimeout(()=>K.classList.remove("dive"),1200);
+    this.place(by==="red"?0.55:-0.55);
+    this.ref.child("meta").update({shot:null, saveNo:no, saveBy:def, resumeAt:this.resumeAt, pos:0}); this.lastPosSent=null;
+    if (this.shownSave!==no){ this.shownSave=no;
+      const F=$("goalFx"); F.className="goalfx "+(def==="red"?"r":"b"); F.querySelector("b").textContent="SAVE!";
+      $("goalWho").textContent=GB.tnV(def,"saves","save")+" it!";
+      show(F,true); setTimeout(()=>show(F,false), SAVE_MS-150);
+      beep(330,.15,"triangle",.2); beep(262,.3,"triangle",.2,.12);
+    }
+  },
+
+  powerShot(pl){
+    if (this.ended || this.meta.state!=="play" || now()<this.resumeAt) return;
+    const k=pl.team==="blue"?"b":"r";
+    if (this.shot) this.shot.bonus[k]+=POWER_DUEL; else this.bonus[k]+=POWER;
+    const d=document.createElement("div"); d.className="pshot "+k;
+    d.innerHTML=`<span class="pav">${ART.avatar(pl.av,"",true)}</span><span><b>POWER SHOT!</b><small>${esc(pl.name)}</small></span>`;
+    $("fieldWrap").appendChild(d); setTimeout(()=>d.remove(),1800);
+    beep(523,.1,"sawtooth",.1); beep(1047,.25,"triangle",.18,.08);
+  },
+
   goal(team){
     if (this.ended || now()<this.resumeAt) return;
+    this.shot=null; show($("duel"),false); $("keepR").classList.remove("ready"); $("keepB").classList.remove("ready");
     this.goals[team]++;
     const t=now(), no=(this.meta.goalNo||0)+1;
     this.resumeAt=t+GOAL_MS; this.needBase=true;
     this.place(team==="red"?1.04:-1.04);
-    this.ref.child("meta").update({goals:this.goals, goalNo:no, goalBy:team, resumeAt:this.resumeAt, pos:team==="red"?1:-1});
+    this.ref.child("meta").update({goals:this.goals, goalNo:no, goalBy:team, resumeAt:this.resumeAt, pos:team==="red"?1:-1, shot:null});
     this.lastPosSent=null;
     this.celebrate(team, no);
     if (this.meta.ot) setTimeout(()=>this.finish("golden"), 1600);   // golden goal ends the game
@@ -398,7 +484,7 @@ const Host = {
 
   celebrate(team, no){
     if (this.shownGoal===no) return; this.shownGoal=no;
-    const F=$("goalFx"); F.className="goalfx "+(team==="red"?"r":"b");
+    const F=$("goalFx"); F.className="goalfx "+(team==="red"?"r":"b"); F.querySelector("b").textContent="GOAL!";
     $("goalWho").textContent=GB.tnV(team,"scores","score")+"!";
     show(F,true); setTimeout(()=>show(F,false), GOAL_MS-200);
     const G=team==="red"?$("goalR"):$("goalL"); G.classList.remove("shake"); void G.offsetWidth; G.classList.add("shake");
@@ -442,15 +528,15 @@ const Host = {
     for (const id in this.players) upd["players/"+id+"/score"]=0;
     Object.assign(upd,{ "meta/game":GAME, "meta/state":"play", "meta/round":(this.meta.round||0)+1, "meta/startAt":startAt, "meta/endAt":startAt+dur*1000,
       "meta/words":words, "meta/mode":$("sMode").value, "meta/margin":margin, "meta/pos":0, "meta/winner":null, "meta/why":null,
-      "meta/goals":{red:0,blue:0}, "meta/base":{r:0,b:0}, "meta/goalNo":0, "meta/goalBy":null, "meta/resumeAt":0, "meta/ot":null });
+      "meta/goals":{red:0,blue:0}, "meta/base":{r:0,b:0}, "meta/goalNo":0, "meta/goalBy":null, "meta/resumeAt":0, "meta/ot":null, "meta/shot":null, "meta/saveNo":0, "meta/saveBy":null });
     this.ended=false; this.tickSec=-1; this.lastShout=Date.now(); this.view="lobby";
-    this.goals={red:0,blue:0}; this.base={r:0,b:0}; this.resumeAt=0; this.needBase=false; this.lastPos=0; this.lastPosSent=0; this.shownGoal=0;
+    this.goals={red:0,blue:0}; this.base={r:0,b:0}; this.resumeAt=0; this.needBase=false; this.lastPos=0; this.lastPosSent=0; this.shownGoal=0; this.shot=null; this.bonus={r:0,b:0}; this.shownSave=0; show($("duel"),false);
     this._synced=(this.meta.round||0)+1;
     await this.ref.update(upd);
   },
 
   timeUp(){
-    if (this.ended || this.meta.state!=="play" || now()<(this.meta.endAt||0)) return;
+    if (this.ended || this.meta.state!=="play" || now()<(this.meta.endAt||0) || this.shot) return;   // a shot in progress is played out
     if (this.goals.red===this.goals.blue && !this.meta.ot){        // tied: one minute of golden goal
       if (now()<this.resumeAt) return;
       const endAt=now()+OT_MS;
@@ -507,7 +593,7 @@ const Host = {
       loop();
     }
     if (st==="end"){
-      show($("hCount"),false); show($("stopBtn"),false); show($("goalFx"),false);
+      show($("hCount"),false); show($("stopBtn"),false); show($("goalFx"),false); show($("duel"),false); this.shot=null;
       this.goals=Object.assign({red:0,blue:0}, m.goals||this.goals);
       this.updateScores(); this.place(0);
       $("timer").classList.remove("warn");
@@ -528,7 +614,7 @@ const Host = {
 
 /* ================== PLAYER ================== */
 const Player = {
-  code:null, ref:null, pid:null, team:null, name:"", av:"a0", meta:{}, score:0, combo:0, best:0, round:-1, q:null, locked:false, recent:[], timerInt:0, joined:false, seenGoal:0,
+  code:null, ref:null, pid:null, team:null, name:"", av:"a0", meta:{}, score:0, combo:0, best:0, round:-1, q:null, locked:false, recent:[], timerInt:0, joined:false, seenGoal:0, seenSave:0,
 
   async start(code){
     this.code=code; this.ref=GB.db.ref("rooms/"+code);
@@ -570,11 +656,32 @@ const Player = {
     this.seenGoal=m.goalNo;
     if (now()>(m.resumeAt||0)) return;                  // that goal is already over (e.g. just reloaded)
     const mine=m.goalBy===this.team, O=$("pGoal");
-    O.className="pgoal "+(m.goalBy==="red"?"r":"b");
+    O.className="pgoal "+(m.goalBy==="red"?"r":"b"); $("pGoalB").textContent="GOAL!";
     $("pGoalWho").textContent = mine ? "We scored!" : GB.tnV(m.goalBy,"scores","score")+"!";
     show(O,true); clearTimeout(this._gT); this._gT=setTimeout(()=>show(O,false),1800);
     if (mine){ beep(784,.15,"triangle",.2); beep(1175,.3,"triangle",.2,.12); } else beep(220,.3,"triangle",.15);
     try{ navigator.vibrate && navigator.vibrate(mine?[60,40,60,40,160]:120); }catch(e){}
+  },
+
+  saveFlash(m){
+    if (!m.saveNo || m.saveNo<=this.seenSave) return;
+    this.seenSave=m.saveNo;
+    if (now()>(m.resumeAt||0)) return;
+    const mine=m.saveBy===this.team, O=$("pGoal");
+    O.className="pgoal "+(m.saveBy==="red"?"r":"b"); $("pGoalB").textContent="SAVE!";
+    $("pGoalWho").textContent = mine ? "We saved it!" : GB.tnV(m.saveBy,"saves","save")+" it!";
+    show(O,true); clearTimeout(this._gT); this._gT=setTimeout(()=>show(O,false),1500);
+    if (mine){ beep(659,.15,"triangle",.2); beep(988,.25,"triangle",.2,.12); } else beep(220,.3,"triangle",.15);
+    try{ navigator.vibrate && navigator.vibrate(mine?[60,40,120]:100); }catch(e){}
+  },
+
+  // shoot-or-save duel: tell this phone whether to shoot or to save, with the seconds left
+  duelBar(m){
+    const D=$("pDuel"), sh=m.shot && m.state==="play" && now()<m.shot.end;
+    show(D, !!sh); if (!sh) return;
+    const atk=m.shot.by===this.team, sec=Math.max(0,Math.ceil((m.shot.end-now())/1000));
+    D.className="pduel "+(this.team==="blue"?"b":"r");
+    D.innerHTML=`<b>${atk?"SHOOT!":"SAVE IT!"}</b><span>Answer fast!</span><i>${sec}</i>`;
   },
 
   render(){
@@ -583,11 +690,11 @@ const Player = {
     show($("pJoin"),false);
     clearInterval(this.timerInt);
     const g=m.goals||{red:0,blue:0}; $("pGR").textContent=g.red||0; $("pGB").textContent=g.blue||0;
-    if (st==="lobby"){ show($("pWait"),true); show($("pPlay"),false); show($("pEnd"),false); show($("pCount"),false); show($("pGoal"),false); this.score=0; this.seenGoal=0; this.setBar(); return; }
+    if (st==="lobby"){ show($("pWait"),true); show($("pPlay"),false); show($("pEnd"),false); show($("pCount"),false); show($("pGoal"),false); this.score=0; this.seenGoal=0; this.seenSave=0; this.setBar(); return; }
     if (st==="play"){
-      if (m.round!==this.round){ this._canResume = this.round===-1 && m.state==="play"; this.round=m.round; this.score=0; this.combo=0; this.best=0; this.recent=[]; this.seenGoal=m.goalNo||0; $("pCombo").textContent=""; GB.join.resume(this);   // refreshed mid-game: keep my points
+      if (m.round!==this.round){ this._canResume = this.round===-1 && m.state==="play"; this.round=m.round; this.score=0; this.combo=0; this.best=0; this.recent=[]; this.seenGoal=m.goalNo||0; this.seenSave=m.saveNo||0; $("pCombo").textContent=""; GB.join.resume(this);   // refreshed mid-game: keep my points
         this.setBar(); this.nextQ(); }
-      this.goalFlash(m);
+      this.goalFlash(m); this.saveFlash(m);
       show($("pWait"),false); show($("pEnd"),false); show($("pPlay"),true);
       let lastN=null;
       const tick=()=>{
@@ -600,6 +707,7 @@ const Player = {
         } else show($("pCount"),false);
         const left=Math.max(0,Math.ceil((m.endAt-Math.max(t,m.startAt))/1000));
         $("pTime").textContent= m.ot ? "Golden goal "+left : left;
+        this.duelBar(m);
         $("pTimeBox").classList.toggle("warn", (left<=10 || !!m.ot) && t>=m.startAt);
       };
       tick(); this.timerInt=setInterval(tick,200);
@@ -629,7 +737,10 @@ const Player = {
       this.score++; this.combo++; this.best=Math.max(this.best,this.combo); this.setBar();
       this.ref.child("players/"+this.pid+"/score").set(this.score);
       $("pCombo").innerHTML = this.combo>=3 ? ART.icon("flame")+" x"+this.combo+" combo!" : "";
-      this.toast(this.combo>=3 && this.combo%5===0 ? "On fire!" : pick(CHEERS_OK));
+      if (this.combo%5===0){                                    // 5 in a row: a power shot for the team
+        this.ref.child("players/"+this.pid+"/ps").transaction(v=>(v||0)+1);
+        this.toast("POWER SHOT!"); try{ navigator.vibrate && navigator.vibrate([40,30,80]); }catch(e){}
+      } else this.toast(pick(CHEERS_OK));
       beep(880,.08,"triangle",.15); beep(1320,.12,"triangle",.12,.07);
       if (this.combo>=3) beep(1760,.1,"triangle",.1,.15);
       setTimeout(()=>{ this.locked=false; this.nextQ(); },450);
