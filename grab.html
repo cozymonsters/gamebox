@@ -38,6 +38,18 @@
 .sidelbl{font-family:var(--display);font-weight:600}
 .dbl{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:var(--mustard);color:var(--ink);border:3px solid #fff;border-radius:16px;padding:4px 20px;font-family:var(--display);font-weight:700;font-size:26px;z-index:5;white-space:nowrap;animation:gb-wiggle .6s infinite}
 .dbl .gi{width:.9em;height:.9em}
+.cbadge{position:absolute;top:6px;display:flex;align-items:center;gap:8px;color:#fff;border:3px solid #fff;border-radius:16px;padding:4px 18px;font-family:var(--display);font-weight:700;font-size:24px;z-index:5;white-space:nowrap;animation:gb-pulse .8s infinite}
+.cbadge.r{left:12px;background:var(--red)} .cbadge.b{right:12px;background:var(--blue)}
+.cbadge .gi{width:.9em;height:.9em}
+.tile.mega{background:linear-gradient(135deg,#f2c14e,#f7d985);box-shadow:inset 0 0 0 4px #fff,0 0 0 4px var(--mustard);animation:gb-pulse 1s infinite}
+.tile.mega.red,.tile.mega.blue{animation:none;box-shadow:inset 0 0 0 4px var(--mustard)}
+.tile.mega.red{background:var(--red)} .tile.mega.blue{background:var(--blue)}
+.tile .mg,.mt .mg{position:absolute;font-family:var(--display);font-weight:700;color:var(--ink);line-height:1}
+.tile .mg{font-size:calc(var(--ts) * .5)}
+.tile.mega.red .mg,.tile.mega.blue .mg,.mt.mega.red .mg,.mt.mega.blue .mg{top:4%;right:8%;font-size:calc(var(--ts) * .26);color:#fff}
+.mt.mega{background:linear-gradient(135deg,#f2c14e,#f7d985)} .mt.mega.red{background:var(--red)} .mt.mega.blue{background:var(--blue)}
+.mt .mg{font-size:min(5vw,24px)}
+.pcb{font-family:var(--display);font-weight:600;font-size:17px;color:#fff;background:var(--tc,var(--orange));border-radius:100px;padding:3px 12px;animation:gb-pulse .8s infinite}
 .hfoot{position:absolute;right:34px;bottom:30px;z-index:6}
 .capfx{position:absolute;z-index:6;pointer-events:none;font-family:var(--display);font-weight:700;font-size:30px;color:#fff;border-radius:14px;padding:2px 14px;white-space:nowrap;animation:capRise 1.6s ease-out forwards}
 .capfx.r{background:var(--red)} .capfx.b{background:var(--blue)}
@@ -118,7 +130,7 @@
             <div class="ctl"><select class="sel" id="sSize"><option value="6x4">Small · 24 tiles</option><option value="8x5" selected>Medium · 40 tiles</option><option value="10x6">Large · 60 tiles</option></select></div></div>
           <div class="setrow"><span class="emo" data-i="timer"></span><div class="txt"><h4>Time Limit</h4><p>Last 20 seconds: every right answer paints 2 tiles</p></div>
             <div class="ctl"><select class="sel" id="sTime"><option value="120">2 minutes</option><option value="180" selected>3 minutes</option><option value="240">4 minutes</option></select></div></div>
-          <div class="setrow"><span class="emo" data-i="brush"></span><div class="txt"><h4>How it works</h4><p>Right answer = paint 1 tile. Empty tiles anywhere; the other team's tiles only next to yours. Surround a small area to grab it all. Gold tiles = 3 points.</p></div></div>
+          <div class="setrow"><span class="emo" data-i="brush"></span><div class="txt"><h4>How it works</h4><p>Right answer = paint 1 tile. Empty tiles anywhere; the other team's tiles only next to yours. Surround a small area to grab it all. Gold tiles = 3 points. Half time: 2 <b>mega tiles</b> worth 5. Far behind = <b>comeback ×2</b>.</p></div></div>
           <div class="setnote">Students can already join with the code at the top right.</div>
         </div>
       </div>
@@ -153,6 +165,7 @@
     <div class="bwrap" id="bwrap">
       <div class="board" id="board"></div>
       <div class="dbl hidden" id="dbl"><i data-i="brush"></i> Double paint! <i data-i="brush"></i></div>
+      <div class="cbadge hidden" id="cbBadge"></div>
       <div class="countdown hidden" id="hCount"><span>3</span></div>
     </div>
     <div class="hfoot"><button class="pill ghost" id="stopBtn"><i data-i="stop"></i> End now</button></div>
@@ -199,7 +212,7 @@
   </div>
 
   <div class="p-body hidden" id="pPlay">
-    <div class="pinfo"><span class="t" id="pTimeBox"><i data-i="timer"></i> <span id="pTime">--</span></span></div>
+    <div class="pinfo"><span class="t" id="pTimeBox"><i data-i="timer"></i> <span id="pTime">--</span></span><span class="pcb hidden" id="pCb">Comeback! ×2 paint</span></div>
     <div class="pstrip"><div class="landbar"><b class="r" id="pR">0</b><b class="b" id="pB">0</b></div></div>
     <div class="qwrap">
       <div class="qcard">
@@ -228,7 +241,7 @@
     <div class="mhead"><span class="ic" data-i="brush"></span><span><b>Pick a tile!</b><small id="pMapSub">Tap a glowing tile</small></span><span class="cnt hidden" id="pPaints">×2</span></div>
     <div class="mbar"><i id="pMapBar"></i></div>
     <div class="mgrid" id="pGrid"></div>
-    <div class="mhint">Empty tiles: anywhere · Other team: only next to yours · Gold = 3 points</div>
+    <div class="mhint">Empty tiles: anywhere · Other team: only next to yours · Star = 3 · Mega = 5 points</div>
   </div>
 
   <div class="pcount hidden" id="pCount"><b id="pCountN">3</b><span id="pCountT">Get ready!</span></div>
@@ -248,6 +261,8 @@ const DOUBLE_MS = 20000;      // last 20 s: each right answer paints 2 tiles
 const PICK_MS = 6000;         // phone auto-picks a tile after 6 s
 const MAX_CAP = 6;            // surround up to 6 tiles to grab them
 const STAR_PTS = 3;
+const MEGA_PTS = 5;           // mega tiles appear at half time, near the leader's land
+const CB_ON = 0.8, CB_OFF = 0.9, CB_MIN = 6;   // comeback ×2 when a team has < 80 % of the leader's land (leader ≥ 6); off again at 90 %
 const other = t => t === "red" ? "blue" : "red";
 const T = t => GB.tn(t);
 
@@ -275,10 +290,13 @@ const Map_ = {
     }
     return out;
   },
-  points(g,stars,N){ const p={red:0,blue:0}; for(let i=0;i<N;i++){ const o=Map_.owner(g,i); if(o) p[o]+= stars.includes(i)?STAR_PTS:1; } return p; },
-  tileHTML(g,i,stars,cls){ const o=Map_.owner(g,i), st=stars.includes(i);
-    return `<div class="${cls}${o?" "+o:""}${st?" star":""}" data-i="${i}">${o&&g[i].av?ART.avatar(g[i].av,"",true):""}${st?`<span class="st">${ART.icon("star")}</span>`:""}</div>`; }
+  megas:[],                                                  // set from meta.megas on host and phones
+  points(g,stars,N){ const p={red:0,blue:0}; for(let i=0;i<N;i++){ const o=Map_.owner(g,i); if(o) p[o]+= Map_.megas.includes(i)?MEGA_PTS:stars.includes(i)?STAR_PTS:1; } return p; },
+  tileHTML(g,i,stars,cls){ const o=Map_.owner(g,i), mg=Map_.megas.includes(i), st=!mg && stars.includes(i);
+    return `<div class="${cls}${o?" "+o:""}${st?" star":""}${mg?" mega":""}" data-i="${i}">${o&&g[i].av?ART.avatar(g[i].av,"",true):""}${st?`<span class="st">${ART.icon("star")}</span>`:""}${mg?`<span class="mg">${MEGA_PTS}</span>`:""}</div>`; }
 };
+// paints per right answer: last 20 s ×2, comeback ×2, both together ×3
+const paintMult = (dbl, cb) => dbl && cb ? 3 : (dbl || cb) ? 2 : 1;
 const dims = m => { const [C,R]=String(m.size||"8x5").split("x").map(Number); return {C,R,N:C*R}; };
 
 function boot(){
@@ -290,7 +308,7 @@ function boot(){
 
 /* ================== HOST (the referee) ================== */
 const Host = {
-  code:null, ref:null, meta:{}, players:{}, grid:{}, tokens:{}, painted:{}, bestCap:null, raf:0, view:"setup", ended:false, dbl:false, _boardKey:"", _celebrated:-1,
+  code:null, ref:null, meta:{}, players:{}, grid:{}, tokens:{}, painted:{}, bestCap:null, raf:0, view:"setup", ended:false, dbl:false, cb:null, _boardKey:"", _celebrated:-1,
 
   async start(existing){
     show($("host")); GB.unlockAudio(); GB.host.netStatus($("hNet"));
@@ -307,7 +325,7 @@ const Host = {
     $("stopBtn").onclick=()=>this.finish();
     $("againBtn").onclick=()=>this.startRound();
     $("lobbyBtn").onclick=()=>{ this.view="lobby"; this.ref.child("meta").update({state:"lobby",winner:null}); };
-    this.ref.child("meta").on("value",s=>{ this.meta=s.val()||{}; this._boardKey=""; this.render(); });
+    this.ref.child("meta").on("value",s=>{ this.meta=s.val()||{}; Map_.megas=this.meta.megas||[]; this.cb=this.meta.cb||null; this._boardKey=""; this.render(); });
     this.ref.child("grid").on("value",s=>{ this.grid=s.val()||{}; this.drawBoard(); });
     this.ref.child("players").on("value",s=>this.onPlayers(s.val()||{}));
     this.ref.child("paint").on("child_added",s=>this.onPaint(s));
@@ -321,7 +339,7 @@ const Host = {
     if (this.live()){
       for (const id in p){
         const d=(p[id].score||0)-((prev[id]&&prev[id].score)||0);
-        if (d>0) this.tokens[id]=(this.tokens[id]||0)+d*(this.dbl?2:1);
+        if (d>0) this.tokens[id]=(this.tokens[id]||0)+d*paintMult(this.dbl, this.cb===p[id].team);
       }
     }
     this.renderTeams();
@@ -377,7 +395,7 @@ const Host = {
   drawBoard(){
     if (this.meta.state!=="play" && this.meta.state!=="end") return;
     const {C,R,N}=dims(this.meta), stars=this.meta.stars||[], g=this.grid, B=$("board");
-    const key=C+"x"+R+":"+this.meta.round;
+    const key=C+"x"+R+":"+this.meta.round+":"+Map_.megas.join(",");
     if (this._boardKey!==key){ this._boardKey=key; B.innerHTML=Array.from({length:N},(_,i)=>Map_.tileHTML(g,i,stars,"tile")).join(""); this.fit(); }
     else for (let i=0;i<N;i++){
       const el=B.children[i], o=Map_.owner(g,i), av=o?g[i].av:"";
@@ -397,7 +415,36 @@ const Host = {
       }
     }
     const pts=Map_.points(g,stars,N);
+    this.comeback(pts);
     for (const [t,id] of [["red","rPts"],["blue","bPts"]]){ const el=$(id); if (el.textContent!==String(pts[t])){ el.textContent=pts[t]; el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); } }
+  },
+
+  // the team far behind paints 2 tiles per right answer until it is close again
+  comeback(pts){
+    if (this.meta.state!=="play" || this.ended) return;
+    const lead=pts.red>=pts.blue?"red":"blue", tr=other(lead), L=pts[lead], Tt=pts[tr];
+    let cb=this.cb;
+    if (!cb && L>=CB_MIN && Tt<L*CB_ON) cb=tr;
+    else if (cb && (pts[cb]>=pts[other(cb)]*CB_OFF || pts[cb]>pts[other(cb)])) cb=null;
+    if (cb===this.cb) return;
+    this.cb=cb; this.ref.child("meta/cb").set(cb);
+    if (cb){ this.shout("Comeback! "+T(cb)+" ×2"); beep(440,.12,"triangle",.15); beep(660,.18,"triangle",.15,.1); }
+  },
+
+  // half time: two mega tiles (worth 5) at the edge of the leader's land; whoever paints them first gets them
+  megaTiles(){
+    const {C,R,N}=dims(this.meta), g=this.grid, pts=Map_.points(g,this.meta.stars||[],N);
+    const lead=pts.red>pts.blue?"red":pts.blue>pts.red?"blue":null, stars=this.meta.stars||[];
+    const edge=i=>Map_.nb(i,C,R).some(n=>Map_.owner(g,n)!==lead);           // leader tiles that touch something else
+    let cand=[];
+    if (lead) cand=[...Array(N).keys()].filter(i=>Map_.owner(g,i)===lead && edge(i) && !stars.includes(i));
+    if (cand.length<2) cand=cand.concat([...Array(N).keys()].filter(i=>!Map_.owner(g,i) && !stars.includes(i)));
+    if (cand.length<2) cand=[...Array(N).keys()].filter(i=>!stars.includes(i));
+    const picks=[]; while (picks.length<2 && cand.length){ const k=rand(cand.length); const i=cand.splice(k,1)[0];
+      if (!picks.some(j=>Math.abs(j%C-i%C)+Math.abs(((j/C)|0)-((i/C)|0))<2)) picks.push(i); }
+    const upd={"meta/megas":picks}; for (const i of picks) upd["grid/"+i]=null;   // up for grabs: the tile is emptied
+    this.ref.update(upd);
+    this.shout("Mega tiles! 5 points"); beep(523,.12,"triangle",.18); beep(784,.12,"triangle",.18,.1); beep(1047,.25,"triangle",.18,.2);
   },
 
   async startRound(){
@@ -410,8 +457,8 @@ const Host = {
     const upd={};
     for (const id in this.players){ upd["players/"+id+"/score"]=0; upd["players/"+id+"/tiles"]=0; }
     Object.assign(upd,{ "grid":null, "paint":null, "meta/game":GAME, "meta/state":"play", "meta/round":(this.meta.round||0)+1, "meta/startAt":startAt, "meta/endAt":startAt+dur*1000,
-      "meta/words":words, "meta/mode":$("sMode").value, "meta/size":size, "meta/stars":stars, "meta/winner":null, "meta/rT":null, "meta/bT":null });
-    this.ended=false; this.tokens={}; this.painted={}; this.bestCap=null; this.dbl=false; this._boardKey=""; this.view="lobby";
+      "meta/words":words, "meta/mode":$("sMode").value, "meta/size":size, "meta/stars":stars, "meta/winner":null, "meta/rT":null, "meta/bT":null, "meta/cb":null, "meta/megas":null });
+    this.ended=false; this.tokens={}; this.painted={}; this.bestCap=null; this.dbl=false; this.cb=null; Map_.megas=[]; this._boardKey=""; this.view="lobby";
     await this.ref.update(upd);
   },
 
@@ -439,6 +486,7 @@ const Host = {
     this.renderTeams(); this.drawBoard(); requestAnimationFrame(()=>this.fit());
     if (st==="play"){
       show($("result"),false); show($("stopBtn"),true);
+      if (this._megaRound!==m.round){ this._megaRound=m.round; this._megaAsked=!!(m.megas||[]).length; }
       const loop=()=>{
         const t=now();
         if (t<m.startAt){
@@ -455,6 +503,8 @@ const Host = {
           $("timer").classList.toggle("warn",left<=10000);
           const d=left<=DOUBLE_MS && left>0;
           if (d!==this.dbl){ this.dbl=d; show($("dbl"),d); $("bwrap").classList.toggle("crunch",d); if(d) this.shout("Double paint!"); }
+          if (!(m.megas||[]).length && !this._megaAsked && t>=m.startAt+(m.endAt-m.startAt)/2){ this._megaAsked=true; this.megaTiles(); }
+          const cbEl=$("cbBadge"); show(cbEl, !!this.cb); if (this.cb){ cbEl.className="cbadge "+(this.cb==="red"?"r":"b"); cbEl.innerHTML=ART.icon("bolt")+" "+esc(T(this.cb))+" comeback ×2"; }
           if (left<=0 && !this.ended) this.finish();
         }
         this.raf=requestAnimationFrame(loop);
@@ -462,7 +512,7 @@ const Host = {
       loop();
     }
     if (st==="end"){
-      show($("hCount"),false); show($("stopBtn"),false); show($("dbl"),false); $("bwrap").classList.remove("crunch"); $("timer").classList.remove("warn"); this.dbl=false;
+      show($("hCount"),false); show($("stopBtn"),false); show($("dbl"),false); show($("cbBadge"),false); $("bwrap").classList.remove("crunch"); $("timer").classList.remove("warn"); this.dbl=false;
       const w=m.winner, {r,b}=GB.host.teams(this.players);
       $("winTxt").className="win "+(w==="red"?"r":w==="blue"?"b":"t");
       $("winMascot").innerHTML = w==="tie" ? "" : ART.mascot(w,"wm");
@@ -511,7 +561,7 @@ const Player = {
       this.setBar();
       if (this.meta.state==="end") $("pTiles").textContent=this.tiles;
     });
-    this.ref.child("meta").on("value",s=>{ this.meta=s.val()||{}; this.render(); });
+    this.ref.child("meta").on("value",s=>{ this.meta=s.val()||{}; Map_.megas=this.meta.megas||[]; this.render(); });
     this.ref.child("grid").on("value",s=>{ this.grid=s.val()||{}; this.drawScore(); if (!$("pMap").classList.contains("hidden")) this.drawMap(); });
   },
 
@@ -549,6 +599,7 @@ const Player = {
     const {C,R}=dims(this.meta), ok=Map_.validList(this.grid,this.team,C,R);
     if (!ok.length){ this.paints=0; this.hideMap(); return; }
     // prefer empty tiles next to our land, then any empty, then steals
+    const mega=ok.filter(i=>Map_.megas.includes(i)); if (mega.length) return this.paintAt(mega[0]);   // never let a mega tile slip by
     const near=ok.filter(i=>!Map_.owner(this.grid,i) && Map_.nb(i,C,R).some(n=>Map_.owner(this.grid,n)===this.team));
     const empty=ok.filter(i=>!Map_.owner(this.grid,i));
     this.paintAt(pick(near.length?near:empty.length?empty:ok));
@@ -587,6 +638,7 @@ const Player = {
         $("pTime").textContent=fmt(Math.ceil(left/1000)*1000);
         $("pTimeBox").classList.toggle("warn", left<=10000 && t>=m.startAt);
         $("player").classList.toggle("crunch", left<=DOUBLE_MS && left>0 && t>=m.startAt);
+        const cbOn = this.meta.cb===this.team && t>=m.startAt && left>0; show($("pCb"), cbOn);
         if (left<=0 && t>=m.startAt && this.paints>0 && !$("pMap").classList.contains("hidden")) this.autoPick();
       };
       tick(); this.timerInt=setInterval(tick,250);
@@ -618,7 +670,8 @@ const Player = {
       this.score++; this.combo++; this.best=Math.max(this.best,this.combo); this.setBar();
       this.ref.child("players/"+this.pid).update({score:this.score, best:this.best});
       beep(880,.08,"triangle",.15); beep(1320,.12,"triangle",.12,.07);
-      setTimeout(()=>{ this.locked=false; this.nextQ(); this.paints+= dbl?2:1; this.openMap(); },350);
+      const cb = this.meta.cb===this.team;
+      setTimeout(()=>{ this.locked=false; this.nextQ(); this.paints+= paintMult(dbl, cb); this.openMap(); },350);
     } else {
       this.combo=0;
       btn.classList.add("no");
