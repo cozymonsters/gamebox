@@ -66,6 +66,89 @@ const GB = (() => {
     }catch(e){}
   }
   const unlockAudio = () => document.addEventListener("click",()=>{ try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); actx.resume(); }catch(e){} },{once:true});
+  /* ---- background music for the big screen: original loops played by Web Audio (no music files, nothing to license).
+     Games call GB.music.play(level) every frame while a round runs — level 0 normal, 1 near the end (last 30 s),
+     2 at the very end (last 10 s): faster and busier — and GB.music.stop() when it ends. Phones never play music. ---- */
+  const AC = () => (actx = actx || new (window.AudioContext||window.webkitAudioContext)());
+  let noiseBuf=null;
+  const noise = c => { if (!noiseBuf){ noiseBuf=c.createBuffer(1, c.sampleRate, c.sampleRate); const d=noiseBuf.getChannelData(0); for (let i=0;i<d.length;i++) d[i]=Math.random()*2-1; } return noiseBuf; };
+  const mhz = n => 440*Math.pow(2,(n-69)/12);
+  const SY = {
+    kick(c,o,t,v=.9){ const s=c.createOscillator(), g=c.createGain(); s.frequency.setValueAtTime(150,t); s.frequency.exponentialRampToValueAtTime(42,t+.16); g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(.001,t+.22); s.connect(g).connect(o); s.start(t); s.stop(t+.25); },
+    snare(c,o,t,v=.45){ const n=c.createBufferSource(), f=c.createBiquadFilter(), g=c.createGain(); n.buffer=noise(c); f.type="bandpass"; f.frequency.value=1800; g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(.001,t+.16); n.connect(f).connect(g).connect(o); n.start(t,Math.random()*.5); n.stop(t+.18); SY.tone(c,o,t,52,.08,"triangle",v*.5); },
+    hat(c,o,t,v=.16,d=.04){ const n=c.createBufferSource(), f=c.createBiquadFilter(), g=c.createGain(); n.buffer=noise(c); f.type="highpass"; f.frequency.value=7000; g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(.001,t+d); n.connect(f).connect(g).connect(o); n.start(t,Math.random()*.5); n.stop(t+d+.02); },
+    tone(c,o,t,note,d,type="sawtooth",v=.3,cut=0){ const s=c.createOscillator(), g=c.createGain(); s.type=type; s.frequency.setValueAtTime(mhz(note),t); let x=s;
+      if (cut){ const f=c.createBiquadFilter(); f.type="lowpass"; f.frequency.setValueAtTime(cut,t); f.frequency.exponentialRampToValueAtTime(Math.max(120,cut*.35),t+d); s.connect(f); x=f; }
+      g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(v,t+.008); g.gain.exponentialRampToValueAtTime(.001,t+d); x.connect(g).connect(o); s.start(t); s.stop(t+d+.03); },
+    tom(c,o,t,f0,v=.6){ const s=c.createOscillator(), g=c.createGain(); s.frequency.setValueAtTime(f0,t); s.frequency.exponentialRampToValueAtTime(f0*.62,t+.25); g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(.001,t+.3); s.connect(g).connect(o); s.start(t); s.stop(t+.32); },
+    click(c,o,t,f,v=.25){ const s=c.createOscillator(), g=c.createGain(); s.type="square"; s.frequency.value=f; g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(.001,t+.03); s.connect(g).connect(o); s.start(t); s.stop(t+.04); }
+  };
+  // each style: 16 steps per bar (16th notes); bpm for levels 0 / 1 / 2; step(c, out, i, t, level)
+  const STYLES = {
+    chase:{ name:"Chase", desc:"Driving drums and bass, like a chase scene", bpm:[124,142,164], len:64, gain:1, step(c,o,i,t,L){
+      const b=i%16, root=[45,41,43,40][(i/16|0)%4];
+      if (b%4===0 || (L>=1 && b===14)) SY.kick(c,o,t);
+      if (b===4 || b===12) SY.snare(c,o,t);
+      if (b%2===0 || L>=2) SY.hat(c,o,t,b%2?.08:.15);
+      if (b%2===0) SY.tone(c,o,t, root+([0,0,12,0,0,12,0,7][b/2]), .16, "sawtooth", .22, 900+L*500);
+      if (L>=1 && [0,3,6,10].includes(b)) SY.tone(c,o,t, root+24+(b===10?3:0), .12, "square", .07, 2600);
+    }},
+    arcade:{ name:"Arcade", desc:"Bouncy 8-bit video game tune", bpm:[132,152,174], len:64, gain:2.3, step(c,o,i,t,L){
+      const b=i%16, ch=[[69,72,76],[65,69,72],[60,64,67],[67,71,74]][(i/16|0)%4];
+      SY.tone(c,o,t, ch[b%3]+(b%6>=3?12:0)+(L>=2?12:0), .09, "square", .07, 0);
+      if (b%4===0) SY.tone(c,o,t, ch[0]-24, .2, "triangle", .3);
+      if (b%4===2) SY.hat(c,o,t,.07,.03);
+      if (b===0 || b===8 || (L>=1 && b===12)) SY.tone(c,o,t,36,.08,"square",.18,600);
+    }}
+  };
+  const MUSIC_VOL = .32;
+  const music = {
+    STYLES, on:false, level:0, step:0, next:0, timer:0, bus:null, previewT:0,
+    get style(){ const v=store.get("gb.music"); return v==="off" ? "off" : STYLES[v] ? v : "chase"; },   // a style that was removed → Chase
+    set style(v){ store.set("gb.music", v); },
+    get muted(){ return store.get("gb.mute")==="1"; },
+    set muted(v){ store.set("gb.mute", v?"1":"0"); if (v) music.stop(.2, true); music.paintBtn(); },
+    levelFor(leftMs){ return leftMs<=10000 ? 2 : leftMs<=30000 ? 1 : 0; },
+    play(level=0, style){
+      if (!style && music.previewing) music.stop(.1, true);  // the game starts while the teacher was listening: the game wins
+      const st=STYLES[style||music.style];
+      if (!st || music.muted){ if (music.on) music.stop(); return; }
+      music.level=Math.max(0,Math.min(2,level|0)); music.cur=st;
+      if (music.on) return;
+      try{
+        const c=AC(); if (c.state==="suspended") c.resume();
+        music.on=true; music.step=0; music.next=c.currentTime+.08;
+        music.bus=c.createGain(); music.bus.gain.setValueAtTime(.0001,c.currentTime); music.bus.gain.linearRampToValueAtTime(MUSIC_VOL*(st.gain||1),c.currentTime+.8); music.bus.connect(c.destination);
+        clearInterval(music.timer); music.timer=setInterval(music.pump,25);
+      }catch(e){ music.on=false; }
+    },
+    pump(){
+      const c=AC(), st=music.cur; if (!music.on || !st) return;
+      while (music.next < c.currentTime+.12){
+        try{ st.step(c, music.bus, music.step, music.next, music.level); }catch(e){}
+        music.next += 60/st.bpm[music.level]/4; music.step=(music.step+1)%(st.len||64);
+      }
+    },
+    stop(fade=.7, force){
+      if (music.previewing && !force) return;               // a game screen refreshing must not cut the teacher's "Listen"
+      clearTimeout(music.previewT); music.previewing=false;
+      if (!music.on) return; music.on=false; clearInterval(music.timer);
+      const b=music.bus; music.bus=null;
+      try{ const c=AC(); b.gain.cancelScheduledValues(c.currentTime); b.gain.setValueAtTime(b.gain.value,c.currentTime); b.gain.linearRampToValueAtTime(.0001,c.currentTime+fade); setTimeout(()=>{ try{ b.disconnect(); }catch(e){} }, fade*1000+300); }catch(e){}
+    },
+    // settings: 4 s at normal speed, then 4 s of the last-10-seconds speed
+    preview(style, done){
+      music.stop(.1, true);
+      if (!STYLES[style]){ done && done(); return; }
+      const m=music.muted; if (m) store.set("gb.mute","0");
+      music.previewing=true;
+      const end=()=>{ music.stop(.6, true); if (m) store.set("gb.mute","1"); done && done(); };
+      music.previewT=setTimeout(()=>{ music.play(0, style); music.previewT=setTimeout(()=>{ music.level=2; music.previewT=setTimeout(end, 4500); }, 4500); }, 150);
+    },
+    // a small music on / off button in the teacher's header
+    paintBtn(){ const b=$("musicBtn"); if (!b) return; const off=music.muted || !STYLES[music.style]; b.innerHTML=ART.icon(off?"mute":"music")+(off?" Music off":" Music"); b.classList.toggle("off", off); }
+  };
+
   const fanfare = (delay=0) => { [523,659,784,1047].forEach((f,i)=>beep(f,.3,"triangle",.25,delay+i*.14)); beep(1047,.8,"triangle",.25,delay+.6); beep(1319,.8,"triangle",.18,delay+.6); };
   const buzzer = () => { beep(180,.9,"sawtooth",.18); beep(186,.9,"square",.1); };
   // pronunciation: recorded Microsoft Ava Neural voice (audio/<slug>.mp3) for every word that has a recording; the browser voice for anything else
@@ -250,6 +333,9 @@ const GB = (() => {
       if (tag && !$("joinPeek")){
         const b=document.createElement("button"); b.className="pill white joinpeek"; b.id="joinPeek"; b.innerHTML=ART.icon("qr")+" Join"; b.title="Show the QR code to join or rejoin";
         tag.insertAdjacentElement("beforebegin", b); tag.style.cursor="pointer"; tag.title="Show the QR code";
+        const mb=document.createElement("button"); mb.className="pill white musicbtn"; mb.id="musicBtn"; mb.title="Background music on / off";
+        b.insertAdjacentElement("beforebegin", mb); music.paintBtn();
+        mb.onclick=()=>{ if (!STYLES[music.style]){ music.style="chase"; music.muted=false; } else music.muted=!music.muted; music.paintBtn(); };
         const m=document.createElement("div"); m.className="modal hidden"; m.id="joinModal";
         m.innerHTML=`<div class="mcard joinm"><div class="jq" id="joinQR"></div><div class="jt"><div class="j1">Scan to join</div><div class="j2">Dropped out? Scan again with the same phone to pick up where you left off.</div><div class="j3"><span>Room code</span><b>${code}</b></div><button class="go" id="joinClose">Back to the game</button></div></div>`;
         document.body.appendChild(m);
@@ -328,6 +414,22 @@ const GB = (() => {
           for (const b of $("setList").querySelectorAll(".setitem")) b.onclick=()=>{ sel.value=b.dataset.v; sel.onchange(); show(m,false); };
           show(m);
         };
+      }
+      // Background music: pick a style (or Off) and listen to it here
+      const sb=document.querySelector(".setbox");
+      if (sb && !$("sMusic")){
+        const r=document.createElement("div"); r.className="setrow";
+        r.innerHTML=`<span class="emo" data-i="music"></span><div class="txt"><h4>Music</h4><p id="musicDesc">Plays on this screen. Gets faster near the end!</p></div>
+          <div class="ctl"><select class="sel" id="sMusic">${Object.entries(music.STYLES).map(([k,v])=>`<option value="${k}">${v.name}</option>`).join("")}<option value="off">Off</option></select><button class="btn-soft" id="musicTry">${ART.icon("play")} Listen</button></div>`;
+        const note=sb.querySelector(".setnote"); if (note) sb.insertBefore(r,note); else sb.appendChild(r);
+        if (window.ART && ART.hydrate) ART.hydrate(r); else { const e=r.querySelector("[data-i]"); if (e) e.innerHTML=ART.icon("music"); }
+        const sm=$("sMusic"), desc=()=>{ const st=music.STYLES[sm.value]; $("musicDesc").textContent = st ? st.desc+". Gets faster near the end!" : "No background music."; };
+        sm.value = music.STYLES[music.style] ? music.style : "off"; desc();
+        let playing=false;
+        sm.onchange=()=>{ music.style=sm.value; if (sm.value!=="off") music.muted=false; desc(); music.paintBtn(); if (playing) $("musicTry").click(); };
+        $("musicTry").onclick=()=>{ if (playing){ playing=false; music.stop(.2, true); $("musicTry").innerHTML=ART.icon("play")+" Listen"; return; }
+          if (!music.STYLES[sm.value]) return; playing=true; $("musicTry").innerHTML=ART.icon("stop")+" Stop";
+          music.preview(sm.value, ()=>{ playing=false; $("musicTry").innerHTML=ART.icon("play")+" Listen"; }); };
       }
       const refresh=()=>{ fill(); modeHide(); prefetch(); showSet(); };
       refresh();
@@ -609,5 +711,5 @@ const GB = (() => {
 
   return { db, now, $, show, esc, store, rand, pick, shuffle, fmt, params, baseUrl, dirUrl, AVATARS, SETS, parseWords, account, kits, profile,
            tn, tnV, tnWin, tnPos, teamSubs, paintTeams,
-           beep, unlockAudio, fanfare, buzzer, speak, voice, primeVoice, confetti, host, join, makeQuestion, renderQuestion, showWhy, wrongMs, noTranslate };
+           beep, unlockAudio, fanfare, buzzer, music, speak, voice, primeVoice, confetti, host, join, makeQuestion, renderQuestion, showWhy, wrongMs, noTranslate };
 })();

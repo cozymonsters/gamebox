@@ -90,7 +90,7 @@ img{-webkit-user-drag:none;user-select:none}
 .setrow .emo{flex:none;width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff}
 .setrow .emo .gi{width:26px;height:26px}
 .setrow:nth-child(1) .emo{background:var(--orange)} .setrow:nth-child(2) .emo{background:var(--lav)}
-.setrow:nth-child(3) .emo{background:var(--teal)} .setrow:nth-child(4) .emo{background:var(--sage)}
+.setrow:nth-child(3) .emo{background:var(--teal)} .setrow:nth-child(4) .emo{background:var(--sage)} .setrow:nth-child(5) .emo{background:var(--pink)} .setrow:nth-child(6) .emo{background:var(--mustard)} .setrow:nth-child(n+7) .emo{background:var(--blue)}
 .setrow .txt{flex:1;min-width:0}
 .setrow h4{margin:0;font-family:var(--display);font-weight:600;font-size:22px}
 .setrow p{margin:1px 0 0;font-size:15px;font-weight:700;color:var(--sub);line-height:1.35}
@@ -431,3 +431,7 @@ html.phone .doodles{display:none}
 .trcard b{display:block;margin-top:10px;font-family:var(--display);font-weight:600;font-size:28px}
 .trcard p{margin:6px 0 10px;font-weight:800;font-size:17px}
 .trcard small{display:block;font-weight:700;font-size:14px;color:var(--sub);line-height:1.5}
+
+/* background music button (teacher header) */
+.musicbtn{padding:7px 14px;font-size:15px} .musicbtn.off{opacity:.6}
+@media (max-width:600px){ .gb-top .musicbtn{padding:5px 11px;font-size:14px} }

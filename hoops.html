@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="gb.css?v=ba0efca6">
+<link rel="stylesheet" href="gb.css?v=3da0cdd0">
 <style>
 .hidden{display:none!important}  /* works even before gb.css arrives */
 /* ---- Hoops scene ---- */
@@ -297,8 +297,8 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="gb-art.js?v=d654df6b"></script>
-<script src="gb.js?v=c408992e"></script>
+<script src="gb-art.js?v=5650c732"></script>
+<script src="gb.js?v=1f9d1c0b"></script>
 <script>
 "use strict";
 const GAME="hoops";
@@ -532,6 +532,7 @@ const Host = {
     show($("lobby"), st==="lobby" && this.view==="lobby");
     show($("court"), st!=="lobby");
     cancelAnimationFrame(this.raf);
+    if (st!=="play") GB.music.stop();
     if (st==="lobby"){ show($("result"),false); this.renderTeams(); return; }
     if (st==="play"){
       show($("result"),false); show($("stopBtn"),true);
@@ -549,6 +550,7 @@ const Host = {
         } else {
           if (!$("hCount").classList.contains("hidden")){ show($("hCount"),false); GB.buzzer(); this.shout("Tip off!"); }
           const left=Math.max(0,m.endAt-t);
+          GB.music.play(GB.music.levelFor(left));                       // background music: faster in the last 30 s and 10 s
           $("timer").textContent=fmt(left);
           const sec=Math.ceil(left/1000);
           $("timer").classList.toggle("warn",sec<=10);

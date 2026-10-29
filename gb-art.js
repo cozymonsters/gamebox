@@ -21,6 +21,8 @@ const ART = (() => {
     play:    '<path d="M8 5.2v13.6a.8.8 0 0 0 1.2.7l10.6-6.8a.8.8 0 0 0 0-1.4L9.2 4.5A.8.8 0 0 0 8 5.2z" fill="currentColor" stroke="none"/>',
     stop:    '<rect x="6" y="6" width="12" height="12" rx="2.5" fill="currentColor" stroke="none"/>',
     refresh: '<path d="M20 11.5A8 8 0 1 0 17.7 17M20 4.5v7h-7"/>',
+    music:   '<path d="M9 18V6l11-2v12"/><circle cx="6.5" cy="18" r="2.6"/><circle cx="17.5" cy="16" r="2.6"/>',
+    mute:    '<path d="M4 9.5h3.5L13 5v14l-5.5-4.5H4z" fill="currentColor"/><path d="M17 9.5l5 5M22 9.5l-5 5"/>',
     volume:  '<path d="M4 9.5h3.5L13 5v14l-5.5-4.5H4z" fill="currentColor"/><path d="M16.5 9a4.2 4.2 0 0 1 0 6M19 6.5a7.8 7.8 0 0 1 0 11"/>',
     flame:   '<path d="M12.3 2.5c.6 3.6 5.2 5.6 5.2 10.6a5.5 5.5 0 0 1-11 0c0-2.4 1.1-4 2.4-5 .1 1.8.9 3 2.1 3.3-.9-3.4.1-6.6 1.3-8.9z" fill="currentColor" stroke="none"/>',
     bolt:    '<path d="M13.5 2 4.5 13.6h6.6L10 22l9.5-12.2h-6.7z" fill="currentColor" stroke="none"/>',
