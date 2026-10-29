@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="en" translate="no" class="notranslate">
+<head>
+<meta charset="utf-8">
+<meta name="google" content="notranslate">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#faf6ec">
+<title>Crew Race · GameBox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="gb.css?v=ba0efca6">
+<style>
+.hidden{display:none!important}  /* works even before gb.css arrives */
+/* ---- Crew Race (like Quizlet Live): random crews of 3–4, the answers are split over the crew's phones ---- */
+.setup-wrap{flex:1;padding:6px 24px 28px;overflow:auto}
+#host{height:100vh;overflow:hidden}
+/* lobby: one pool of players (crews are made at Start) */
+.pool{flex:1;min-height:0;display:flex;flex-direction:column;border-radius:22px;background:var(--paper);border:2px solid var(--line);overflow:hidden}
+.pool .ph{display:flex;align-items:center;gap:12px;padding:12px 20px;font-family:var(--display);font-weight:600;font-size:28px;background:var(--lav);color:#fff}
+.pool .ph .n{margin-left:auto;font-family:var(--body);font-weight:900;font-size:18px;background:rgba(255,255,255,.25);border-radius:100px;padding:2px 13px}
+.pool .names{flex:1;display:flex;flex-wrap:wrap;gap:10px;align-content:flex-start;padding:18px 16px;overflow:auto}
+.pool.dense .pchip{font-size:17px;gap:6px;padding:3px 5px} .pool.dense .pchip .av{width:30px;height:30px}
+/* crews: the "find your crew" step */
+#crews{flex:1;min-height:0;display:flex;flex-direction:column;padding:6px 24px 18px;gap:14px}
+.chead{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.chead h2{margin:0;font-family:var(--display);font-weight:600;font-size:34px;color:var(--on-bg)}
+.chead p{margin:0;font-weight:800;color:var(--on-bg-sub);font-size:17px}
+.chead .sp{flex:1}
+.cgrid{flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;align-content:start}
+.ccard{background:var(--paper);border-radius:20px;overflow:hidden;border:2px solid var(--line);animation:gb-pop .4s}
+.ccard .ch{padding:8px 16px;font-family:var(--display);font-weight:600;font-size:30px;color:#fff;background:var(--cc)}
+.ccard .cm{padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.ccard .mem{display:flex;align-items:center;gap:8px;font-weight:900;font-size:22px}
+.ccard .mem .av{width:40px;height:40px;display:inline-block}
+.ccard .mem.off{opacity:.45}
+/* the race */
+#race{flex:1;display:flex;flex-direction:column;min-height:0;position:relative;padding:8px 24px 18px;gap:10px}
+.rtop{display:flex;align-items:center;gap:14px}
+.rtop .goal{font-family:var(--display);font-weight:600;font-size:26px;color:var(--on-bg);display:flex;align-items:center;gap:8px}
+.rtop .goal b{background:var(--mustard);color:var(--ink);border-radius:12px;padding:0 12px}
+.rtop .sp{flex:1}
+.lanes{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;position:relative}
+.lane{flex:1;min-height:44px;max-height:120px;display:flex;align-items:center;gap:12px;background:var(--paper);border-radius:18px;padding:6px 14px 6px 8px;border:2px solid var(--line);position:relative;transition:background .2s}
+.lane .lt{display:flex;align-items:center;gap:8px;width:290px;flex:none;min-width:0}
+.lane .nm{font-family:var(--display);font-weight:600;font-size:clamp(18px,2.6vh,26px);color:#fff;background:var(--cc);border-radius:12px;padding:2px 12px;white-space:nowrap}
+.lane .avs{display:flex} .lane .avs span{width:clamp(24px,3.6vh,34px);height:clamp(24px,3.6vh,34px);margin-left:-6px;display:inline-block}
+.lane .track{flex:1;height:58%;min-height:26px;position:relative;display:grid;grid-template-columns:repeat(var(--goal),1fr);gap:4px}
+.lane .track i{border-radius:7px;background:var(--cream);transition:background .25s}
+.lane .track i.on{background:var(--cc)}
+.lane .runner{position:absolute;top:50%;width:clamp(40px,7vh,72px);height:clamp(40px,7vh,72px);transform:translate(-50%,-56%);transition:left .45s cubic-bezier(.3,1.5,.5,1);z-index:2}
+.lane .flag{flex:none;width:30px;height:70%;background:repeating-conic-gradient(var(--ink) 0 25%,#fff 0 50%) 0 0/12px 12px;border-radius:5px;border:2px solid var(--ink)}
+.lane .num{flex:none;font-family:var(--display);font-weight:600;font-size:clamp(20px,3vh,30px);min-width:62px;text-align:right}
+.lane.oops{background:#fde3dc;animation:shake .5s}
+.lane .ob{position:absolute;left:310px;top:50%;transform:translateY(-50%);font-family:var(--display);font-weight:700;font-size:26px;color:var(--red);background:#fff;border:3px solid var(--red);border-radius:14px;padding:0 14px;z-index:3;animation:gb-pop .3s}
+.lane.win{background:#fff5d6}
+@keyframes shake{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(4px)}}
+.hfoot{position:absolute;right:34px;bottom:30px;z-index:5}
+.rk{display:flex;flex-direction:column;gap:6px}
+.wavs{display:flex} .wavs img,.wavs svg{width:84px;height:84px;margin-left:-14px;animation:gb-hop 1.8s infinite}
+.rk .row{display:flex;align-items:center;gap:10px;font-weight:900;font-size:19px}
+.rk .row .cn{color:#fff;background:var(--cc);border-radius:10px;padding:1px 10px;font-family:var(--display);font-weight:600}
+.rk .row .s{margin-left:auto}
+/* phone */
+.mycrew{display:flex;align-items:center;gap:10px;background:var(--cc,var(--lav));color:#fff;border-radius:18px;padding:8px 14px;flex:none}
+.mycrew b{font-family:var(--display);font-weight:600;font-size:22px}
+.mycrew .pg{margin-left:auto;font-family:var(--display);font-weight:600;font-size:22px;background:rgba(255,255,255,.25);border-radius:10px;padding:0 10px}
+.mybar{display:grid;grid-template-columns:repeat(var(--goal,12),1fr);gap:3px;height:12px;flex:none}
+.mybar i{border-radius:4px;background:var(--line)} .mybar i.on{background:var(--cc,var(--lav))}
+.findcard{width:min(360px,100%);background:var(--paper);border:2px solid var(--line);border-radius:24px;overflow:hidden;box-shadow:0 6px 0 var(--lift)}
+.findcard .fh{background:var(--cc,var(--lav));color:#fff;padding:14px 18px;text-align:center}
+.findcard .fh small{display:block;font-weight:900;font-size:14px;letter-spacing:.08em;text-transform:uppercase;opacity:.85}
+.findcard .fh b{display:block;font-family:var(--display);font-weight:700;font-size:40px;line-height:1.1}
+.findcard .fm{padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.findcard .mem{display:flex;align-items:center;gap:10px;font-weight:900;font-size:20px}
+.findcard .mem .av{width:40px;height:40px;display:inline-block}
+.findcard .mem.me{color:var(--cc,var(--lav))}
+.findcard .tip{padding:0 16px 14px;font-weight:800;color:var(--sub);text-align:center}
+.nohand{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;background:var(--paper);border:2px dashed var(--line-d);border-radius:22px;padding:16px;font-weight:900;font-size:20px;color:var(--sub)}
+.nohand b{font-family:var(--display);font-weight:600;font-size:26px;color:var(--ink)}
+#pOpts .opt.sent{opacity:.6}
+.pfb{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(250,246,236,.93);pointer-events:none;text-align:center;padding:20px}
+.pfb b{font-family:var(--display);font-weight:700;font-size:64px;line-height:1;color:var(--red);animation:gb-pop .4s}
+.pfb span{font-weight:900;font-size:20px}
+.pfb .ans{font-family:var(--display);font-weight:600;font-size:30px;background:#fff;border:3px solid var(--go);color:var(--go);border-radius:16px;padding:4px 18px}
+.qwrap{display:flex;flex-direction:column;gap:12px;flex:1}
+@media (max-width:900px){ .lane .lt{width:200px} .lane .ob{left:220px} }
+@media (max-width:600px){ #crews{padding:4px 14px 14px} .lane .lt{width:auto} .lane .avs{display:none} .lane .ob{left:40%;font-size:18px} }
+</style>
+</head>
+<body>
+<div class="doodles"></div>
+
+<!-- ============ HOST (teacher computer) ============ -->
+<section id="host" class="screen hidden">
+  <header class="gb-top">
+    <a class="brand" href="./"><span class="ic" data-art="logo"></span>Cozy Monsters</a>
+    <span class="game">· Crew Race</span>
+    <div class="sp"></div>
+    <span class="net" id="hNet">Connecting…</span>
+    <span class="codetag">CODE<b id="hCode">----</b></span>
+  </header>
+
+  <!-- step 1: settings -->
+  <div class="setup-wrap" id="setup">
+    <div class="panel">
+      <div class="hero">
+        <div class="cover"><img src="img/cover-crew.webp" alt=""></div>
+        <div class="info">
+          <div class="eyebrow">Game settings</div>
+          <h1>Crew Race</h1>
+          <div class="tagline">Random crews of 3–4. The answers are split over your phones: talk it out!</div>
+          <div class="chips">
+            <div class="chip"><span class="i" data-i="clock"></span><div><small>Duration</small><b>5–10 min</b></div></div>
+            <div class="chip"><span class="i" data-i="users"></span><div><small>Teams</small><b>Crews of 3–4</b></div></div>
+            <div class="chip"><span class="i" data-i="flag"></span><div><small>Goal</small><b>First to the flag</b></div></div>
+          </div>
+          <div class="act"><button class="go" id="toLobby">Continue <i data-i="play"></i></button></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="setbox">
+          <div class="setrow"><span class="emo" data-i="book"></span><div class="txt"><h4>Question Set</h4><p>Pick one of your sets from My Sets</p></div>
+            <div class="ctl"><select class="sel" id="sSet"></select></div></div>
+          <div class="setrow"><span class="emo" data-i="help"></span><div class="txt"><h4>Question Type</h4><p>Show English and pick 中文, or the other way</p></div>
+            <div class="ctl"><select class="sel" id="sMode"><option value="mix">Mixed</option><option value="en2zh">English → 中文</option><option value="zh2en">中文 → English</option></select></div></div>
+          <div class="setrow"><span class="emo" data-i="flag"></span><div class="txt"><h4>Race Length</h4><p>Right answers in a row to reach the flag. A wrong answer sends the crew back to 0!</p></div>
+            <div class="ctl"><select class="sel" id="sGoal"><option value="8">8 in a row · quick</option><option value="12" selected>12 in a row</option><option value="16">16 in a row · long</option></select></div></div>
+          <div class="setrow"><span class="emo" data-i="users"></span><div class="txt"><h4>How it works</h4><p>Press Start: everyone is put in a random crew of 3–4. Every crew member sees the question, but the answer is only on <b>one</b> phone. Talk, then tap!</p></div></div>
+          <div class="setnote">Students can already join with the code at the top right.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- step 2: lobby -->
+  <div class="lobby hidden" id="lobby">
+    <div class="lob-top">
+      <div class="lob-qr" id="qr"></div>
+      <div class="lob-join">
+        <div class="l1">Scan the QR code to join</div>
+        <div class="l2"><span class="rc">Room code</span><span class="bigcode" id="hCode2">----</span></div>
+      </div>
+      <div class="lob-peek"><img src="img/m/a2.webp" alt=""><img src="img/m/a9.webp" alt=""><img src="img/m/a5.webp" alt=""></div>
+      <div class="lob-act"><button class="go" id="startBtn" disabled>Make crews <i data-i="shuffle"></i></button><button class="pill ghost" id="toSetup"><i data-i="sliders"></i> Settings</button></div>
+    </div>
+    <div class="pool" id="pool"><div class="ph"><i data-i="users"></i> Players <span class="n" id="poolN">0</span></div><div class="names" id="poolNames"></div></div>
+    <div class="lob-hint" id="startHint">Need at least 2 players.</div>
+  </div>
+
+  <!-- step 3: find your crew -->
+  <div id="crews" class="hidden">
+    <div class="chead"><div><h2>Find your crew!</h2><p>Sit with your crew. Then press Start race.</p></div><div class="sp"></div>
+      <button class="pill white" id="shuffleBtn"><i data-i="shuffle"></i> New crews</button><button class="go" id="raceBtn">Start race <i data-i="play"></i></button></div>
+    <div class="cgrid" id="cgrid"></div>
+  </div>
+
+  <!-- step 4: the race -->
+  <div id="race" class="hidden">
+    <div class="rtop"><div class="goal"><i data-i="flag"></i> First crew to <b id="goalN">12</b> in a row</div><div class="sp"></div><div class="timer" id="timer">0:00</div></div>
+    <div class="lanes" id="lanes"></div>
+    <div class="countdown hidden" id="hCount"><span>3</span></div>
+    <div class="hfoot"><button class="pill ghost" id="stopBtn"><i data-i="stop"></i> End now</button></div>
+    <div class="result hidden" id="result">
+      <canvas class="confetti" id="confetti"></canvas>
+      <div class="rcard">
+        <div class="rhead"><img class="tro" src="img/trophy.webp" alt=""><div class="wtxt"><div class="win t" id="winTxt">Chompers win!</div><div class="why" id="whyTxt"></div></div><span id="winAvs"></span></div>
+        <div class="rbody"><div class="mvps">
+          <div class="mvp y"><h3><i data-i="flag"></i> Crews</h3><div class="rows rk" id="rankList"></div></div>
+          <div class="mvp b"><h3><i data-i="star"></i> Most right answers</h3><div class="rows" id="mvpList"></div></div>
+        </div></div>
+        <div class="rbtns"><button class="go" id="againBtn"><i data-i="shuffle"></i> New crews</button><button class="pill ghost" id="lobbyBtn"><i data-i="users"></i> Back to lobby</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PLAYER (student phone) ============ -->
+<section id="player" class="screen hidden">
+  <div class="p-top"><span class="av" id="pAvSm"></span><span class="me" id="pMe">Cozy Monsters</span><span class="sc hidden" id="pSc"></span></div>
+
+  <div class="p-body" id="pJoin">
+    <div class="joincard">
+      <h1>Join the game</h1>
+      <div class="room">Crew Race · Room <b id="pCodeLbl"></b></div>
+      <div class="avpick"><div class="big" id="pAvBtn"></div><div class="t"><b>Meet your monster!</b>It plays for you today</div></div>
+      <div class="lbl">Your name</div>
+      <input id="pName" class="field" maxlength="8" placeholder="Name" autocomplete="off">
+      <button class="btn-ink" id="pGo" disabled>Join</button>
+      <div class="err" id="pErr"></div>
+    </div>
+  </div>
+
+  <div class="p-body hidden" id="pWait">
+    <div class="wait">
+      <div class="bigav" id="pAvBig"></div>
+      <h2>You're in!</h2>
+      <div class="msg" style="margin-top:6px">Waiting for the teacher…</div>
+      <div class="sub">You'll be put in a crew of 3–4. Keep your screen on!</div>
+    </div>
+  </div>
+
+  <div class="p-body hidden" id="pFind">
+    <div class="wait">
+      <div class="findcard" id="findCard"></div>
+    </div>
+  </div>
+
+  <div class="p-body hidden" id="pPlay">
+    <div class="mycrew" id="pCrew"><b id="pCrewName">Crew</b><span class="pg" id="pProg">0 / 12</span></div>
+    <div class="mybar" id="pBar"></div>
+    <div class="qwrap">
+      <div class="qcard">
+        <div class="ask" id="pAsk">What does it mean?</div>
+        <div class="q" id="pQ">—</div>
+        <button class="say hidden" id="pSay" aria-label="Listen" data-i="volume"></button>
+      </div>
+      <div class="opts" id="pOpts"></div>
+      <div class="nohand hidden" id="pNoHand"><b>Not on your phone</b>The answer is on a crew mate's phone. Help them find it!</div>
+    </div>
+  </div>
+
+  <div class="p-body hidden" id="pEnd">
+    <div class="wait">
+      <div class="bigav" id="pEndAv"></div>
+      <div class="res" id="pWin">You win!</div>
+      <div class="msg" id="pWinSub"></div>
+      <div class="stats">
+        <div class="stat"><b id="pMine">0</b><span>Your right answers</span></div>
+        <div class="stat"><b id="pBestRun">0</b><span>Crew's best run</span></div>
+      </div>
+      <div class="sub" style="margin-top:8px">Wait for the next round…</div>
+    </div>
+  </div>
+
+  <div class="pfb hidden" id="pFb"><b>Oops!</b><span id="pFbWho"></span><span>The answer was</span><span class="ans" id="pFbAns"></span><span>Back to 0. Keep going!</span></div>
+  <div class="pcount hidden" id="pCount"><b id="pCountN">3</b><span id="pCountT">Get ready!</span></div>
+</section>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="gb-art.js?v=d654df6b"></script>
+<script src="gb.js?v=c408992e"></script>
+<script>
+"use strict";
+const GAME="crew";
+const { $, show, esc, store, rand, pick, shuffle, fmt, beep } = GB;
+const now = GB.now;
+const CREW_NAMES = ["Chompers","Stompers","Fireballs","Rumblers","Spikers","Grumblers","Munchers","Roarers","Sizzlers","Fangsters","Gobblers",
+  "Splashers","Bubblers","Wigglers","Zappers","Snowballs","Gigglers","Bouncers","Fuzzballs","Glimmers","Snoozers","Blobbers"];
+const CREW_COLORS = ["#e2683a","#3a78c9","#2f9e8f","#8a7bd0","#d4537e","#5a9e3a","#c9902a","#6b5b95","#d9534f","#2b88b5","#9a6b3f","#e07b9b"];
+const OK_MS = 400, WRONG_MS = 2300;    // pause after a right / wrong tap before the crew's next question
+
+function boot(){
+  const r=(GB.params.get("r")||"").replace(/\D/g,"");
+  if (GB.params.has("host")) return Host.start(GB.params.get("host"));
+  if (r.length===4) return Player.start(r);
+  location.replace(GB.dirUrl);
+}
+const crewOf = (m, pid) => { const g=m.groups||{}; for (const id in g) if (g[id].members && g[id].members[pid]) return id; return null; };
+
+/* ================== HOST (the referee) ==================
+   meta.groups = { g0:{name, color, members:{pid:{n,av}}} }   (made at "Make crews")
+   crews/{gid}  = { prog, best, qn, q:{kind,text,sub,en}, opts:[text], ans, hand:{pid:[k]}, last:{ok,pid,n,t,right,at} }
+   crewAns      = phones push {pid, g, qn, k}; only the host decides and writes crews/{gid}. */
+const Host = {
+  code:null, ref:null, meta:{}, players:{}, cs:{}, view:"setup", ended:false, recent:{}, busy:{}, _celebrated:-1, _seenLast:{},
+
+  async start(existing){
+    show($("host")); GB.unlockAudio(); GB.host.netStatus($("hNet"));
+    GB.host.initSettings(["sMode","sGoal"]);
+    this.code = await GB.host.openRoom(GAME, existing);
+    this.ref = GB.db.ref("rooms/"+this.code);
+    $("hCode").textContent=this.code; $("hCode2").textContent=this.code;
+    GB.host.drawQR(GB.baseUrl+"?r="+this.code, $("qr"));
+    ART.preload(["trophy"]);
+    if (existing && String(existing).replace(/\D/g,"")===this.code) this.view="lobby";
+    $("toLobby").onclick=()=>{ this.view="lobby"; this.render(); };
+    $("toSetup").onclick=()=>{ this.view="setup"; this.render(); };
+    $("startBtn").onclick=()=>this.makeCrews();
+    $("shuffleBtn").onclick=()=>this.makeCrews();
+    $("raceBtn").onclick=()=>this.startRace();
+    $("stopBtn").onclick=()=>this.finish(null);
+    $("againBtn").onclick=()=>this.makeCrews();
+    $("lobbyBtn").onclick=()=>{ this.view="lobby"; this.ref.update({"meta/state":"lobby","meta/winner":null,"meta/groups":null,"crews":null}); };
+    this.ref.child("meta").on("value",s=>{ this.meta=s.val()||{}; this.render(); });
+    this.ref.child("players").on("value",s=>this.onPlayers(s.val()||{}));
+    this.ref.child("crews").on("value",s=>{ this.dbCrews=s.val()||{}; if (!Object.keys(this.cs).length && this.meta.state==="play") this.cs=JSON.parse(JSON.stringify(this.dbCrews)); this.drawLanes(); });
+    this.ref.child("crewAns").on("child_added",s=>this.onAnswer(s));
+    addEventListener("resize",()=>this.drawLanes());
+  },
+
+  online(){ return Object.entries(this.players).filter(([id,p])=>p && p.name && p.online!==false).map(([id,p])=>Object.assign({id},p)); },
+
+  onPlayers(p){
+    const prev=this.players; this.players=p;
+    const st=this.meta.state||"lobby";
+    if (st==="lobby") this.renderPool();
+    if (st==="groups" || st==="play"){
+      const g=this.meta.groups||{}, upd={};
+      // a new player (or one the teacher had removed) joins the smallest crew
+      for (const pl of this.online()) if (!crewOf(this.meta, pl.id)){
+        const ids=Object.keys(g); if (!ids.length) break;
+        ids.sort((a,b)=>Object.keys(g[a].members||{}).length-Object.keys(g[b].members||{}).length);
+        const gid=ids[0]; g[gid].members=g[gid].members||{}; g[gid].members[pl.id]={n:pl.name, av:pl.av||"a0"};
+        upd["meta/groups/"+gid+"/members/"+pl.id]={n:pl.name, av:pl.av||"a0"};
+        if (st==="play") this._reissue=(this._reissue||new Set()).add(gid);
+      }
+      // someone dropped out (or came back) while holding answers: deal that crew's question again
+      if (st==="play") for (const gid in this.cs){
+        const h=this.cs[gid].hand||{};
+        for (const pid in Object.assign({}, h, (g[gid]||{}).members||{})){
+          const was=!!(prev[pid] && prev[pid].online!==false && prev[pid].name), is=!!(p[pid] && p[pid].online!==false && p[pid].name);
+          if (was!==is && (h[pid] || is)) (this._reissue=this._reissue||new Set()).add(gid);
+        }
+      }
+      if (Object.keys(upd).length) this.ref.update(upd);
+      if (this._reissue && st==="play" && now()>=this.meta.startAt){ for (const gid of this._reissue) if (!this.busy[gid]) this.deal(gid); this._reissue=null; }
+      if (st==="groups") this.drawCrews();
+    }
+  },
+
+  renderPool(){
+    const list=Object.entries(this.players).filter(([id,p])=>p&&p.name).map(([id,p])=>Object.assign({id},p)).sort((a,b)=>(a.joined||0)-(b.joined||0));
+    $("poolNames").innerHTML = list.length ? list.map(p=>`<span class="pchip${p.online===false?" off":""}"><span class="av">${ART.avatar(p.av,"",true)}</span>${esc(p.name)}<button data-x="${p.id}" title="Remove">${ART.icon("x")}</button></span>`).join("")
+      : `<div class="waiting">Waiting for players…<br><span class="dots"><i></i><i></i><i></i></span></div>`;
+    for (const b of $("poolNames").querySelectorAll("[data-x]")) b.onclick=()=>this.ref.child("players/"+b.dataset.x).remove();
+    $("poolN").textContent=list.length; $("pool").classList.toggle("dense", list.length>24);
+    const n=this.online().length;
+    $("startBtn").disabled = n<2;
+    $("startHint").textContent = n<2 ? "Need at least 2 players." : n<6 ? "Small class: crews of 2–3." : "Press Make crews: random crews of 3–4.";
+  },
+
+  // random crews of 3–4 (smaller only when there are very few players)
+  async makeCrews(){
+    const words=await GB.host.wordsReady();
+    if (words.length<4) return alert(words.length ? "This question set needs at least 4 words or questions." : "Choose a question set first: sign in to My Sets.");
+    const list=shuffle(this.online()); if (list.length<2) return;
+    const G=Math.max(1, Math.ceil(list.length/4)), names=shuffle(CREW_NAMES.slice()), cols=shuffle(CREW_COLORS.slice()), groups={};
+    for (let k=0;k<G;k++) groups["g"+k]={ name:names[k%names.length], color:cols[k%cols.length], members:{} };
+    list.forEach((p,i)=>{ groups["g"+(i%G)].members[p.id]={n:p.name, av:p.av||"a0"}; });
+    const upd={ "crews":null, "crewAns":null, "meta/game":GAME, "meta/state":"groups", "meta/groups":groups, "meta/winner":null,
+      "meta/words":words, "meta/mode":$("sMode").value, "meta/goal":+$("sGoal").value, "meta/round":(this.meta.round||0)+1 };
+    for (const id in this.players) upd["players/"+id+"/score"]=0;
+    this.cs={}; this.busy={}; this.recent={}; this.ended=false; this.view="lobby";
+    await this.ref.update(upd);
+  },
+
+  async startRace(){
+    const startAt=now()+4200, upd={"meta/state":"play","meta/startAt":startAt,"meta/winner":null};
+    this.cs={}; this.busy={}; this.ended=false; this._seenLast={};
+    for (const gid in (this.meta.groups||{})){ this.cs[gid]={prog:0, best:0, qn:0}; }
+    await this.ref.update(upd);
+    setTimeout(()=>{ for (const gid in this.cs) this.deal(gid); }, Math.max(0, startAt-now()-300));
+  },
+
+  // a new question for one crew: everybody sees it, the options are dealt over the crew's phones
+  deal(gid){
+    if (this.meta.state!=="play" || this.ended) return;
+    const W=this.meta.words||[], c=this.cs[gid]; if (!c || W.length<4) return;
+    const mem=Object.keys(((this.meta.groups||{})[gid]||{}).members||{}).filter(pid=>this.players[pid] && this.players[pid].online!==false && this.players[pid].name);
+    const holders=shuffle(mem.length?mem:Object.keys(((this.meta.groups||{})[gid]||{}).members||{}));
+    const rec=this.recent[gid]=this.recent[gid]||[];
+    let i, guard=0; do { i=rand(W.length); } while (rec.includes(i) && guard++<60);
+    rec.push(i); if (rec.length>Math.min(Math.floor(W.length*.6), W.length-1)) rec.shift();
+    let q, opts, ans;
+    if (!Array.isArray(W[i])){                                     // multiple-choice item
+      const it=W[i], order=shuffle(it.o.map((_,k)=>k));
+      q={kind:"quiz", text:it.q, sub:it.s||""}; opts=order.map(k=>it.o[k]); ans=order.indexOf(it.a);
+    } else {
+      const mode=this.meta.mode||"mix", dir= mode==="mix" ? (Math.random()<.5?"en2zh":"zh2en") : mode, col= dir==="en2zh"?1:0;
+      const n=Math.min(12, Math.max(4, holders.length*3)), seen=new Set([W[i][col]]), pool=[];
+      for (const k of shuffle(W.map((_,k)=>k))){ if (k===i || seen.has(W[k][col])) continue; seen.add(W[k][col]); pool.push(W[k][col]); if (pool.length>=n-1) break; }
+      opts=shuffle([W[i][col], ...pool]); ans=opts.indexOf(W[i][col]);
+      q= dir==="en2zh" ? {kind:"en", text:W[i][0], en:W[i][0]} : {kind:"zh", text:W[i][1], en:W[i][0]};
+    }
+    const hand={}; holders.forEach(pid=>hand[pid]=[]);
+    shuffle(opts.map((_,k)=>k)).forEach((k,j)=>{ if (holders.length) hand[holders[j%holders.length]].push(k); });
+    for (const pid in hand) hand[pid].sort((a,b)=>a-b);
+    c.qn=(c.qn||0)+1; c.q=q; c.opts=opts; c.ans=ans; c.hand=hand;
+    this.ref.child("crews/"+gid).update({qn:c.qn, q, opts, ans, hand, prog:c.prog||0, best:c.best||0});
+  },
+
+  onAnswer(snap){
+    const v=snap.val()||{}; snap.ref.remove();
+    if (this.meta.state!=="play" || this.ended || now()<this.meta.startAt) return;
+    const c=this.cs[v.g]; if (!c || v.qn!==c.qn || this.busy[v.g]) return;
+    if (!(c.hand && c.hand[v.pid] || []).includes(+v.k)) return;
+    const pl=this.players[v.pid]||{}, goal=this.meta.goal||12, at=now();
+    this.busy[v.g]=true;
+    if (+v.k===c.ans){
+      c.prog=(c.prog||0)+1; c.best=Math.max(c.best||0,c.prog);
+      c.last={ok:true, pid:v.pid, n:pl.name||"", t:c.opts[v.k], at};
+      this.ref.update({["crews/"+v.g+"/prog"]:c.prog, ["crews/"+v.g+"/best"]:c.best, ["crews/"+v.g+"/last"]:c.last, ["players/"+v.pid+"/score"]:(pl.score||0)+1});
+      if (c.prog>=goal){ this.finish(v.g); return; }
+      setTimeout(()=>{ this.busy[v.g]=false; this.deal(v.g); }, OK_MS);
+    } else {
+      c.prog=0;
+      c.last={ok:false, pid:v.pid, n:pl.name||"", t:c.opts[v.k], right:c.opts[c.ans], at};
+      this.ref.update({["crews/"+v.g+"/prog"]:0, ["crews/"+v.g+"/last"]:c.last});
+      setTimeout(()=>{ this.busy[v.g]=false; this.deal(v.g); }, WRONG_MS);
+    }
+  },
+
+  finish(winner){
+    if (this.ended || this.meta.state!=="play") return;
+    this.ended=true;
+    if (!winner){                                                  // "End now": the crew furthest along wins (a tie: no winner)
+      const ids=Object.keys(this.cs).sort((a,b)=>(this.cs[b].prog||0)-(this.cs[a].prog||0) || (this.cs[b].best||0)-(this.cs[a].best||0));
+      const a=this.cs[ids[0]]||{}, b=this.cs[ids[1]]||{};
+      winner = ids.length && ((a.prog||0)>(b.prog||0) || (!ids[1] && (a.prog||0)>0)) ? ids[0] : "tie";
+    }
+    const snap={}; for (const gid in this.cs) snap[gid]={prog:this.cs[gid].prog||0, best:this.cs[gid].best||0};
+    setTimeout(()=>this.ref.update({"meta/state":"end","meta/winner":winner,"meta/endAt":now(),"meta/final":snap}), 900);
+  },
+
+  drawCrews(){
+    const g=this.meta.groups||{};
+    $("cgrid").innerHTML=Object.keys(g).sort().map(gid=>{ const c=g[gid];
+      return `<div class="ccard" style="--cc:${c.color}"><div class="ch">${esc(c.name)}</div><div class="cm">${Object.entries(c.members||{}).map(([pid,m])=>`<div class="mem${this.players[pid]&&this.players[pid].online!==false?"":" off"}"><span class="av">${ART.avatar(m.av,"",true)}</span>${esc(m.n)}</div>`).join("")}</div></div>`; }).join("");
+  },
+
+  drawLanes(){
+    const st=this.meta.state; if (st!=="play" && st!=="end") return;
+    const g=this.meta.groups||{}, goal=this.meta.goal||12, src=st==="end" ? Object.assign({}, this.dbCrews||{}) : this.dbCrews||{};
+    const ids=Object.keys(g).sort(), L=$("lanes");
+    if (L.dataset.k!==ids.join(",")+":"+goal+":"+this.meta.round){
+      L.dataset.k=ids.join(",")+":"+goal+":"+this.meta.round;
+      L.innerHTML=ids.map(gid=>{ const c=g[gid];
+        return `<div class="lane" id="ln_${gid}" style="--cc:${c.color};--goal:${goal}"><div class="lt"><span class="nm">${esc(c.name)}</span><span class="avs">${Object.values(c.members||{}).map(m=>`<span>${ART.avatar(m.av,"",true)}</span>`).join("")}</span></div>
+          <div class="track">${"<i></i>".repeat(goal)}<span class="runner">${ART.avatar(Object.values(c.members||{})[0] ? Object.values(c.members)[0].av : "a5","",true)}</span></div><span class="flag"></span><span class="num">0/${goal}</span></div>`; }).join("");
+    }
+    for (const gid of ids){
+      const el=$("ln_"+gid); if (!el) continue;
+      const c=src[gid]||{}, p=Math.min(goal, c.prog||0);
+      [...el.querySelectorAll(".track i")].forEach((i,k)=>i.classList.toggle("on",k<p));
+      el.querySelector(".runner").style.left=(p===0?2:(p/goal)*100-100/goal/2)+"%";
+      el.querySelector(".num").textContent=p+"/"+goal;
+      el.classList.toggle("win", st==="end" && this.meta.winner===gid);
+      const last=c.last;
+      if (last && last.at && this._seenLast[gid]!==last.at){
+        const first=this._seenLast[gid]===undefined; this._seenLast[gid]=last.at;
+        if (!first && !last.ok && st==="play"){
+          el.classList.remove("oops"); void el.offsetWidth; el.classList.add("oops");
+          const b=document.createElement("div"); b.className="ob"; b.textContent="Back to 0!"; el.appendChild(b); setTimeout(()=>{ b.remove(); el.classList.remove("oops"); },1700);
+          beep(180,.25,"sawtooth",.1);
+        } else if (!first && last.ok && st==="play") beep(660+Math.min(p,16)*40,.08,"triangle",.1);
+      }
+    }
+  },
+
+  render(){
+    const m=this.meta, st=m.state||"lobby";
+    show($("setup"), st==="lobby" && this.view==="setup");
+    show($("lobby"), st==="lobby" && this.view==="lobby");
+    show($("crews"), st==="groups");
+    show($("race"), st==="play" || st==="end");
+    cancelAnimationFrame(this.raf);
+    if (st==="lobby"){ show($("result"),false); this.renderPool(); return; }
+    if (st==="groups"){ this.drawCrews(); return; }
+    $("goalN").textContent=m.goal||12;
+    this.drawLanes();
+    if (st==="play"){
+      show($("result"),false); show($("stopBtn"),true);
+      const loop=()=>{
+        if (m!==this.meta) return;
+        const t=now();
+        if (t<m.startAt){
+          const n=Math.ceil((m.startAt-t)/1000); show($("hCount"),true);
+          const lab = n>3 ? "Ready?" : String(n);
+          if ($("hCount").firstElementChild.textContent!==lab){ $("hCount").innerHTML="<span>"+lab+"</span>"; if(n<=3) beep(n===1?880:660,.15,"triangle",.25); }
+          $("hCount").firstElementChild.style.fontSize = n>3 ? "130px" : "";
+          $("timer").textContent="0:00";
+        } else {
+          if (!$("hCount").classList.contains("hidden")){ show($("hCount"),false); beep(1175,.35,"triangle",.3); }
+          $("timer").textContent=fmt(t-m.startAt);
+        }
+        this.raf=requestAnimationFrame(loop);
+      };
+      loop();
+    }
+    if (st==="end"){
+      show($("hCount"),false); show($("stopBtn"),false);
+      const g=m.groups||{}, w=m.winner, fin=m.final||{}, goal=m.goal||12;
+      const wc=g[w];
+      $("winTxt").textContent = wc ? wc.name+" win!" : "Great race!";
+      $("winTxt").style.color = wc ? wc.color : "";
+      $("whyTxt").textContent = wc ? (fin[w]&&fin[w].prog>=goal ? "First to "+goal+" in a row!" : "Furthest along when the race ended") : "No crew was ahead";
+      $("winAvs").innerHTML = wc ? `<span class="wavs">${Object.values(wc.members||{}).slice(0,4).map(mm=>ART.avatar(mm.av,"",true)).join("")}</span>` : "";
+      const ids=Object.keys(g).sort((a,b)=>((fin[b]||{}).prog||0)-((fin[a]||{}).prog||0) || ((fin[b]||{}).best||0)-((fin[a]||{}).best||0));
+      $("rankList").innerHTML=ids.slice(0,6).map((gid,i)=>`<div class="row" style="--cc:${g[gid].color}">${ART.medal(Math.min(i,2))} <span class="cn">${esc(g[gid].name)}</span><span class="s">${(fin[gid]||{}).prog||0}/${goal}</span></div>`).join("");
+      const all=Object.entries(this.players).filter(([id,p])=>p&&p.name).map(([id,p])=>p).sort((a,b)=>(b.score||0)-(a.score||0)).slice(0,5);
+      $("mvpList").innerHTML=all.map((p,i)=>`<div class="row">${ART.medal(Math.min(i,2))} <span class="av">${ART.avatar(p.av,"",true)}</span> ${esc(p.name)} <span class="s">${p.score||0}</span></div>`).join("")||"<div class='row'>—</div>";
+      show($("result"),true);
+      if (this._celebrated!==m.round){ this._celebrated=m.round; GB.fanfare(); GB.confetti($("confetti")); }
+    }
+  }
+};
+
+/* ================== PLAYER ================== */
+const Player = {
+  code:null, ref:null, pid:null, team:null, name:"", av:"a0", meta:{}, score:0, round:-1, gid:null, crew:{}, qn:-1, sent:false, lastAt:0, joined:false, timerInt:0,
+
+  async start(code){
+    this.code=code; this.ref=GB.db.ref("rooms/"+code);
+    const ok=await GB.join.checkGame(GAME, code); if (!ok) return;
+    show($("player"));
+    if (!ok.exists) $("pErr").textContent="Room "+code+" not found. Check the code on the big screen.";
+    GB.join.setup(this, { game:GAME, ref:this.ref, code, extra:{score:0}, onEnter:()=>this.enter() });
+    $("pSay").onclick=()=>{ if (this.crew.q && this.crew.q.en) GB.speak(this.crew.q.en); };
+    $("pOpts").onclick=e=>{ const b=e.target.closest(".opt"); if (b) this.tap(+b.dataset.k, b); };
+  },
+
+  showAv(){ $("pAvBtn").innerHTML=ART.avatar(this.av); $("pAvSm").innerHTML=this.joined?ART.avatar(this.av):ART.avatar("a5"); $("pAvBig").innerHTML=ART.avatar(this.av); },
+
+  enter(){
+    if (this.joined) return; this.joined=true;
+    const me=GB.join.presence(this, this.ref);
+    me.on("value",s=>{
+      const v=s.val();
+      if (!v || !v.name){ if (this.joined){ GB.join.kicked(this, this.ref, me, v); this.watchCrew(null); show($("pFind"),false); this.setBar(); } return; }
+      this.name=v.name; this.score=v.score||0; this.setBar();
+    });
+    this.ref.child("meta").on("value",s=>{ this.meta=s.val()||{}; this.render(); });
+  },
+
+  setBar(){
+    $("pMe").textContent=this.joined ? this.name : "Cozy Monsters";
+    $("pSc").innerHTML=ART.icon("check")+" "+this.score; show($("pSc"),this.joined);
+    this.showAv();
+  },
+
+  watchCrew(gid){
+    if (gid===this.gid) return;
+    if (this.gid) this.ref.child("crews/"+this.gid).off();
+    this.gid=gid; this.crew={}; this.qn=-1;
+    if (gid) this.ref.child("crews/"+gid).on("value",s=>{ this.crew=s.val()||{}; this.drawPlay(); });
+  },
+
+  myCrew(){ return (this.meta.groups||{})[this.gid]||null; },
+
+  render(){
+    const m=this.meta, st=m.state||"lobby";
+    if (!this.joined) return;
+    show($("pJoin"),false); clearInterval(this.timerInt);
+    const gid = (st==="groups"||st==="play"||st==="end") ? crewOf(m, this.pid) : null;
+    this.watchCrew(gid);
+    const c=this.myCrew(); $("player").style.setProperty("--cc", c ? c.color : "var(--lav)");
+    for (const id of ["pWait","pFind","pPlay","pEnd","pCount"]) show($(id), false);
+    if (st==="lobby" || !c){ show($("pWait"),true); show($("pFb"),false); return; }
+    if (st==="groups"){
+      $("findCard").innerHTML=`<div class="fh"><small>Your crew</small><b>${esc(c.name)}</b></div><div class="fm">${Object.entries(c.members||{}).map(([pid,mm])=>`<div class="mem${pid===this.pid?" me":""}"><span class="av">${ART.avatar(mm.av,"",true)}</span>${esc(mm.n)}${pid===this.pid?" (you)":""}</div>`).join("")}</div><div class="tip">Find your crew and sit together!</div>`;
+      show($("pFind"),true); try{ navigator.vibrate && navigator.vibrate(60); }catch(e){} return;
+    }
+    if (st==="play"){
+      if (m.round!==this.round){ this.round=m.round; this.qn=-1; this.lastAt=0; }
+      show($("pPlay"),true); $("pCrewName").textContent=c.name; this.drawPlay();
+      let lastN=null;
+      const tick=()=>{
+        const t=now();
+        if (t<m.startAt){ show($("pCount"),true); const n=Math.ceil((m.startAt-t)/1000), lab=n>3?"go":String(n);
+          if (lab!==lastN){ lastN=lab; $("pCountN").innerHTML= n>3 ? ART.avatar(this.av) : lab; $("pCountN").style.animation="none"; void $("pCountN").offsetWidth; $("pCountN").style.animation=""; }
+          $("pCountT").textContent = n>3 ? "Get ready!" : "Ready…"; }
+        else show($("pCount"),false);
+      };
+      tick(); this.timerInt=setInterval(tick,200); return;
+    }
+    if (st==="end"){
+      show($("pFb"),false); show($("pEnd"),true);
+      const w=m.winner, mine=w===this.gid, wc=(m.groups||{})[w], fin=(m.final||{})[this.gid]||{};
+      $("pWin").textContent = mine ? "Your crew wins!" : wc ? wc.name+" win!" : "Great race!";
+      $("pWin").style.color = mine ? c.color : wc ? wc.color : "var(--orange)";
+      $("pWinSub").textContent = mine ? "Amazing teamwork!" : "Next time it's yours!";
+      $("pEndAv").innerHTML = mine ? ART.img("trophy") : ART.avatar(this.av);
+      $("pMine").textContent=this.score; $("pBestRun").textContent=fin.best||0;
+      try{ navigator.vibrate && navigator.vibrate(mine?[80,60,80,60,200]:200); }catch(e){}
+    }
+  },
+
+  drawPlay(){
+    const m=this.meta, c=this.crew||{}, crew=this.myCrew(); if (m.state!=="play" || !crew) return;
+    const goal=m.goal||12, p=Math.min(goal,c.prog||0);
+    $("pProg").textContent=p+" / "+goal;
+    const B=$("pBar"); B.style.setProperty("--goal",goal); if (B.children.length!==goal) B.innerHTML="<i></i>".repeat(goal);
+    [...B.children].forEach((i,k)=>i.classList.toggle("on",k<p));
+    // what happened to the crew's last tap
+    const L=c.last;
+    if (L && L.at && L.at!==this.lastAt){
+      const first=!this.lastAt; this.lastAt=L.at;
+      if (c.qn===this.qn) this.sent=true;                // that question is done: no more taps until the next one
+      if (!first){
+        if (L.ok){ this.toast(L.pid===this.pid ? "Right!" : "Right! "+L.n); beep(880,.08,"triangle",.15); beep(1320,.12,"triangle",.12,.07); try{ navigator.vibrate && navigator.vibrate(30); }catch(e){} }
+        else { $("pFbWho").textContent = L.pid===this.pid ? "You tapped “"+L.t+"”" : L.n+" tapped “"+L.t+"”"; $("pFbAns").textContent=L.right;
+          show($("pFb"),true); clearTimeout(this._fbT); this._fbT=setTimeout(()=>show($("pFb"),false), WRONG_MS-250); beep(160,.25,"sawtooth",.12); try{ navigator.vibrate && navigator.vibrate(150); }catch(e){} }
+      }
+    }
+    if (!c.q || c.qn===this.qn) return;
+    this.qn=c.qn; this.sent=false;
+    const q=c.q, mine=(c.hand||{})[this.pid]||[], card=$("pQ").parentNode;
+    card.querySelectorAll(".qsub").forEach(e=>e.remove());
+    const quiz=q.kind==="quiz";
+    $("pAsk").textContent = quiz ? "Choose the best answer" : q.kind==="en" ? "What does it mean?" : "Which English word?";
+    $("pQ").textContent=q.text; $("pQ").dataset.t=q.text;
+    $("pQ").classList.toggle("zh", q.kind==="zh"); $("pQ").classList.toggle("long", quiz); card.classList.toggle("quiz", quiz); $("pOpts").classList.toggle("long", quiz);
+    if (quiz && q.sub){ const d=document.createElement("div"); d.className="qsub"; d.textContent=q.sub; card.appendChild(d); }
+    show($("pSay"), q.kind==="en");
+    $("pOpts").innerHTML = mine.map(k=>`<button class="opt" data-k="${k}" data-t="${esc(c.opts[k])}">${esc(c.opts[k])}</button>`).join("");
+    show($("pOpts"), mine.length>0); show($("pNoHand"), !mine.length);
+    card.classList.remove("pop"); void card.offsetWidth; card.classList.add("pop");
+  },
+
+  tap(k, btn){
+    if (this.sent || this.meta.state!=="play" || now()<this.meta.startAt || !this.gid) return;
+    this.sent=true; btn.classList.add("sent");
+    for (const b of $("pOpts").children) if (b!==btn) b.disabled=true;
+    this.ref.child("crewAns").push({pid:this.pid, g:this.gid, qn:this.qn, k});
+    setTimeout(()=>{ if (this.sent && this.crew.qn===this.qn){ this.sent=false; for (const b of $("pOpts").children){ b.disabled=false; b.classList.remove("sent"); } } }, 4000);   // nothing came back: let them try again
+  },
+
+  toast(txt){ const d=document.createElement("div"); d.className="toast"; d.textContent=txt; document.body.appendChild(d); setTimeout(()=>d.remove(),950); }
+};
+
+boot();
+</script>
+</body>
+</html>

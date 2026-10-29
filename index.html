@@ -176,10 +176,14 @@ const GAMES = [
     chips:[["clock","Duration","5–10 min"],["users","Teams","Red vs Blue"],["grid","Twist","Steal & surround"]],
     rules:["Every right answer lets you paint one tile in your team's color.","Empty tiles anywhere. The other team's tiles only if they touch yours. Close in a small area to grab it all at once!","Gold tiles are worth 3; at half time two mega tiles worth 5 appear. Far behind? Comeback: each right answer paints 2. Last 20 seconds: everyone paints 2."],
     cover:"cover-grab" },
-  { id:"hockey", name:"Goal Rush", icon:"ball", tagline:"Field hockey! Answer to drive the ball into the goal.", isNew:true,
+  { id:"hockey", name:"Goal Rush", icon:"ball", tagline:"Field hockey! Answer to drive the ball into the goal.",
     chips:[["clock","Duration","5–10 min"],["users","Teams","Red vs Blue"],["target","Goal","Score the most"]],
     rules:["Every right answer drives the ball toward the other team's goal.","Ball at the goal? Shoot or save! For 6 seconds both teams answer: more right answers wins. GOAL! or SAVE!","5 right in a row = POWER SHOT for your team. Most goals wins; a tie goes to golden goal."],
-    cover:"cover-hockey" }
+    cover:"cover-hockey" },
+  { id:"crew", name:"Crew Race", icon:"users", tagline:"Random crews of 3–4. The answers are split over your phones: talk it out!", isNew:true,
+    chips:[["clock","Duration","5–10 min"],["users","Teams","Crews of 3–4"],["flag","Goal","First to the flag"]],
+    rules:["The teacher presses Make crews: everyone is put in a random crew of 3–4. Find your crew and sit together.","Every crew member sees the same question, but the right answer is on only ONE phone. Talk, then tap!","Right answer = one step forward. Wrong answer = the whole crew goes back to 0. First crew to the flag wins!"],
+    cover:"cover-crew" }
 ];
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));

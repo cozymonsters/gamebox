@@ -292,7 +292,7 @@ const icon = n => PI[n] ? `<svg class="gi" viewBox="0 0 24 24" fill="none" strok
 // fill the page-only icons first (gb-art.js fills the rest and skips anything marked done)
 for (const el of document.querySelectorAll("i[data-i]")) if (PI[el.dataset.i]){ el.innerHTML=icon(el.dataset.i); el.dataset.done=1; }
 
-const GAMES = [ ["tug","Tug of War"], ["hoops","Hoops"], ["potato","Hot Potato"], ["grab","Color Grab"], ["hockey","Goal Rush"] ];
+const GAMES = [ ["tug","Tug of War"], ["hoops","Hoops"], ["potato","Hot Potato"], ["grab","Color Grab"], ["hockey","Goal Rush"], ["crew","Crew Race"] ];
 const TYPE = { words:{ label:"Vocabulary", ic:"book", unit:"words" }, quiz:{ label:"Multiple choice", ic:"help", unit:"questions" } };
 const LETTERS = "ABCD";
 const views = ["vLoad","vLogin","vList","vEdit"];
