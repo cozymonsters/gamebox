@@ -250,7 +250,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="gb-art.js?v=5650c732"></script>
-<script src="gb.js?v=1f9d1c0b"></script>
+<script src="gb.js?v=41430e05"></script>
 <script>
 "use strict";
 const GAME="grab";
@@ -482,7 +482,8 @@ const Host = {
     show($("lobby"), st==="lobby" && this.view==="lobby");
     show($("arena"), st!=="lobby");
     cancelAnimationFrame(this.raf);
-    if (st!=="play") GB.music.stop();
+    GB.music.inLobby = (st==="lobby" && this.view==="lobby") || st==="groups";        // relaxed music while students join
+    if (GB.music.inLobby) GB.music.lobby(); else if (st==="play") GB.music.lobbyOff(); else GB.music.stop();
     if (st==="lobby"){ show($("result"),false); this.renderTeams(); return; }
     this.renderTeams(); this.drawBoard(); requestAnimationFrame(()=>this.fit());
     if (st==="play"){
