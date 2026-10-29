@@ -83,7 +83,13 @@ const GB = (() => {
     tom(c,o,t,f0,v=.6){ const s=c.createOscillator(), g=c.createGain(); s.frequency.setValueAtTime(f0,t); s.frequency.exponentialRampToValueAtTime(f0*.62,t+.25); g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(.001,t+.3); s.connect(g).connect(o); s.start(t); s.stop(t+.32); },
     ep(c,o,t,note,d=1.2,v=.06){ for (const [type,mul,vv] of [["sine",1,v],["triangle",2,v*.25]]){ const s=c.createOscillator(), g=c.createGain(); s.type=type; s.frequency.value=mhz(note)*mul;
       g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(vv,t+.012); g.gain.exponentialRampToValueAtTime(.0005,t+d); s.connect(g).connect(o); s.start(t); s.stop(t+d+.05); } },
-    click(c,o,t,f,v=.25){ const s=c.createOscillator(), g=c.createGain(); s.type="square"; s.frequency.value=f; g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(.001,t+.03); s.connect(g).connect(o); s.start(t); s.stop(t+.04); }
+    click(c,o,t,f,v=.25){ const s=c.createOscillator(), g=c.createGain(); s.type="square"; s.frequency.value=f; g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(.001,t+.03); s.connect(g).connect(o); s.start(t); s.stop(t+.04); },
+    // hand clap: three quick noise bursts
+    clap(c,o,t,v=.4){ for (const [k,d] of [[0,.012],[.012,.012],[.024,.13]]){ const n=c.createBufferSource(), f=c.createBiquadFilter(), g=c.createGain(); n.buffer=noise(c); f.type="bandpass"; f.frequency.value=1150; f.Q.value=.9;
+      g.gain.setValueAtTime(v,t+k); g.gain.exponentialRampToValueAtTime(.001,t+k+d); n.connect(f).connect(g).connect(o); n.start(t+k,Math.random()*.5); n.stop(t+k+d+.02); } },
+    // stadium organ: sine partials, held for d
+    organ(c,o,t,note,d,v=.05){ for (const [m,a] of [[1,1],[2,.55],[3,.3],[4,.18]]){ const s=c.createOscillator(), g=c.createGain(); s.type="sine"; s.frequency.value=mhz(note)*m;
+      g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(v*a,t+.006); g.gain.setValueAtTime(v*a,t+d); g.gain.exponentialRampToValueAtTime(.0005,t+d+.06); s.connect(g).connect(o); s.start(t); s.stop(t+d+.1); } }
   };
   // each style: 16 steps per bar (16th notes); bpm for levels 0 / 1 / 2; step(c, out, i, t, level)
   const STYLES = {
@@ -95,16 +101,16 @@ const GB = (() => {
       if (b%2===0) SY.tone(c,o,t, root+([0,0,12,0,0,12,0,7][b/2]), .16, "sawtooth", .22, 900+L*500);
       if (L>=1 && [0,3,6,10].includes(b)) SY.tone(c,o,t, root+24+(b===10?3:0), .12, "square", .07, 2600);
     }},
-    // relaxed loop for the lobby while students scan the QR code (not a game style: never listed in the settings)
-    lounge:{ name:"Lounge", lobby:true, desc:"Relaxed music for the lobby", bpm:[86,86,86], len:64, gain:1.6, step(c,o,i,t,L){
-      const b=i%16, bar=(i/16|0)%4, ch=[[53,57,60,64],[52,55,59,62],[50,53,57,60],[48,52,55,59]][bar], beat=60/86;
-      if (b===0) ch.forEach(n=>SY.ep(c,o,t,n,beat*3.2,.05));
-      if (b===10) ch.slice(1).forEach(n=>SY.ep(c,o,t,n,beat*1.6,.035));
-      if (b===0) SY.tone(c,o,t,ch[0]-12,beat*1.6,"sine",.22);
-      if (b===8) SY.tone(c,o,t,ch[0]-5,beat*1.2,"sine",.16);
-      if (b===0 || b===8) SY.kick(c,o,t,.28);
-      if (b%4===2) SY.hat(c,o,t,.045,.05); else if (b%2===1) SY.hat(c,o,t,.02,.03);
-      if ((bar===1 || bar===3) && [3,6,12].includes(b)) SY.ep(c,o,t,[72,74,76,79,81][(i*7+bar)%5],beat*1.4,.035);
+    // lobby music while students scan the QR code (not a game style: never listed in the settings):
+    // stadium organ, stomp and clap, a "charge" bugle call every 4th bar
+    stadium:{ name:"Stadium", lobby:true, desc:"Stadium organ and claps", bpm:[118,118,118], len:64, gain:1, step(c,o,i,t,L){
+      const b=i%16, bar=(i/16|0)%4, ch=[[60,64,67],[60,65,69],[59,62,67],[60,64,67]][bar], root=[36,41,43,36][bar], beat=60/118;
+      if (b%4===0) SY.kick(c,o,t,.75);
+      if (b===4 || b===12 || (bar===3 && b===14)) SY.clap(c,o,t,.38);
+      if (b%2===0) SY.hat(c,o,t,b%4===2?.09:.05,.035);
+      if (b%2===0) SY.tone(c,o,t, root+(b%4===2?12:0), beat*.42, "triangle", .32);
+      if (bar<3 && [2,6,10,13].includes(b)) ch.forEach(n=>SY.organ(c,o,t,n,beat*.2,.035));
+      if (bar===3){ const bug={0:[67,.2],1:[72,.2],2:[76,.2],4:[79,.7],7:[76,.2],8:[79,1.7]}[b]; if (bug) SY.organ(c,o,t,bug[0],beat*bug[1],.06); }
     }},
     arcade:{ name:"Arcade", desc:"Bouncy 8-bit video game tune", bpm:[132,152,174], len:64, gain:2.3, step(c,o,i,t,L){
       const b=i%16, ch=[[69,72,76],[65,69,72],[60,64,67],[67,71,74]][(i/16|0)%4];
@@ -114,16 +120,16 @@ const GB = (() => {
       if (b===0 || b===8 || (L>=1 && b===12)) SY.tone(c,o,t,36,.08,"square",.18,600);
     }}
   };
-  const MUSIC_VOL = .32;
+  const MUSIC_VOL = .32, LOBBY = "stadium";
   const music = {
     STYLES, on:false, level:0, step:0, next:0, timer:0, bus:null, previewT:0,
     get style(){ const v=store.get("gb.music"); return v==="off" ? "off" : STYLES[v] && !STYLES[v].lobby ? v : "chase"; },   // a style that was removed → Chase
     set style(v){ store.set("gb.music", v); },
     get muted(){ return store.get("gb.mute")==="1"; },
     set muted(v){ store.set("gb.mute", v?"1":"0"); if (v) music.stop(.2, true); music.paintBtn(); },
-    // lobby: relaxed music while students join (only when game music is on); stopped for the 3-2-1 countdown
-    lobby(){ if (music.previewing) return; if (!STYLES[music.style] || music.muted){ music.stop(.5, true); return; } music.play(0, "lounge"); },
-    lobbyOff(){ if (music.on && music.key==="lounge") music.stop(.6, true); },
+    // lobby: upbeat stadium music while students join (only when game music is on); stopped for the 3-2-1 countdown
+    lobby(){ if (music.previewing) return; if (!STYLES[music.style] || music.muted){ music.stop(.5, true); return; } music.play(0, LOBBY); },
+    lobbyOff(){ if (music.on && music.key===LOBBY) music.stop(.6, true); },
     levelFor(leftMs){ return leftMs<=10000 ? 2 : leftMs<=30000 ? 1 : 0; },
     play(level=0, style){
       if (!style && music.previewing) music.stop(.1, true);  // the game starts while the teacher was listening: the game wins
@@ -440,7 +446,7 @@ const GB = (() => {
           <div class="ctl"><select class="sel" id="sMusic">${Object.entries(music.STYLES).filter(([k,v])=>!v.lobby).map(([k,v])=>`<option value="${k}">${v.name}</option>`).join("")}<option value="off">Off</option></select><button class="btn-soft" id="musicTry">${ART.icon("play")} Listen</button></div>`;
         const note=sb.querySelector(".setnote"); if (note) sb.insertBefore(r,note); else sb.appendChild(r);
         if (window.ART && ART.hydrate) ART.hydrate(r); else { const e=r.querySelector("[data-i]"); if (e) e.innerHTML=ART.icon("music"); }
-        const sm=$("sMusic"), desc=()=>{ const st=music.STYLES[sm.value]; $("musicDesc").textContent = st ? st.desc+". Gets faster near the end! Relaxed music in the lobby." : "No background music."; };
+        const sm=$("sMusic"), desc=()=>{ const st=music.STYLES[sm.value]; $("musicDesc").textContent = st ? st.desc+". Gets faster near the end! Stadium music in the lobby." : "No background music."; };
         sm.value = music.STYLES[music.style] ? music.style : "off"; desc();
         let playing=false;
         sm.onchange=()=>{ music.style=sm.value; if (sm.value!=="off") music.muted=false; desc(); music.paintBtn(); if (playing) $("musicTry").click(); };
