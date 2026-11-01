@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="gb.css?v=3da0cdd0">
+<link rel="stylesheet" href="gb.css?v=20e3b931">
 <style>
 .hidden{display:none!important}  /* works even before gb.css arrives */
 /* ---- Tug of War scene ---- */
@@ -111,11 +111,13 @@
       <div class="lob-peek"><img src="img/m/a2.webp" alt=""><img src="img/m/a9.webp" alt=""><img src="img/m/a5.webp" alt=""></div>
       <div class="lob-act"><button class="go" id="startBtn" disabled>Start <i data-i="play"></i></button><button class="pill ghost" id="toSetup"><i data-i="sliders"></i> Settings</button></div>
     </div>
-    <div class="lob-teams">
+    <div class="findhead hidden" id="findHead"><div><h2>Find your team!</h2><p>Sit with your team. Then press Start.</p></div><div class="sp"></div><button class="pill white" id="newTeams"><i data-i="shuffle"></i> New teams</button></div>
+    <div class="pool" id="pool"><div class="ph"><i data-i="users"></i> Players <span class="n" id="poolN">0</span></div><div class="names" id="poolNames"></div></div>
+    <div class="lob-teams hidden" id="lobTeams">
       <div class="tcol red"><div class="th"><span data-art="red"></span><span data-tn="red">Red Team</span> <span class="n" id="rN">0</span></div><div class="names" id="rNames"></div></div>
       <div class="tcol blue"><div class="th"><span data-art="blue"></span><span data-tn="blue">Blue Team</span> <span class="n" id="bN">0</span></div><div class="names" id="bNames"></div></div>
     </div>
-    <div class="lob-hint" id="startHint">Need at least 1 player on each team.</div>
+    <div class="lob-hint" id="startHint">Need at least 2 players.</div>
   </div>
 
   <!-- step 3: game -->
@@ -148,7 +150,7 @@
           <div class="mvp r"><h3><i data-i="flame"></i> <span data-tn="red">Red</span> MVPs</h3><div class="rows" id="mvpR"></div></div>
           <div class="mvp b"><h3><i data-i="bolt"></i> <span data-tn="blue">Blue</span> MVPs</h3><div class="rows" id="mvpB"></div></div>
         </div></div>
-        <div class="rbtns"><button class="go" id="againBtn"><i data-i="refresh"></i> Play again</button><button class="pill ghost" id="lobbyBtn"><i data-i="users"></i> Back to lobby</button></div>
+        <div class="rbtns"><button class="go" id="againBtn"><i data-i="refresh"></i> Play again</button><button class="pill ghost" id="newTeams2"><i data-i="shuffle"></i> New teams</button><button class="pill ghost" id="lobbyBtn"><i data-i="users"></i> Back to lobby</button></div>
       </div>
     </div>
   </div>
@@ -213,7 +215,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="gb-art.js?v=5650c732"></script>
-<script src="gb.js?v=36693b47"></script>
+<script src="gb.js?v=5826a432"></script>
 <script>
 "use strict";
 const GAME="tug";
@@ -245,16 +247,19 @@ const Host = {
     if (existing && String(existing).replace(/\D/g,"")===this.code) this.view="lobby";
     $("toLobby").onclick=()=>{ this.view="lobby"; this.render(); };
     $("toSetup").onclick=()=>{ this.view="setup"; this.render(); };
-    $("startBtn").onclick=()=>this.startRound();
+    $("startBtn").onclick=()=>this.meta.dealt ? this.startRound() : GB.host.pool.deal(this);   // first "Make teams", then Start
+    $("newTeams").onclick=()=>GB.host.pool.deal(this);
     $("stopBtn").onclick=()=>this.finish("time");
     $("againBtn").onclick=()=>this.startRound();
-    $("lobbyBtn").onclick=()=>{ this.view="lobby"; this.ref.child("meta").update({state:"lobby",pos:0,winner:null}); };
+    $("lobbyBtn").onclick=()=>{ this.view="lobby"; GB.host.pool.clear(this, {"meta/state":"lobby","meta/pos":0,"meta/winner":null}); };   // everyone back into one pool
+    $("newTeams2").onclick=()=>{ this.view="lobby"; GB.host.pool.deal(this, {"meta/state":"lobby","meta/pos":0,"meta/winner":null}); };
     this.ref.child("meta").on("value",s=>{ this.meta=s.val()||{}; this.render(); });
     this.ref.child("players").on("value",s=>{ this.onPlayers(s.val()||{}); });
   },
 
   onPlayers(p){
     const prev=this.players; this.players=p;
+    GB.host.pool.fill(this);                                     // late joiners → the smaller team (once the teams are made)
     if (this.meta.state==="play" && now()>=this.meta.startAt){
       for (const id in p){ const a=(p[id].score||0), b=(prev[id]&&prev[id].score)||0; if (a>b) this.popFeed(p[id], a-b); }
     }
@@ -264,9 +269,7 @@ const Host = {
 
   renderTeams(){
     if ((this.meta.state||"lobby")==="lobby"){
-      const {r,b}=GB.host.renderLobby(this.players, this.ref);
-      $("startBtn").disabled = !(r.length&&b.length);
-      $("startHint").textContent = (r.length&&b.length) ? "Use the arrows to move a player to the other team, or X to remove." : "Need at least 1 player on each team.";
+      GB.host.pool.render(this);                                 // one pool → "Make teams" → the two team columns
     }
     this.updateScores();
   },
@@ -415,7 +418,7 @@ const Player = {
     const ok=await GB.join.checkGame(GAME, code); if (!ok) return;
     show($("player"));
     if (!ok.exists) $("pErr").textContent="Room "+code+" not found. Check the code on the big screen.";
-    GB.join.setup(this, { game:GAME, ref:this.ref, code, extra:{score:0}, onEnter:()=>this.enter() });
+    GB.join.setup(this, { game:GAME, ref:this.ref, code, pool:true, extra:{score:0}, onEnter:()=>this.enter() });
     $("pSay").onclick=()=>{ if(this.q) GB.speak(this.q.en); };
   },
 
@@ -442,6 +445,7 @@ const Player = {
     $("pSc").innerHTML=ART.icon("check")+" "+this.score; show($("pSc"),this.joined);
     $("pTeamBig").innerHTML=this.team==="blue"?ART.mascot("blue")+`<span data-tn="blue">${GB.esc(GB.tn("blue"))}</span>`:ART.mascot("red")+`<span data-tn="red">${GB.esc(GB.tn("red"))}</span>`;
     this.showAv();
+    GB.join.waitCard(this);
   },
 
   render(){

@@ -545,7 +545,8 @@ const GB = (() => {
 
     teams(players){
       const r=[], b=[];
-      for (const id in players){ const p={id,...players[id]}; if(!p.name) continue; (p.team==="blue"?b:r).push(p); }
+      // a player without a team yet (still in the pool, or just joined) is on neither side
+      for (const id in players){ const p={id,...players[id]}; if(!p.name) continue; if (p.team==="blue") b.push(p); else if (p.team==="red") r.push(p); }
       const byJoin=(x,y)=>(x.joined||0)-(y.joined||0);
       r.sort(byJoin); b.sort(byJoin); return {r,b};
     },
@@ -567,6 +568,64 @@ const GB = (() => {
         ref.child("players/"+el.dataset.sw+"/team").set(to); retally(to==="red"?1:-1, to==="red"?-1:1); };
       for (const el of document.querySelectorAll("[data-x]")) el.onclick=()=>{ const p=players[el.dataset.x]; ref.child("players/"+el.dataset.x).remove(); if (p) retally(p.team==="blue"?0:-1, p.team==="blue"?-1:0); };
       return {r,b};
+    },
+
+    /* ---- teams made by the teacher, like Crew Race (Tug of War, Hoops, Hot Potato).
+       Everyone joins one pool (no team). "Make teams" deals random Red / Blue (meta.dealt), the lobby then shows
+       the two team columns ("Find your team!") with New teams + the game's Start button. Anyone without a team
+       after that (joined late, or was away when the teams were dealt) goes to the smaller team: the host is the
+       only one who writes teams. Back to lobby clears the teams. Markup: #pool #poolNames #poolN #lobTeams
+       #findHead #newTeams #startBtn #startHint. ---- */
+    pool: {
+      online: players => Object.entries(players).filter(([id,p])=>p && p.name && p.online!==false).map(([id,p])=>Object.assign({id},p)),
+      render(H){
+        const dealt=!!(H.meta||{}).dealt, sb=$("startBtn");
+        if (!sb.dataset.go) sb.dataset.go=sb.innerHTML;                  // the game's own Start label
+        show($("pool"), !dealt); show($("lobTeams"), dealt); show($("findHead"), dealt);
+        if (!dealt){
+          const list=Object.entries(H.players).filter(([id,p])=>p&&p.name).map(([id,p])=>Object.assign({id},p)).sort((a,b)=>(a.joined||0)-(b.joined||0));
+          $("poolNames").innerHTML = list.length ? list.map(p=>`<span class="pchip${p.online===false?" off":""}"><span class="av">${ART.avatar(p.av,"",true)}</span>${esc(p.name)}<button data-x="${p.id}" title="Remove">${ART.icon("x")}</button></span>`).join("")
+            : `<div class="waiting">Waiting for players…<br><span class="dots"><i></i><i></i><i></i></span></div>`;
+          for (const el of $("poolNames").querySelectorAll("[data-x]")) el.onclick=()=>H.ref.child("players/"+el.dataset.x).remove();
+          $("poolN").textContent=list.length; $("pool").classList.toggle("dense", list.length>24);
+          const n=host.pool.online(H.players).length;
+          sb.innerHTML="Make teams "+ART.icon("shuffle"); sb.disabled = n<2;
+          $("startHint").textContent = n<2 ? "Need at least 2 players." : "Press Make teams: random Red and Blue teams.";
+          return null;
+        }
+        const t=host.renderLobby(H.players, H.ref);
+        sb.innerHTML=sb.dataset.go; sb.disabled = !(t.r.length&&t.b.length);
+        $("startHint").textContent = (t.r.length&&t.b.length) ? "Use the arrows to move a player to the other team, or X to remove." : "Need at least 1 player on each team.";
+        return t;
+      },
+      // random, even teams (who gets the odd player is random too); players who are away now get a team when they come back
+      deal(H, extra){
+        const list=shuffle(host.pool.online(H.players)), first=Math.random()<.5?0:1, upd=Object.assign({ "meta/dealt":true, "meta/dealtAt":now() }, extra||{});
+        for (const id in H.players) if (H.players[id] && H.players[id].name) upd["players/"+id+"/team"]=null;
+        list.forEach((p,i)=>{ upd["players/"+p.id+"/team"] = (i+first)%2 ? "blue" : "red"; });
+        H._filling={};
+        return H.ref.update(upd);
+      },
+      fill(H){
+        const m=H.meta||{}, st=m.state||"lobby";
+        if (st==="lobby" && !m.dealt) return;
+        let r=0, b=0; const need=[];
+        const F=H._filling=H._filling||{}, T=Date.now();               // teams just written, until Firebase echoes them back
+        for (const id in H.players){ const p=H.players[id]; if (!p||!p.name) continue;
+          const f=F[id] && T-F[id].at<4000 ? F[id].t : null;
+          const t=p.team||f; if (t==="red") r++; else if (t==="blue") b++; else if (p.online!==false) need.push(id); }
+        if (!need.length) return;
+        const upd={};
+        for (const id of shuffle(need)){ const t = r<b ? "red" : b<r ? "blue" : (Math.random()<.5?"red":"blue"); t==="red"?r++:b++; upd["players/"+id+"/team"]=t; F[id]={t, at:T}; }
+        H.ref.update(upd).catch(()=>{});
+      },
+      // back to the lobby: everyone goes back into one pool
+      clear(H, extra){
+        const upd=Object.assign({ "meta/dealt":null, "meta/dealtAt":null }, extra||{});
+        for (const id in H.players) if (H.players[id] && H.players[id].name) upd["players/"+id+"/team"]=null;
+        H._filling={};
+        return H.ref.update(upd);
+      }
     }
   };
 
@@ -612,7 +671,7 @@ const GB = (() => {
       };
       deal(new Set());
       opts.ref.child("players").get().then(s=>{ const all=s.val()||{}; deal(new Set(Object.keys(all).filter(id=>id!==P.pid && all[id] && all[id].av).map(id=>all[id].av))); }).catch(()=>{});
-      // teams are dealt by the room (no picking): see assignTeam()
+      // teams are dealt by the room (no picking): see assignTeam(), or by the teacher's "Make teams" (opts.pool, host.pool)
       const check=()=>{ $("pGo").disabled=!$("pName").value.trim(); };
       $("pName").oninput=check; check();
       opts.ref.child("players/"+P.pid).get().then(s=>{ const v=s.val(); if (v && v.name){ P.name=v.name; P.team=v.team; if(v.av) P.av=v.av; opts.onEnter(); } }).catch(()=>{});
@@ -624,7 +683,8 @@ const GB = (() => {
           const s=await opts.ref.child("meta/state").get();
           if(!s.exists()){ $("pErr").textContent="Room not found. Check the code on the big screen."; $("pGo").disabled=false; $("pGo").textContent=goTxt; return; }
           P.name=name; store.set("tug.name",name);
-          if (P.team!=="red" && P.team!=="blue") P.team=await assignTeam(opts.ref);
+          if (opts.pool) P.team=null;                                    // the teacher makes the teams (host.pool)
+          else if (P.team!=="red" && P.team!=="blue") P.team=await assignTeam(opts.ref);
           await opts.ref.child("players/"+P.pid).update(Object.assign({name, team:P.team, av:P.av, online:true, joined:firebase.database.ServerValue.TIMESTAMP}, opts.extra||{}));
           $("pGo").textContent=goTxt; opts.onEnter();
         }catch(e){ $("pErr").textContent="No connection. Check your internet and try again."; $("pGo").disabled=false; $("pGo").textContent=goTxt; }
@@ -646,6 +706,20 @@ const GB = (() => {
       for (const k of ["score","pts","threes","best","combo","tricks"]) if (typeof P.meV[k]==="number" && k in P && P.meV[k]>P[k]) P[k]=P.meV[k];
       try{ P.setBar && P.setBar(); P.renderMeter && P.renderMeter(); }catch(e){}
       const sc=$("pSc"); if (sc && typeof P.pts==="number" && P.pts>0) sc.textContent=P.pts+" pts";
+    },
+    // the phone's waiting card in games where the teacher makes the teams: "You're in!" → "Find your team!" + team badge
+    waitCard(P){
+      const w=$("pWait"); if (!w) return;
+      const m=P.meta||{}, st=m.state||"lobby", has=!!m.dealt && (P.team==="red"||P.team==="blue");
+      const msg=w.querySelector(".msg"), sub=w.querySelector(".sub");
+      if (msg && msg.dataset.t0===undefined) msg.dataset.t0=msg.textContent;   // the game's own line ("Warm up…")
+      w.querySelector("h2").textContent = has ? "Find your team!" : "You're in!";
+      show($("pTeamBig"), has);
+      if (msg) msg.textContent = has ? "Sit with your team." : msg.dataset.t0;
+      if (sub) sub.textContent = has ? "The game starts soon. Keep your screen on!" : "The teacher will make the teams. Keep your screen on!";
+      const key = has ? P.team+"@"+(m.dealtAt||"") : "";
+      if (has && st==="lobby" && P._dealtKey!==undefined && key!==P._dealtKey){ try{ navigator.vibrate && navigator.vibrate(60); }catch(e){} }
+      P._dealtKey=key;
     },
     kicked(P, ref, me, v){
       P.joined=false; me.off(); ref.child("meta").off();

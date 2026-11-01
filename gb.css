@@ -134,6 +134,16 @@ select.sel:focus{outline:none;border-color:var(--lav);box-shadow:0 0 0 3px rgba(
 .waiting .dots i{width:10px;height:10px;border-radius:50%;background:var(--line-d);animation:gb-bob 1s infinite}
 .waiting .dots i:nth-child(2){animation-delay:.15s} .waiting .dots i:nth-child(3){animation-delay:.3s}
 .lob-hint{text-align:center;font-weight:700;font-size:15px;color:var(--sub);padding:0 0 14px}
+/* teams made by the teacher (host.pool): one pool of players, then "Find your team!" over the two team columns */
+.pool{flex:1;min-height:0;display:flex;flex-direction:column;border-radius:22px;background:var(--paper);border:2px solid var(--line);overflow:hidden}
+.pool .ph{display:flex;align-items:center;gap:12px;padding:12px 20px;font-family:var(--display);font-weight:600;font-size:28px;background:var(--lav);color:#fff}
+.pool .ph .n{margin-left:auto;font-family:var(--body);font-weight:900;font-size:18px;background:rgba(255,255,255,.25);border-radius:100px;padding:2px 13px}
+.pool .names{flex:1;display:flex;flex-wrap:wrap;gap:10px;align-content:flex-start;padding:18px 16px;overflow:auto}
+.pool.dense .pchip{font-size:17px;gap:6px;padding:3px 5px} .pool.dense .pchip .av{width:30px;height:30px}
+.findhead{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:-4px 0 -6px}
+.findhead h2{margin:0;font-family:var(--display);font-weight:600;font-size:32px;color:var(--on-bg)}
+.findhead p{margin:0;font-weight:800;color:var(--on-bg-sub);font-size:17px}
+.findhead .sp{flex:1}
 
 /* ---------- scoreboard (shared by game screens) ---------- */
 .scorebar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
@@ -421,6 +431,8 @@ html.phone .doodles{display:none}
   .tcol .th{font-size:24px;min-height:62px;padding-left:76px}
   .tcol .th>[data-art]{width:50px;height:50px}
   .lobby{flex:none} .lob-teams{flex:none} .tcol .names{min-height:96px;overflow:visible}   /* the page scrolls instead of squeezing the team lists */
+  .pool{flex:none} .pool .names{min-height:96px;overflow:visible} .pool .ph{font-size:24px}
+  .findhead{text-align:center;justify-content:center} .findhead h2{font-size:26px} .findhead .sp{display:none}
   .setshow{justify-content:flex-start} .setshow .ss-txt{align-items:flex-start;text-align:left;width:100%;margin:0 0 4px}
 }
 
