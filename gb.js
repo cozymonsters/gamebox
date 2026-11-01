@@ -445,7 +445,7 @@ const GB = (() => {
         r.innerHTML=`<span class="emo" data-i="music"></span><div class="txt"><h4>Music</h4><p id="musicDesc">Plays on this screen. Gets faster near the end!</p></div>
           <div class="ctl"><select class="sel" id="sMusic">${Object.entries(music.STYLES).filter(([k,v])=>!v.lobby).map(([k,v])=>`<option value="${k}">${v.name}</option>`).join("")}<option value="off">Off</option></select><button class="btn-soft" id="musicTry">${ART.icon("play")} Listen</button></div>`;
         const note=sb.querySelector(".setnote"); if (note) sb.insertBefore(r,note); else sb.appendChild(r);
-        if (window.ART && ART.hydrate) ART.hydrate(r); else { const e=r.querySelector("[data-i]"); if (e) e.innerHTML=ART.icon("music"); }
+        { const e=r.querySelector("[data-i]"); if (e){ e.innerHTML=ART.icon("music"); e.dataset.done=1; } }   // done=1: ART.hydrate() on page load must not add a second icon
         const sm=$("sMusic"), desc=()=>{ const st=music.STYLES[sm.value]; $("musicDesc").textContent = st ? st.desc+". Gets faster near the end! Stadium music in the lobby." : "No background music."; };
         sm.value = music.STYLES[music.style] ? music.style : "off"; desc();
         let playing=false;
