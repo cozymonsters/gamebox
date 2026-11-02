@@ -126,8 +126,8 @@
             <div class="ctl"><select class="sel" id="sSet"></select></div></div>
           <div class="setrow"><span class="emo" data-i="help"></span><div class="txt"><h4>Question Type</h4><p>Show English and pick 中文, or the other way</p></div>
             <div class="ctl"><select class="sel" id="sMode"><option value="mix">Mixed</option><option value="en2zh">English → 中文</option><option value="zh2en">中文 → English</option></select></div></div>
-          <div class="setrow"><span class="emo" data-i="flag"></span><div class="txt"><h4>Race Length</h4><p>Right answers in a row to reach the flag. A wrong answer sends the crew back to 0!</p></div>
-            <div class="ctl"><select class="sel" id="sGoal"><option value="8">8 in a row · quick</option><option value="12" selected>12 in a row</option><option value="16">16 in a row · long</option></select></div></div>
+          <div class="setrow"><span class="emo" data-i="flag"></span><div class="txt"><h4>Race Length</h4><p>Right answers to reach the flag. A wrong answer sends the crew 5 steps back!</p></div>
+            <div class="ctl"><select class="sel" id="sGoal"><option value="8">8 steps · quick</option><option value="12" selected>12 steps</option><option value="16">16 steps · long</option></select></div></div>
           <div class="setrow"><span class="emo" data-i="users"></span><div class="txt"><h4>How it works</h4><p>Press Start: everyone is put in a random crew of 3–4. Every crew member sees the question, but the answer is only on <b>one</b> phone. Talk, then tap!</p></div></div>
           <div class="setnote">Students can already join with the code at the top right.</div>
         </div>
@@ -159,7 +159,7 @@
 
   <!-- step 4: the race -->
   <div id="race" class="hidden">
-    <div class="rtop"><div class="goal"><i data-i="flag"></i> First crew to <b id="goalN">12</b> in a row</div><div class="sp"></div><div class="timer" id="timer">0:00</div></div>
+    <div class="rtop"><div class="goal"><i data-i="flag"></i> First crew to <b id="goalN">12</b> steps</div><div class="sp"></div><div class="timer" id="timer">0:00</div></div>
     <div class="lanes" id="lanes"></div>
     <div class="countdown hidden" id="hCount"><span>3</span></div>
     <div class="hfoot"><button class="pill ghost" id="stopBtn"><i data-i="stop"></i> End now</button></div>
@@ -229,13 +229,13 @@
       <div class="msg" id="pWinSub"></div>
       <div class="stats">
         <div class="stat"><b id="pMine">0</b><span>Your right answers</span></div>
-        <div class="stat"><b id="pBestRun">0</b><span>Crew's best run</span></div>
+        <div class="stat"><b id="pBestRun">0</b><span>Crew's furthest</span></div>
       </div>
       <div class="sub" style="margin-top:8px">Wait for the next round…</div>
     </div>
   </div>
 
-  <div class="pfb hidden" id="pFb"><b>Oops!</b><span id="pFbWho"></span><span>The answer was</span><span class="ans" id="pFbAns"></span><span>Back to 0. Keep going!</span></div>
+  <div class="pfb hidden" id="pFb"><b>Oops!</b><span id="pFbWho"></span><span>The answer was</span><span class="ans" id="pFbAns"></span><span id="pFbBack">5 steps back. Keep going!</span></div>
   <div class="pcount hidden" id="pCount"><b id="pCountN">3</b><span id="pCountT">Get ready!</span></div>
 </section>
 
@@ -252,6 +252,7 @@ const CREW_NAMES = ["Chompers","Stompers","Fireballs","Rumblers","Spikers","Grum
   "Splashers","Bubblers","Wigglers","Zappers","Snowballs","Gigglers","Bouncers","Fuzzballs","Glimmers","Snoozers","Blobbers"];
 const CREW_COLORS = ["#e2683a","#3a78c9","#2f9e8f","#8a7bd0","#d4537e","#5a9e3a","#c9902a","#6b5b95","#d9534f","#2b88b5","#9a6b3f","#e07b9b"];
 const OK_MS = 400, WRONG_MS = 2300;    // pause after a right / wrong tap before the crew's next question
+const WRONG_STEPS = 5;                  // a wrong answer sends the crew this many steps back (never below 0)
 
 function boot(){
   const r=(GB.params.get("r")||"").replace(/\D/g,"");
@@ -263,7 +264,7 @@ const crewOf = (m, pid) => { const g=m.groups||{}; for (const id in g) if (g[id]
 
 /* ================== HOST (the referee) ==================
    meta.groups = { g0:{name, color, members:{pid:{n,av}}} }   (made at "Make crews")
-   crews/{gid}  = { prog, best, qn, q:{kind,text,sub,en}, opts:[text], ans, hand:{pid:[k]}, last:{ok,pid,n,t,right,at} }
+   crews/{gid}  = { prog, best, qn, q:{kind,text,sub,en}, opts:[text], ans, hand:{pid:[k]}, last:{ok,pid,n,t,right,drop,at} }
    crewAns      = phones push {pid, g, qn, k}; only the host decides and writes crews/{gid}. */
 const Host = {
   code:null, ref:null, meta:{}, players:{}, cs:{}, view:"setup", ended:false, recent:{}, busy:{}, _celebrated:-1, _seenLast:{},
@@ -397,9 +398,9 @@ const Host = {
       if (c.prog>=goal){ this.finish(v.g); return; }
       setTimeout(()=>{ this.busy[v.g]=false; this.deal(v.g); }, OK_MS);
     } else {
-      c.prog=0;
-      c.last={ok:false, pid:v.pid, n:pl.name||"", t:c.opts[v.k], right:c.opts[c.ans], at};
-      this.ref.update({["crews/"+v.g+"/prog"]:0, ["crews/"+v.g+"/last"]:c.last});
+      const before=c.prog||0; c.prog=Math.max(0, before-WRONG_STEPS);
+      c.last={ok:false, pid:v.pid, n:pl.name||"", t:c.opts[v.k], right:c.opts[c.ans], drop:before-c.prog, at};
+      this.ref.update({["crews/"+v.g+"/prog"]:c.prog, ["crews/"+v.g+"/last"]:c.last});
       setTimeout(()=>{ this.busy[v.g]=false; this.deal(v.g); }, WRONG_MS);
     }
   },
@@ -444,7 +445,7 @@ const Host = {
         const first=this._seenLast[gid]===undefined; this._seenLast[gid]=last.at;
         if (!first && !last.ok && st==="play"){
           el.classList.remove("oops"); void el.offsetWidth; el.classList.add("oops");
-          const b=document.createElement("div"); b.className="ob"; b.textContent="Back to 0!"; el.appendChild(b); setTimeout(()=>{ b.remove(); el.classList.remove("oops"); },1700);
+          const b=document.createElement("div"); b.className="ob"; b.textContent=last.drop>0 ? "−"+last.drop+(last.drop===1?" step":" steps") : "Oops!"; el.appendChild(b); setTimeout(()=>{ b.remove(); el.classList.remove("oops"); },1700);
           beep(180,.25,"sawtooth",.1);
         } else if (!first && last.ok && st==="play") beep(660+Math.min(p,16)*40,.08,"triangle",.1);
       }
@@ -491,7 +492,7 @@ const Host = {
       const wc=g[w];
       $("winTxt").textContent = wc ? wc.name+" win!" : "Great race!";
       $("winTxt").style.color = wc ? wc.color : "";
-      $("whyTxt").textContent = wc ? (fin[w]&&fin[w].prog>=goal ? "First to "+goal+" in a row!" : "Furthest along when the race ended") : "No crew was ahead";
+      $("whyTxt").textContent = wc ? (fin[w]&&fin[w].prog>=goal ? "First to the flag!" : "Furthest along when the race ended") : "No crew was ahead";
       $("winAvs").innerHTML = wc ? `<span class="wavs">${Object.values(wc.members||{}).slice(0,4).map(mm=>ART.avatar(mm.av,"",true)).join("")}</span>` : "";
       const ids=Object.keys(g).sort((a,b)=>((fin[b]||{}).prog||0)-((fin[a]||{}).prog||0) || ((fin[b]||{}).best||0)-((fin[a]||{}).best||0));
       $("rankList").innerHTML=ids.slice(0,6).map((gid,i)=>`<div class="row" style="--cc:${g[gid].color}">${ART.medal(Math.min(i,2))} <span class="cn">${esc(g[gid].name)}</span><span class="s">${(fin[gid]||{}).prog||0}/${goal}</span></div>`).join("");
@@ -596,7 +597,7 @@ const Player = {
       if (c.qn===this.qn) this.sent=true;                // that question is done: no more taps until the next one
       if (!first){
         if (L.ok){ this.toast(L.pid===this.pid ? "Right!" : "Right! "+L.n); beep(880,.08,"triangle",.15); beep(1320,.12,"triangle",.12,.07); try{ navigator.vibrate && navigator.vibrate(30); }catch(e){} }
-        else { $("pFbWho").textContent = L.pid===this.pid ? "You tapped “"+L.t+"”" : L.n+" tapped “"+L.t+"”"; $("pFbAns").textContent=L.right;
+        else { $("pFbWho").textContent = L.pid===this.pid ? "You tapped “"+L.t+"”" : L.n+" tapped “"+L.t+"”"; $("pFbAns").textContent=L.right; $("pFbBack").textContent = L.drop>0 ? L.drop+(L.drop===1?" step":" steps")+" back. Keep going!" : "Keep going!";
           show($("pFb"),true); clearTimeout(this._fbT); this._fbT=setTimeout(()=>show($("pFb"),false), WRONG_MS-250); beep(160,.25,"sawtooth",.12); try{ navigator.vibrate && navigator.vibrate(150); }catch(e){} }
       }
     }
