@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="en" translate="no" class="notranslate">
+<head>
+<meta charset="utf-8">
+<meta name="google" content="notranslate">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#faf6ec">
+<title>Monster Market · GameBox</title>
+<link rel="icon" href="favicon.ico?v=1" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png?v=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="gb.css?v=20e3b931">
+<style>
+.hidden{display:none!important}  /* works even before gb.css arrives */
+/* ---- Monster Market: big screen ---- */
+.setup-wrap{flex:1;padding:6px 24px 28px;overflow:auto}
+#host{height:100vh;overflow:hidden}
+#arena{flex:1;display:flex;flex-direction:column;min-height:0;position:relative;padding:10px 24px 18px;gap:12px}
+.mtop{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
+.mtag{justify-self:start;display:flex;align-items:center;gap:10px;background:var(--paper);border-radius:100px;padding:6px 18px 6px 8px;font-family:var(--display);font-weight:600;font-size:22px}
+.mtag .ic{width:40px;height:40px;border-radius:50%;background:var(--mustard);display:flex;align-items:center;justify-content:center}
+.mtag .ic .gi{width:24px;height:24px}
+.mtop .hfoot2{justify-self:end}
+.board{flex:1;display:grid;grid-template-columns:1fr 340px;gap:18px;min-height:0}
+.box{position:relative;border-radius:24px;background:var(--paper);overflow:hidden;display:flex;flex-direction:column;min-height:0;box-shadow:0 6px 0 var(--lift)}
+/* striped market awning with a scalloped edge */
+.awn{flex:none;height:54px;position:relative;background:repeating-linear-gradient(90deg,var(--aw,var(--mustard)) 0 56px,#fff 56px 112px)}
+.awn:after{content:"";position:absolute;left:0;right:0;bottom:-14px;height:14px;background:radial-gradient(circle at 28px 0,var(--aw,var(--mustard)) 13px,transparent 14px) 0 0/112px 14px repeat-x,radial-gradient(circle at 84px 0,#fff 13px,transparent 14px) 0 0/112px 14px repeat-x;z-index:1}
+.awn b{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--ink);color:#fff;font-family:var(--display);font-weight:600;font-size:22px;border-radius:100px;padding:2px 20px;white-space:nowrap;display:flex;align-items:center;gap:8px;z-index:2}
+.awn b .gi{width:20px;height:20px}
+.awn.r{--aw:var(--red)} .awn.b{--aw:var(--blue)} .awn.l{--aw:var(--lav)}
+.inner{flex:1;min-height:0;padding:26px 20px 16px;display:flex;flex-direction:column;gap:12px}
+.money{font-family:var(--display);font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+/* teams */
+.stalls{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:18px;min-height:0}
+.thead{display:flex;align-items:center;gap:12px}
+.thead .mas{width:62px;height:62px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.thead .mas .mascot{height:50px;width:auto}
+.thead .tn{font-family:var(--display);font-weight:600;font-size:30px}
+.stall.r .tn{color:var(--red)} .stall.b .tn{color:var(--blue)}
+.avg{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.avg .money{font-size:64px}
+.stall.r .avg .money{color:var(--red)} .stall.b .avg .money{color:var(--blue)}
+.avg span{font-weight:900;color:var(--sub);font-size:17px}
+.tsub{font-weight:800;color:var(--sub);font-size:16px;margin-top:-6px}
+.lead{display:flex;align-items:center;gap:8px;justify-content:center;font-family:var(--display);font-weight:600;font-size:22px;color:#fff;border-radius:100px;padding:2px 14px;align-self:center}
+.rows2{display:flex;flex-direction:column;gap:6px;overflow:hidden}
+.mrow{display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;padding:4px 12px 4px 6px;font-weight:900;font-size:20px}
+.mrow .av{width:38px;height:38px;flex:none;display:inline-block}
+.mrow .nm{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mrow .c{font-family:var(--display);font-weight:600;font-size:22px}
+.mrow .rk{width:30px;text-align:center;font-family:var(--display);font-weight:600;color:var(--sub);flex:none}
+.mrow .bar{flex:1.3;height:12px;border-radius:6px;background:var(--line);overflow:hidden}
+.mrow .bar i{display:block;height:100%;border-radius:6px;background:var(--mustard);transition:width .5s}
+.mrow .lv{font-size:13px;font-weight:900;color:var(--sub);white-space:nowrap}
+/* solo */
+.lb{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:min-content;gap:8px 16px;align-content:start}
+.lb .mrow{font-size:21px}
+.lb .mrow.top1{background:#fff6dc}
+/* class goal */
+.goal{display:flex;flex-direction:column;gap:22px;padding:6px 10px 18px}
+.goal .nums{display:flex;align-items:baseline;justify-content:center;gap:14px}
+.goal .nums .money{font-size:78px;color:var(--purple)}
+.goal .nums span{font-family:var(--display);font-weight:600;font-size:34px;color:var(--sub)}
+.gbar{position:relative;height:56px;border-radius:28px;background:var(--line);overflow:visible;margin:0 30px 0 10px}
+.gbar i{position:absolute;left:0;top:0;bottom:0;border-radius:28px;background:linear-gradient(90deg,var(--lav),var(--purple));transition:width .6s}
+.gbar .runner{position:absolute;top:50%;width:76px;height:76px;margin:-38px 0 0 -38px;transition:left .6s}
+.gbar .fin{position:absolute;right:-30px;top:50%;transform:translateY(-50%);width:44px;height:44px;color:var(--ink)} .gbar .fin .gi{width:44px;height:44px}
+.gbar .pct{position:absolute;right:20px;top:50%;transform:translateY(-50%);font-family:var(--display);font-weight:600;font-size:22px;color:var(--ink)}
+.cgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.cgrid .mrow{font-size:18px}
+/* news feed */
+.feed{flex:1;min-height:0;padding:22px 14px 14px;display:flex;flex-direction:column;gap:8px;overflow:hidden}
+.news{display:flex;align-items:center;gap:8px;background:#fff;border-radius:14px;padding:6px 10px 6px 6px;font-weight:800;font-size:16px;line-height:1.25;animation:gb-pop .35s;border-left:6px solid var(--line-d)}
+.news .av{width:34px;height:34px;flex:none;display:inline-block}
+.news .gi{width:20px;height:20px;flex:none}
+.news.n-atk{border-left-color:var(--red)} .news.n-buy{border-left-color:var(--go)} .news.n-self{border-left-color:var(--lav)} .news.n-blk{border-left-color:var(--teal)}
+.news b{font-weight:900}
+.news .pw{display:inline-flex;align-items:center;gap:3px;border-radius:8px;padding:0 6px;color:#fff;background:var(--ink);font-size:14px}
+.news .pw .gi{width:14px;height:14px}
+.hfoot{position:absolute;right:34px;bottom:30px;z-index:5}
+.hint0{margin:auto;text-align:center;font-weight:800;color:var(--sub);font-size:18px}
+/* result */
+.soloRes{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;align-items:end}
+.soloRes .mvp .rows{padding:4px 12px 6px} .soloRes .mvp .row{font-size:19px}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:14px;padding:6px 0 0}
+.podium .pp{display:flex;flex-direction:column;align-items:center;gap:4px;width:150px}
+.podium .pp .av{width:74px;height:74px}
+.podium .pp .nm{font-weight:900;font-size:20px;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.podium .pp .blk{width:100%;border-radius:14px 14px 0 0;display:flex;align-items:flex-start;justify-content:center;padding-top:8px;font-family:var(--display);font-weight:700;font-size:30px;color:#fff}
+.podium .p1 .blk{height:110px;background:var(--mustard);color:var(--ink)} .podium .p2 .blk{height:80px;background:var(--lav)} .podium .p3 .blk{height:58px;background:var(--orange)}
+.podium .pp .money{font-size:22px}
+
+/* ---- phone ---- */
+.cash{font-family:var(--display);font-weight:600}
+.pinfo .rate{display:flex;align-items:center;gap:5px;color:var(--go-d);font-weight:900}
+.pinfo .rate .gi{width:17px;height:17px}
+.pstrip .sline{flex:1;display:flex;align-items:center;gap:6px;padding:0 6px;overflow:hidden}
+.badge{display:inline-flex;align-items:center;gap:4px;border-radius:100px;padding:3px 10px 3px 6px;font-weight:900;font-size:14px;color:#fff;white-space:nowrap}
+.badge .gi{width:16px;height:16px}
+.badge.sh{background:var(--teal)} .badge.ru{background:var(--orange)} .badge.di{background:var(--purple)} .badge.st{background:var(--go)}
+.shopbtn{flex:none;display:flex;align-items:center;gap:8px;height:100%;padding:0 18px;border-radius:14px;background:var(--go);color:#fff;font-family:var(--display);font-weight:600;font-size:22px;box-shadow:0 4px 0 var(--go-d)}
+.shopbtn .gi{width:22px;height:22px}
+.shopbtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--go-d)}
+.shopbtn.can{animation:gb-pulse 1.2s infinite}
+#pPlay .qwrap{position:relative}
+#pPlay.blurred .qcard .q,#pPlay.blurred .opts .opt{filter:blur(7px)}
+.frz{position:absolute;inset:0;z-index:4;border-radius:22px;background:rgba(214,236,250,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--blue-d);font-family:var(--display);font-weight:700;font-size:36px}
+.frz .gi{width:90px;height:90px}
+.palert{position:fixed;left:12px;right:12px;top:66px;z-index:9;display:flex;align-items:center;gap:8px;border-radius:16px;padding:10px 14px;font-weight:900;font-size:16px;color:#fff;animation:gb-pop .3s;box-shadow:0 6px 18px rgba(29,29,31,.2)}
+.palert.r{background:var(--red)} .palert.ok{background:var(--go)} .palert.n{background:var(--ink)}
+.palert .gi{width:22px;height:22px;flex:none}
+/* shop sheet */
+.shop{position:fixed;inset:0;z-index:7;background:var(--cream);display:flex;flex-direction:column}
+.shop .sh-top{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--paper);border-bottom:4px solid var(--tc,var(--line))}
+.shop .sh-top h2{margin:0;font-family:var(--display);font-weight:600;font-size:28px;display:flex;align-items:center;gap:8px;flex:1}
+.shop .sh-top h2 .gi{width:26px;height:26px}
+.shop .sh-cash{background:var(--mustard);border-radius:100px;padding:3px 14px;font-family:var(--display);font-weight:600;font-size:22px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 14px 0}
+.tabs button{border-radius:14px;padding:10px;font-weight:900;font-size:17px;background:var(--paper);border:2px solid var(--line);color:var(--sub)}
+.tabs button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.slist{flex:1;overflow:auto;padding:12px 14px 14px;display:flex;flex-direction:column;gap:10px}
+.card{display:flex;flex-direction:column;gap:8px;background:#fff;border-radius:18px;padding:10px 12px;border:2px solid var(--line)}
+.card .hd{display:flex;align-items:center;gap:10px}
+.card .ic{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;flex:none}
+.card .ic .gi{width:26px;height:26px}
+.card .tx{flex:1;min-width:0}
+.card .tx b{display:block;font-family:var(--display);font-weight:600;font-size:20px;line-height:1.1}
+.card .tx small{display:block;font-size:13px;font-weight:800;color:var(--sub);line-height:1.3}
+.card .now{font-size:14px;font-weight:900;color:var(--ink)}
+.card .now em{font-style:normal;color:var(--go-d)}
+.dots{display:flex;gap:4px}
+.dots i{flex:1;height:7px;border-radius:4px;background:var(--line)}
+.dots i.on{background:var(--go)}
+.buy{flex:none;min-width:96px;border-radius:14px;padding:10px 12px;font-family:var(--display);font-weight:600;font-size:19px;background:var(--go);color:#fff;box-shadow:0 4px 0 var(--go-d)}
+.buy:disabled{background:#d6cfbf;box-shadow:0 4px 0 #b8b0a0;color:#fff}
+.buy.max{background:var(--mustard);color:var(--ink);box-shadow:none}
+.buy s{opacity:.7;font-size:14px;margin-right:4px}
+.ic.c0{background:var(--orange)} .ic.c1{background:var(--red)} .ic.c2{background:var(--purple)} .ic.c3{background:var(--teal)}
+.ic.k-freeze{background:var(--blue)} .ic.k-blur{background:#5a5470} .ic.k-steal{background:var(--red)} .ic.k-shield{background:var(--teal)} .ic.k-rush{background:var(--orange)} .ic.k-disc{background:var(--purple)}
+.back{margin:0 14px 14px;border-radius:16px;padding:14px;font-family:var(--display);font-weight:600;font-size:22px;background:var(--ink);color:#fff}
+.tlist{display:flex;flex-direction:column;gap:8px}
+.tlist button{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid var(--line);border-radius:14px;padding:6px 12px 6px 6px;font-weight:900;font-size:18px;text-align:left}
+.tlist button .av{width:40px;height:40px;flex:none}
+.tlist button .nm{flex:1}
+.tlist button .gi{width:18px;height:18px;color:var(--teal)}
+.qwrap{display:flex;flex-direction:column;gap:12px;flex:1}
+</style>
+</head>
+<body>
+<div class="doodles"></div>
+
+<!-- ============ HOST (teacher computer) ============ -->
+<section id="host" class="screen hidden">
+  <header class="gb-top">
+    <a class="brand" href="./"><span class="ic" data-art="logo"></span>Cozy Monsters</a>
+    <span class="game">· Monster Market</span>
+    <div class="sp"></div>
+    <span class="net" id="hNet">Connecting…</span>
+    <span class="codetag">CODE<b id="hCode">----</b></span>
+  </header>
+
+  <!-- step 1: settings -->
+  <div class="setup-wrap" id="setup">
+    <div class="panel">
+      <div class="hero">
+        <div class="cover"><img src="img/cover-market.webp" alt=""></div>
+        <div class="info">
+          <div class="eyebrow">Game settings</div>
+          <h1>Monster Market</h1>
+          <div class="tagline">Answer to earn coins. Upgrade your stall. Get rich!</div>
+          <div class="chips">
+            <div class="chip"><span class="i" data-i="clock"></span><div><small>Duration</small><b>5–10 min</b></div></div>
+            <div class="chip"><span class="i" data-i="users"></span><div><small>Mode</small><b id="chipMode">Red vs Blue</b></div></div>
+            <div class="chip"><span class="i" data-i="cart"></span><div><small>Twist</small><b>Shop &amp; power-ups</b></div></div>
+          </div>
+          <div class="act"><button class="go" id="toLobby">Continue <i data-i="play"></i></button></div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="setbox">
+          <div class="setrow"><span class="emo" data-i="book"></span><div class="txt"><h4>Question Set</h4><p>Pick one of your sets from My Sets</p></div>
+            <div class="ctl"><select class="sel" id="sSet"></select></div></div>
+          <div class="setrow"><span class="emo" data-i="help"></span><div class="txt"><h4>Question Type</h4><p>Show English and pick 中文, or the other way</p></div>
+            <div class="ctl"><select class="sel" id="sMode"><option value="mix">Mixed</option><option value="en2zh">English → 中文</option><option value="zh2en">中文 → English</option></select></div></div>
+          <div class="setrow"><span class="emo" data-i="users"></span><div class="txt"><h4>Game Mode</h4><p id="gmDesc">Two teams. The richer team (average per player) wins</p></div>
+            <div class="ctl"><select class="sel" id="sGame"><option value="teams" selected>Teams · Red vs Blue</option><option value="solo">Solo · everyone for themselves</option><option value="class">Class goal · all together</option></select></div></div>
+          <div class="setrow" id="goalRow"><span class="emo" data-i="flag"></span><div class="txt"><h4>Class Goal</h4><p>Coins the class must earn together, per player</p></div>
+            <div class="ctl"><select class="sel" id="sGoal"><option value="500">Easy · $500 each</option><option value="1500" selected>Normal · $1,500 each</option><option value="4000">Hard · $4,000 each</option></select></div></div>
+          <div class="setrow"><span class="emo" data-i="timer"></span><div class="txt"><h4>Time Limit</h4><p>When time runs out, the richest wins</p></div>
+            <div class="ctl"><select class="sel" id="sTime"><option value="180">3 minutes</option><option value="300" selected>5 minutes</option><option value="420">7 minutes</option><option value="600">10 minutes</option></select></div></div>
+          <div class="setrow"><span class="emo" data-i="bolt"></span><div class="txt"><h4>Power-ups</h4><p>Buy <b>freeze</b>, <b>blur</b>, <b>steal</b>, <b>shield</b>, <b>rush</b> or <b>discount</b> in the shop</p></div>
+            <div class="ctl"><select class="sel" id="sPower"><option value="on" selected>On · more fun</option><option value="off">Off · upgrades only</option></select></div></div>
+          <div class="setnote">Students can already join with the code at the top right.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- step 2: lobby -->
+  <div class="lobby hidden" id="lobby">
+    <div class="lob-top">
+      <div class="lob-qr" id="qr"></div>
+      <div class="lob-join">
+        <div class="l1">Scan the QR code to join</div>
+        <div class="l2"><span class="rc">Room code</span><span class="bigcode" id="hCode2">----</span></div>
+      </div>
+      <div class="lob-peek"><img src="img/m/a2.webp" alt=""><img src="img/m/a9.webp" alt=""><img src="img/m/a5.webp" alt=""></div>
+      <div class="lob-act"><button class="go" id="startBtn" disabled>Open shop <i data-i="play"></i></button><button class="pill ghost" id="toSetup"><i data-i="sliders"></i> Settings</button></div>
+    </div>
+    <div class="findhead hidden" id="findHead"><div><h2>Find your team!</h2><p>Sit with your team. Then press Open shop.</p></div><div class="sp"></div><button class="pill white" id="newTeams"><i data-i="shuffle"></i> New teams</button></div>
+    <div class="pool" id="pool"><div class="ph"><i data-i="users"></i> Players <span class="n" id="poolN">0</span></div><div class="names" id="poolNames"></div></div>
+    <div class="lob-teams hidden" id="lobTeams">
+      <div class="tcol red"><div class="th"><span data-art="red"></span><span data-tn="red">Red Team</span> <span class="n" id="rN">0</span></div><div class="names" id="rNames"></div></div>
+      <div class="tcol blue"><div class="th"><span data-art="blue"></span><span data-tn="blue">Blue Team</span> <span class="n" id="bN">0</span></div><div class="names" id="bNames"></div></div>
+    </div>
+    <div class="lob-hint" id="startHint">Need at least 2 players.</div>
+  </div>
+
+  <!-- step 3: the market -->
+  <div id="arena" class="hidden">
+    <div class="mtop">
+      <div class="mtag"><span class="ic" data-i="store"></span><span id="modeTag">Teams · Red vs Blue</span></div>
+      <div class="timer" id="timer">0:00</div>
+      <div></div>
+    </div>
+    <div class="board">
+      <!-- teams -->
+      <div class="stalls hidden" id="vTeams">
+        <div class="box stall r"><div class="awn r"><b><i data-i="store"></i> <span data-tn="red">Red</span></b></div><div class="inner">
+          <div class="thead"><span class="mas" data-art="red"></span><div><div class="tn" data-tn="red">Red</div><div class="tsub" id="rSub">0 players</div></div></div>
+          <div class="avg"><span class="money" id="rAvg">$0</span><span>per player</span></div>
+          <div class="rows2" id="rTop"></div></div></div>
+        <div class="box stall b"><div class="awn b"><b><i data-i="store"></i> <span data-tn="blue">Blue</span></b></div><div class="inner">
+          <div class="thead"><span class="mas" data-art="blue"></span><div><div class="tn" data-tn="blue">Blue</div><div class="tsub" id="bSub">0 players</div></div></div>
+          <div class="avg"><span class="money" id="bAvg">$0</span><span>per player</span></div>
+          <div class="rows2" id="bTop"></div></div></div>
+      </div>
+      <!-- solo -->
+      <div class="box hidden" id="vSolo"><div class="awn"><b><i data-i="trophy"></i> Richest monsters</b></div><div class="inner"><div class="lb" id="soloList"></div></div></div>
+      <!-- class goal -->
+      <div class="box hidden" id="vClass"><div class="awn l"><b><i data-i="flag"></i> Class goal</b></div><div class="inner">
+        <div class="goal"><div class="nums"><span class="money" id="cTot">$0</span><span id="cGoal">/ $0</span></div>
+          <div class="gbar"><i id="cBar" style="width:0%"></i><span class="pct" id="cPct">0%</span><span class="fin"><i data-i="flag"></i></span><span class="runner" id="cRun"></span></div></div>
+        <div class="cgrid" id="cTop"></div></div></div>
+      <!-- news -->
+      <div class="box"><div class="awn"><b><i data-i="spark"></i> Market news</b></div><div class="feed" id="feed"><div class="hint0">Shopping news shows up here.</div></div></div>
+    </div>
+    <div class="countdown hidden" id="hCount"><span>3</span></div>
+    <div class="hfoot"><button class="pill ghost" id="stopBtn"><i data-i="stop"></i> End now</button></div>
+    <div class="result hidden" id="result">
+      <canvas class="confetti" id="confetti"></canvas>
+      <div class="rcard">
+        <div class="rhead"><img class="tro" src="img/trophy.webp" alt=""><div class="wtxt"><div class="win" id="winTxt">Red wins!</div><div class="why" id="whyTxt"></div></div><span id="winMascot"></span></div>
+        <div class="rbody"><div id="resBody"></div></div>
+        <div class="rbtns"><button class="go" id="againBtn"><i data-i="refresh"></i> Play again</button><button class="pill ghost" id="newTeams2"><i data-i="shuffle"></i> New teams</button><button class="pill ghost" id="lobbyBtn"><i data-i="users"></i> Back to lobby</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PLAYER (student phone) ============ -->
+<section id="player" class="screen hidden">
+  <div class="p-top"><span class="av" id="pAvSm"></span><span class="me" id="pMe">Cozy Monsters</span><span class="sc hidden" id="pSc"></span></div>
+
+  <div class="p-body" id="pJoin">
+    <div class="joincard">
+      <h1>Join the game</h1>
+      <div class="room">Monster Market · Room <b id="pCodeLbl"></b></div>
+      <div class="avpick"><div class="big" id="pAvBtn"></div><div class="t"><b>Meet your monster!</b>It plays for you today</div></div>
+      <div class="lbl">Your name</div>
+      <input id="pName" class="field" maxlength="8" placeholder="Name" autocomplete="off">
+      <button class="btn-ink" id="pGo" disabled>Join</button>
+      <div class="err" id="pErr"></div>
+    </div>
+  </div>
+
+  <div class="p-body hidden" id="pWait">
+    <div class="wait">
+      <div class="bigav" id="pAvBig"></div>
+      <h2>You're in!</h2>
+      <div class="tbadge" id="pTeamBig">Red Team</div>
+      <div class="msg" style="margin-top:14px">Get ready to earn coins!</div>
+      <div class="sub">Keep your screen on!</div>
+    </div>
+  </div>
+
+  <div class="p-body hidden" id="pPlay">
+    <div class="pinfo"><span class="t" id="pTimeBox"><i data-i="timer"></i> <span id="pTime">--</span></span><span class="rate" id="pRate"></span></div>
+    <div class="pstrip"><div class="sline" id="pStat"></div><button class="shopbtn" id="pShopBtn"><i data-i="cart"></i> Shop</button></div>
+    <div class="qwrap">
+      <div class="qcard">
+        <div class="ask" id="pAsk">What does it mean?</div>
+        <div class="q" id="pQ">—</div>
+        <button class="say hidden" id="pSay" aria-label="Listen" data-i="volume"></button>
+      </div>
+      <div class="opts" id="pOpts"></div>
+      <div class="frz hidden" id="pFrz"><i data-i="snow"></i><span>Frozen! <span id="pFrzN">10</span></span></div>
+    </div>
+  </div>
+
+  <div class="p-body hidden" id="pEnd">
+    <div class="wait">
+      <div class="bigav" id="pEndAv"></div>
+      <div class="res" id="pWin">Red wins!</div>
+      <div class="msg" id="pWinSub"></div>
+      <div class="stats">
+        <div class="stat"><b id="pEndCash">$0</b><span>Coins</span></div>
+        <div class="stat"><b id="pEndRight">0</b><span>Right answers</span></div>
+      </div>
+      <div class="sub" style="margin-top:8px">Wait for the next round…</div>
+    </div>
+  </div>
+
+  <!-- the shop sheet -->
+  <div class="shop hidden" id="pShop">
+    <div class="sh-top"><h2><i data-i="store"></i> Shop</h2><span class="sh-cash" id="pShopCash">$0</span></div>
+    <div class="tabs" id="pTabs"><button data-tab="up" class="on">Upgrades</button><button data-tab="pw">Power-ups</button></div>
+    <div class="slist" id="pList"></div>
+    <button class="back" id="pBack">Back to questions</button>
+  </div>
+  <!-- pick who to hit -->
+  <div class="modal hidden" id="pPick"><div class="mcard"><div class="mh" id="pPickH">Choose a player</div><div class="mb"><div class="tlist" id="pPickList"></div><div class="row"><button class="pill ghost" id="pPickX">Cancel</button></div></div></div></div>
+
+  <div class="pcount hidden" id="pCount"><b id="pCountN">3</b><span id="pCountT">Get ready!</span></div>
+</section>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="gb-art.js?v=834292ea"></script>
+<script src="gb.js?v=a331cfa8"></script>
+<script>
+"use strict";
+const GAME="market";
+const { $, show, esc, store, rand, pick, fmt, beep } = GB;
+const now = GB.now;
+
+/* NOTE: never use data-t for anything but the shown text: GB.noTranslate treats a [data-t] whose text differs as a translated page
+   ---- the economy (tuned for 5–7 minute rounds: a strong student reaches level 6–7) ----
+   right answer: (Money per Question + Streak bonus × streak) × Multiplier (× 2 during Rush); the streak bonus counts up to 5 in a row
+   wrong answer: lose half of (Money per Question × Multiplier), minus Insurance; coins never go below 0 */
+const UP = {
+  mpq:   { name:"Money per Question", icon:"coin",     c:"c0", fmt:v=>"$"+v,      desc:"Coins for every right answer",
+           vals:[1,2,5,10,25,50,100,200,400,800],      cost:[0,5,20,60,200,500,1200,3000,7000,16000] },
+  streak:{ name:"Streak Bonus",       icon:"flame",    c:"c1", fmt:v=>"+$"+v,     desc:"Extra coins for each right answer in a row",
+           vals:[0,1,2,5,10,20,40,80,150,300],         cost:[0,10,40,120,350,900,2200,5000,11000,25000] },
+  mult:  { name:"Multiplier",         icon:"bolt",     c:"c2", fmt:v=>"×"+v,      desc:"Every coin in or out gets multiplied",
+           vals:[1,1.5,2,2.5,3,4,5,6,8,10],            cost:[0,30,100,300,800,2000,4500,10000,22000,50000] },
+  ins:   { name:"Insurance",          icon:"umbrella", c:"c3", fmt:v=>v+"%",      desc:"Lose less when you answer wrong",
+           vals:[0,25,40,50,60,70,80,90,95,100],       cost:[0,5,20,60,180,450,1100,2600,6000,14000] }
+};
+const UPS = ["mpq","streak","mult","ins"], STREAK_CAP = 5;
+// power-ups: price = max(base, k × what one right answer is worth now), so they stay worth buying all game
+const PW = {
+  freeze:{ name:"Freeze",   icon:"snow",   atk:true,  base:25, k:6,  desc:"A player can't answer or shop for 10 seconds" },
+  blur:  { name:"Blur",     icon:"eyeoff", atk:true,  base:20, k:5,  desc:"Blur a player's screen for 12 seconds" },
+  steal: { name:"Steal",    icon:"magnet", atk:true,  base:40, k:10, desc:"Take 10% of a player's coins" },
+  shield:{ name:"Shield",   icon:"shield", atk:false, base:30, k:6,  desc:"Block every attack for 60 seconds" },
+  rush:  { name:"Rush",     icon:"up",     atk:false, base:30, k:8,  desc:"Double coins for 30 seconds" },
+  disc:  { name:"Discount", icon:"tag",    atk:false, base:40, k:8,  desc:"Upgrades 25% off for 60 seconds" }
+};
+const FREEZE_MS=10000, BLUR_MS=12000, SHIELD_MS=60000, RUSH_MS=30000, DISC_MS=60000, STEAL_PCT=.10;
+const MODE_TAG = { teams:"Teams · Red vs Blue", solo:"Solo · everyone for themselves", class:"Class goal · all together" };
+const MODE_DESC = { teams:"Two teams. The richer team (average per player) wins", solo:"Everyone for themselves. The richest player wins", class:"Everyone works together to reach the class goal" };
+const money = n => { n=Math.floor(n||0); return n>=1e7 ? "$"+(n/1e6).toFixed(1).replace(/\.0$/,"")+"M" : "$"+n.toLocaleString("en-US"); };
+const upVal = (lv,k) => UP[k].vals[Math.min(9,lv[k]||0)];
+const perRight = (lv, streak, rush) => Math.round((upVal(lv,"mpq") + upVal(lv,"streak")*Math.min(Math.max(streak,0),STREAK_CAP)) * upVal(lv,"mult") * (rush?2:1));
+const lossOf = lv => Math.floor(upVal(lv,"mpq") * upVal(lv,"mult") * (1-upVal(lv,"ins")/100) / 2);
+const pwPrice = (k, lv) => Math.max(PW[k].base, Math.ceil(PW[k].k * upVal(lv,"mpq") * upVal(lv,"mult")));
+const lvlSum = up => UPS.reduce((s,k)=>s+((up||{})[k]||0),0);
+
+function boot(){
+  const r=(GB.params.get("r")||"").replace(/\D/g,"");
+  if (GB.params.has("host")) return Host.start(GB.params.get("host"));
+  if (r.length===4) return Player.start(r);
+  location.replace(GB.dirUrl);
+}
+
+/* ================== HOST ================== */
+const Host = {
+  code:null, ref:null, meta:{}, players:{}, raf:0, view:"setup", ended:false, tickSec:-1, news:[], lastDraw:0,
+
+  async start(existing){
+    show($("host")); GB.unlockAudio(); GB.host.netStatus($("hNet"));
+    GB.host.initSettings(["sMode","sTime","sGame","sGoal","sPower"]);
+    this.code = await GB.host.openRoom(GAME, existing);
+    this.ref = GB.db.ref("rooms/"+this.code);
+    $("hCode").textContent=this.code; $("hCode2").textContent=this.code;
+    GB.host.drawQR(GB.baseUrl+"?r="+this.code, $("qr"));
+    ART.preload(["trophy","team-red","team-blue"]);
+    if (existing && String(existing).replace(/\D/g,"")===this.code) this.view="lobby";
+    const gmUi=()=>{ const g=$("sGame").value; $("gmDesc").textContent=MODE_DESC[g]; show($("goalRow"), g==="class"); $("chipMode").textContent = g==="teams"?"Red vs Blue":g==="solo"?"Solo":"Class goal"; };
+    gmUi();
+    $("sGame").addEventListener("change", ()=>{ gmUi(); if ((this.meta.state||"lobby")==="lobby") this.setMode(); });
+    $("toLobby").onclick=()=>{ this.view="lobby"; this.setMode(); this.render(); };
+    $("toSetup").onclick=()=>{ this.view="setup"; this.render(); };
+    $("startBtn").onclick=()=> this.gm()==="teams" && !this.meta.dealt ? GB.host.pool.deal(this) : this.startRound();
+    $("newTeams").onclick=()=>GB.host.pool.deal(this);
+    $("stopBtn").onclick=()=>this.finish("stop");
+    $("againBtn").onclick=()=>this.startRound();
+    $("newTeams2").onclick=()=>{ this.view="lobby"; GB.host.pool.deal(this, {"meta/state":"lobby","meta/winner":null}); };
+    $("lobbyBtn").onclick=()=>{ this.view="lobby"; GB.host.pool.clear(this, {"meta/state":"lobby","meta/winner":null}); };
+    this.ref.child("meta").on("value",s=>{ this.meta=s.val()||{}; this.render(); });
+    this.ref.child("players").on("value",s=>this.onPlayers(s.val()||{}));
+    this.ref.child("fx").on("child_added",s=>this.onFx(s));
+  },
+
+  gm(){ return $("sGame").value; },
+  // the lobby tells the phones which mode is coming (their waiting card); leaving Teams puts everyone back into one pool
+  setMode(){
+    const g=this.gm(), upd={"meta/gm":g};
+    if (g!=="teams" && this.meta.dealt){ GB.host.pool.clear(this, upd); return; }
+    this.ref.update(upd);
+  },
+
+  onPlayers(p){
+    this.players=p;
+    const st=this.meta.state||"lobby", g = st==="lobby" ? this.gm() : (this.meta.gm||"teams");
+    if (g==="teams") GB.host.pool.fill(this);                                     // late joiners → the smaller team
+    if (st==="lobby") this.renderLobby();
+    else this.draw(st!=="play");                                                  // during play the loop redraws 4× a second
+  },
+
+  renderLobby(){
+    if (this.gm()==="teams"){ GB.host.pool.render(this); return; }
+    GB.host.pool.render({ players:this.players, ref:this.ref, meta:{} });          // solo / class: just the pool, no teams
+    const n=GB.host.pool.online(this.players).length, sb=$("startBtn");
+    sb.innerHTML=sb.dataset.go; sb.disabled = n<1;
+    $("startHint").textContent = n<1 ? "Waiting for players…" : "Press Open shop when everyone is in.";
+  },
+
+  list(){ return Object.entries(this.players).filter(([id,p])=>p&&p.name).map(([id,p])=>Object.assign({id},p)); },
+
+  async startRound(){
+    const words=await GB.host.wordsReady();
+    if (words.length<4) return alert(words.length ? "This question set needs at least 4 words or questions." : "Choose a question set first: sign in to My Sets.");
+    const gm=this.gm(), dur=+$("sTime").value, startAt=now()+4200;
+    const n=Math.max(2, this.list().filter(p=>p.online!==false).length);
+    const upd={ "fx":null, "hits":null };
+    for (const p of this.list()){
+      Object.assign(upd, { ["players/"+p.id+"/cash"]:0, ["players/"+p.id+"/earned"]:0, ["players/"+p.id+"/right"]:0, ["players/"+p.id+"/wrong"]:0,
+        ["players/"+p.id+"/best"]:0, ["players/"+p.id+"/up"]:null, ["players/"+p.id+"/shieldUntil"]:null });
+      if (gm!=="teams") upd["players/"+p.id+"/team"]=null;                    // no team colours in Solo / Class goal
+    }
+    Object.assign(upd,{ "meta/game":GAME, "meta/state":"play", "meta/round":(this.meta.round||0)+1, "meta/startAt":startAt, "meta/endAt":startAt+dur*1000,
+      "meta/words":words, "meta/mode":$("sMode").value, "meta/gm":gm, "meta/powers":$("sPower").value!=="off",
+      "meta/goal": gm==="class" ? n*(+$("sGoal").value) : null, "meta/winner":null, "meta/why":null });
+    if (gm!=="teams") upd["meta/dealt"]=null;
+    this.ended=false; this.tickSec=-1; this.view="lobby"; this.news=[]; this.drawNews();
+    await this.ref.update(upd);
+  },
+
+  /* ---- power-ups: phones push what they bought, the host checks it and tells everybody (hits) ---- */
+  onFx(snap){
+    const f=snap.val(); snap.ref.remove();
+    if (!f || this.meta.state!=="play" || f.round!==this.meta.round || this.ended) return;
+    const from=this.players[f.from]; if (!from || !from.name) return;
+    if (f.k==="buy"){ if (UP[f.what]) this.addNews("buy", from, `bought <b>${UP[f.what].name}</b> Lv ${f.lv}`, UP[f.what].icon); return; }
+    if (!PW[f.k]) return;
+    if (!PW[f.k].atk){ this.addNews("self", from, f.k==="shield"?"raised a <b>Shield</b>":f.k==="rush"?"started a <b>Rush</b> (double coins)":"got a <b>Discount</b>", PW[f.k].icon); return; }
+    const to=this.players[f.target]; if (!to || !to.name || f.target===f.from) return;
+    if (this.meta.gm==="class") return;                                           // nobody attacks in Class goal
+    if (this.meta.gm==="teams" && to.team===from.team) return;                    // only the other team
+    const blocked = (to.shieldUntil||0) > now();
+    const amount = f.k==="steal" && !blocked ? Math.floor((to.cash||0)*STEAL_PCT) : 0;
+    this.ref.child("hits").push({ k:f.k, from:f.from, fn:from.name, fav:from.av||"a0", target:f.target, tn:to.name, tav:to.av||"a0", blocked, amount, round:f.round, at:now() });
+    if (blocked) this.addNews("blk", to, `'s shield blocked ${esc(from.name)}'s <b>${PW[f.k].name}</b>`, "shield", true);
+    else this.addNews("atk", from, f.k==="steal" ? `stole <b>${money(amount)}</b> from ${esc(to.name)}` : f.k==="freeze" ? `froze <b>${esc(to.name)}</b>` : `blurred <b>${esc(to.name)}</b>'s screen`, PW[f.k].icon);
+    beep(f.k==="freeze"?1800:f.k==="steal"?300:500,.15,"triangle",.1);
+  },
+  addNews(cls, p, html, icon, poss){
+    this.news.unshift({ cls, html:`<span class="av">${ART.avatar(p.av||"a0","",true)}</span>${ART.icon(icon)}<span><b>${esc(p.name)}</b>${poss?"":" "}${html}</span>` });
+    this.news=this.news.slice(0,8); this.drawNews();
+  },
+  drawNews(){ $("feed").innerHTML = this.news.length ? this.news.map(n=>`<div class="news n-${n.cls}">${n.html}</div>`).join("") : `<div class="hint0">Shopping news shows up here.</div>`; },
+
+  // scores for each mode
+  teamStats(){
+    const {r,b}=GB.host.teams(this.players), sum=l=>l.reduce((s,p)=>s+(p.cash||0),0);
+    return { r, b, rT:sum(r), bT:sum(b), rA:r.length?sum(r)/r.length:0, bA:b.length?sum(b)/b.length:0 };
+  },
+  classTotal(){ return this.list().reduce((s,p)=>s+(p.earned||0),0); },
+
+  draw(force){
+    const st=this.meta.state; if (st!=="play" && st!=="end") return;
+    const t=Date.now(); if (!force && t-this.lastDraw<250) return; this.lastDraw=t;
+    const gm=this.meta.gm||"teams";
+    show($("vTeams"), gm==="teams"); show($("vSolo"), gm==="solo"); show($("vClass"), gm==="class");
+    $("modeTag").textContent=MODE_TAG[gm];
+    const row=(p,i,max,showRank)=>`<div class="mrow${i===0&&showRank?" top1":""}">${showRank?`<span class="rk">${i<3?ART.medal(i):i+1}</span>`:""}<span class="av">${ART.avatar(p.av||"a0","",true)}</span><span class="nm">${esc(p.name)}</span>`+
+      (max!=null?`<span class="bar"><i style="width:${max>0?Math.max(3,Math.round((p.cash||0)/max*100)):3}%"></i></span>`:"")+`<span class="c">${money(gm==="class"?p.earned:p.cash)}</span></div>`;
+    if (gm==="teams"){
+      const s=this.teamStats(), top=l=>l.slice().sort((x,y)=>(y.cash||0)-(x.cash||0)).slice(0,6);
+      $("rAvg").textContent=money(s.rA); $("bAvg").textContent=money(s.bA);
+      $("rSub").textContent=s.r.length+" players · "+money(s.rT)+" in total"; $("bSub").textContent=s.b.length+" players · "+money(s.bT)+" in total";
+      $("rTop").innerHTML=top(s.r).map((p,i)=>row(p,i,null,false)).join(""); $("bTop").innerHTML=top(s.b).map((p,i)=>row(p,i,null,false)).join("");
+    } else if (gm==="solo"){
+      const l=this.list().sort((x,y)=>(y.cash||0)-(x.cash||0)), max=l.length?(l[0].cash||0):0;
+      $("soloList").innerHTML = l.length ? l.slice(0,12).map((p,i)=>row(p,i,max,true)).join("") : `<div class="hint0">No players yet.</div>`;
+    } else {
+      const tot=this.classTotal(), goal=this.meta.goal||1, pc=Math.min(100, tot/goal*100);
+      $("cTot").textContent=money(tot); $("cGoal").textContent="/ "+money(goal); $("cPct").textContent=Math.floor(pc)+"%";
+      $("cBar").style.width=pc+"%"; $("cRun").style.left=Math.max(4,pc)+"%";
+      if (!$("cRun").innerHTML) $("cRun").innerHTML=ART.avatar("a5");
+      const l=this.list().sort((x,y)=>(y.earned||0)-(x.earned||0));
+      $("cTop").innerHTML=l.slice(0,8).map((p,i)=>row(p,i,null,false)).join("");
+      if (st==="play" && tot>=goal && !this.ended && now()>=this.meta.startAt) this.finish("goal");
+    }
+  },
+
+  finish(why){
+    if (this.ended || this.meta.state!=="play") return;
+    this.ended=true;
+    const gm=this.meta.gm||"teams"; let winner="tie";
+    if (gm==="teams"){ const s=this.teamStats(); winner = s.rA>s.bA ? "red" : s.bA>s.rA ? "blue" : "tie"; }
+    else if (gm==="solo"){ const l=this.list().sort((x,y)=>(y.cash||0)-(x.cash||0)); winner = l.length && (!l[1] || (l[0].cash||0)>(l[1].cash||0)) ? l[0].id : "tie"; }
+    else winner = this.classTotal() >= (this.meta.goal||1) ? "class" : "none";
+    this.ref.child("meta").update({ state:"end", winner, why: why==="goal"?"goal":"time", endedAt:now() });
+  },
+
+  render(){
+    const m=this.meta, st=m.state||"lobby";
+    show($("setup"), st==="lobby" && this.view==="setup");
+    show($("lobby"), st==="lobby" && this.view==="lobby");
+    show($("arena"), st!=="lobby");
+    cancelAnimationFrame(this.raf);
+    GB.music.inLobby = (st==="lobby" && this.view==="lobby");              // relaxed music while students join
+    if (GB.music.inLobby) GB.music.lobby(); else if (st==="play") GB.music.lobbyOff(); else GB.music.stop();
+    if (st==="lobby"){ show($("result"),false); this.renderLobby(); return; }
+    show($("newTeams2"), m.gm==="teams");
+    this.draw(true);
+    if (st==="play"){
+      show($("result"),false); show($("stopBtn"),true);
+      const loop=()=>{
+        if (m!==this.meta) return;
+        const t=now();
+        if (t<m.startAt){
+          const n=Math.ceil((m.startAt-t)/1000); show($("hCount"),true);
+          const lab = n>3 ? "Ready?" : String(n);
+          if ($("hCount").firstElementChild.textContent!==lab){ $("hCount").innerHTML="<span>"+lab+"</span>"; if(n<=3) beep(n===1?880:660,.15,"triangle",.25); }
+          $("hCount").firstElementChild.style.fontSize = n>3 ? "130px" : "";
+          $("timer").textContent=fmt(m.endAt-m.startAt);
+        } else {
+          if (!$("hCount").classList.contains("hidden")){ show($("hCount"),false); beep(1175,.35,"triangle",.3); }
+          const left=Math.max(0,m.endAt-t);
+          GB.music.play(GB.music.levelFor(left));
+          $("timer").textContent=fmt(left);
+          const sec=Math.ceil(left/1000); $("timer").classList.toggle("warn",sec<=10);
+          if (sec<=10 && sec!==this.tickSec && sec>0){ this.tickSec=sec; beep(1000,.05,"square",.08); }
+          this.draw();
+          if (left<=0){ this.finish("time"); return; }
+        }
+        this.raf=requestAnimationFrame(loop);
+      };
+      loop();
+    }
+    if (st==="end"){
+      show($("hCount"),false); show($("stopBtn"),false); $("timer").classList.remove("warn");
+      this.showResult();
+    }
+  },
+
+  showResult(){
+    const m=this.meta, gm=m.gm||"teams", w=m.winner, L=this.list();
+    const rows=(l,f,cap)=>l.map((p,i)=>`<div class="row">${ART.medal(i)} <span class="av">${ART.avatar(p.av||"a0","",true)}</span> ${esc(p.name)} <span class="s">${f(p)}</span></div>`).join("")||"<div class='row'>—</div>";
+    const byCash=l=>l.slice().sort((x,y)=>(y.cash||0)-(x.cash||0)), byRight=l=>l.slice().sort((x,y)=>(y.right||0)-(x.right||0));
+    let win="", why="", mascot="", body="";
+    if (gm==="teams"){
+      const s=this.teamStats();
+      win = w==="red"||w==="blue" ? GB.tnWin(w)+"!" : "It's a tie!"; mascot = w==="red"||w==="blue" ? ART.mascot(w,"wm") : "";
+      $("winTxt").className="win "+(w==="red"?"r":w==="blue"?"b":"t");
+      why = "Average per player: "+GB.tn("red")+" "+money(s.rA)+"  ·  "+GB.tn("blue")+" "+money(s.bA);
+      body = `<div class="mvps"><div class="mvp r"><h3>${ART.icon("coin")} ${esc(GB.tn("red"))}: richest</h3><div class="rows">${rows(byCash(s.r).slice(0,3),p=>money(p.cash))}</div></div>
+        <div class="mvp b"><h3>${ART.icon("coin")} ${esc(GB.tn("blue"))}: richest</h3><div class="rows">${rows(byCash(s.b).slice(0,3),p=>money(p.cash))}</div></div></div>`;
+    } else if (gm==="solo"){
+      const l=byCash(L), p=l[0];
+      win = w && w!=="tie" && p ? esc(p.name)+" wins!" : "It's a tie!"; mascot="";
+      $("winTxt").className="win t";
+      why = p ? "Richest monster: "+money(p.cash) : "";
+      const pod=(q,i)=>q?`<div class="pp p${i+1}"><span class="av">${ART.avatar(q.av||"a0")}</span><span class="nm">${esc(q.name)}</span><span class="money">${money(q.cash)}</span><div class="blk">${i+1}</div></div>`:"";
+      body = `<div class="soloRes"><div class="podium">${pod(l[1],1)}${pod(l[0],0)}${pod(l[2],2)}</div>
+        <div class="mvps" style="grid-template-columns:1fr"><div class="mvp y"><h3>${ART.icon("check")} Most right answers</h3><div class="rows">${rows(byRight(L).slice(0,3),q=>q.right||0)}</div></div>
+        <div class="mvp y"><h3>${ART.icon("flame")} Best streak</h3><div class="rows">${rows(L.slice().sort((x,y)=>(y.best||0)-(x.best||0)).slice(0,2),q=>q.best||0)}</div></div></div></div>`;
+    } else {
+      const tot=this.classTotal(), goal=m.goal||1;
+      win = w==="class" ? "Goal reached!" : "So close!"; $("winTxt").className="win "+(w==="class"?"b":"t");
+      why = money(tot)+" of "+money(goal)+(w==="class" && m.why==="goal" ? " · before time ran out!" : "");
+      body = `<div class="mvps"><div class="mvp y"><h3>${ART.icon("coin")} Top earners</h3><div class="rows">${rows(L.slice().sort((x,y)=>(y.earned||0)-(x.earned||0)).slice(0,3),q=>money(q.earned))}</div></div>
+        <div class="mvp y"><h3>${ART.icon("check")} Most right answers</h3><div class="rows">${rows(byRight(L).slice(0,3),q=>q.right||0)}</div></div></div>`;
+    }
+    $("winTxt").innerHTML=win; $("whyTxt").textContent=why; $("winMascot").innerHTML=mascot; $("resBody").innerHTML=body;
+    show($("result"),true);
+    if (this._celebrated!==m.round){ this._celebrated=m.round; if (gm!=="class" || w==="class"){ GB.fanfare(); GB.confetti($("confetti")); } }
+  }
+};
+
+/* ================== PLAYER ================== */
+const Player = {
+  code:null, ref:null, pid:null, team:null, name:"", av:"a0", meta:{}, round:-1, q:null, locked:false, recent:[], timerInt:0, joined:false,
+  cash:0, earned:0, right:0, wrong:0, streak:0, best:0, up:{}, frozenUntil:0, blurUntil:0, shieldUntil:0, rushUntil:0, discUntil:0, tab:"up",
+
+  async start(code){
+    this.code=code; this.ref=GB.db.ref("rooms/"+code);
+    const ok=await GB.join.checkGame(GAME, code); if (!ok) return;
+    show($("player"));
+    if (!ok.exists) $("pErr").textContent="Room "+code+" not found. Check the code on the big screen.";
+    GB.join.setup(this, { game:GAME, ref:this.ref, code, pool:true, extra:{cash:0, earned:0, right:0, wrong:0, best:0}, onEnter:()=>this.enter() });
+    $("pSay").onclick=()=>{ if(this.q) GB.speak(this.q.en); };
+    $("pShopBtn").onclick=()=>this.openShop();
+    $("pBack").onclick=()=>this.closeShop();
+    for (const b of $("pTabs").children) b.onclick=()=>{ this.tab=b.dataset.tab; this.renderShop(); };
+    $("pPickX").onclick=()=>show($("pPick"),false);
+    setInterval(()=>this.tickFx(), 250);
+  },
+
+  showAv(){ $("pAvBtn").innerHTML=ART.avatar(this.av); $("pAvSm").innerHTML=this.joined?ART.avatar(this.av):ART.avatar("a5"); $("pAvBig").innerHTML=ART.avatar(this.av); },
+
+  enter(){
+    if (this.joined) return; this.joined=true;
+    const me=GB.join.presence(this, this.ref);
+    me.on("value",s=>{
+      const v=s.val(); this.meV=v||null;
+      if (!v || !v.name){ if (this.joined){ GB.join.kicked(this, this.ref, me, v); this.closeShop(); this.setBar(); } return; }
+      this.team=v.team||null; this.name=v.name;
+      if (this._restore && this.meta.state==="play"){                  // refreshed mid-game: pick up my coins and upgrades again
+        this._restore=false; this.cash=v.cash||0; this.earned=v.earned||0; this.right=v.right||0; this.wrong=v.wrong||0; this.best=v.best||0; this.up=Object.assign({}, v.up||{});
+      }
+      this.setBar();
+    });
+    this.ref.child("meta").on("value",s=>{ this.meta=s.val()||{}; this.render(); });
+    this.ref.child("hits").on("child_added",s=>this.onHit(s.val()));
+  },
+
+  save(extra){ if (!this.joined) return; this.ref.child("players/"+this.pid).update(Object.assign({ cash:Math.floor(this.cash), earned:Math.floor(this.earned), right:this.right, wrong:this.wrong, best:this.best, up:this.up }, extra||{})); },
+
+  setBar(){
+    const P=$("player"), gm=this.meta.gm||"teams", tm = gm==="teams" ? this.team : null;
+    P.classList.toggle("red",tm==="red"&&this.joined); P.classList.toggle("blue",tm==="blue"&&this.joined);
+    $("pMe").textContent=this.joined ? this.name : "Cozy Monsters";
+    $("pSc").innerHTML=ART.icon("coin")+" "+money(this.cash); show($("pSc"),this.joined);
+    $("pTeamBig").innerHTML=this.team==="blue"?ART.mascot("blue")+`<span data-tn="blue">${GB.esc(GB.tn("blue"))}</span>`:ART.mascot("red")+`<span data-tn="red">${GB.esc(GB.tn("red"))}</span>`;
+    this.showAv();
+    GB.join.waitCard(this);
+    if (gm!=="teams"){ const w=$("pWait"); show($("pTeamBig"),false); w.querySelector("h2").textContent="You're in!"; w.querySelector(".sub").textContent = gm==="class" ? "Class goal: earn coins together!" : "Solo: earn more coins than everyone!"; }
+    this.drawStat();
+  },
+
+  render(){
+    const m=this.meta, st=m.state||"lobby";
+    if (!this.joined) return;
+    show($("pJoin"),false);
+    clearInterval(this.timerInt);
+    if (st==="lobby"){ this.closeShop(); show($("pWait"),true); show($("pPlay"),false); show($("pEnd"),false); show($("pCount"),false); this.setBar(); return; }
+    if (st==="play"){
+      if (m.round!==this.round){
+        this._restore = this.round===-1;                                 // first look at this round: maybe a refresh mid-game
+        this.round=m.round; this.cash=0; this.earned=0; this.right=0; this.wrong=0; this.streak=0; this.best=0; this.up={}; this.recent=[];
+        this.frozenUntil=0; this.blurUntil=0; this.shieldUntil=0; this.rushUntil=0; this.discUntil=0; this.closeShop();
+        if (this._restore && this.meV && (this.meV.cash||this.meV.earned)){ const v=this.meV; this._restore=false; this.cash=v.cash||0; this.earned=v.earned||0; this.right=v.right||0; this.wrong=v.wrong||0; this.best=v.best||0; this.up=Object.assign({},v.up||{}); }
+        this.setBar(); this.nextQ();
+      }
+      show($("pWait"),false); show($("pEnd"),false); show($("pPlay"),true);
+      let lastN=null;
+      const tick=()=>{
+        const t=now();
+        if (t<m.startAt){
+          show($("pCount"),true); const n=Math.ceil((m.startAt-t)/1000);
+          const lab = n>3 ? "go" : String(n);
+          if (lab!==lastN){ lastN=lab; $("pCountN").innerHTML= n>3 ? ART.avatar(this.av) : lab; $("pCountN").style.animation="none"; void $("pCountN").offsetWidth; $("pCountN").style.animation=""; }
+          $("pCountT").textContent = n>3 ? "Get ready!" : "Ready…";
+        } else show($("pCount"),false);
+        const left=Math.max(0,Math.ceil((m.endAt-Math.max(t,m.startAt))/1000));
+        $("pTime").textContent=left; $("pTimeBox").classList.toggle("warn", left<=10 && t>=m.startAt);
+      };
+      tick(); this.timerInt=setInterval(tick,200);
+      return;
+    }
+    if (st==="end"){
+      this.closeShop(); show($("pPick"),false); show($("pFrz"),false); $("pPlay").classList.remove("blurred");
+      show($("pCount"),false); show($("pPlay"),false); show($("pWait"),false); show($("pEnd"),true);
+      const w=m.winner, gm=m.gm||"teams"; let txt="", sub="", col="var(--ink)", happy=false;
+      if (gm==="teams"){ happy = w===this.team; txt = w==="tie" ? "It's a tie!" : happy ? "You win!" : GB.tnWin(w)+"!"; col = w==="red"?"var(--red)":w==="blue"?"var(--blue)":"var(--orange)"; sub = happy ? "Great teamwork!" : w==="tie" ? "What a market!" : "So close! Next time!"; }
+      else if (gm==="solo"){ happy = w===this.pid; txt = happy ? "You win!" : "Time's up!"; col = happy ? "var(--go)" : "var(--orange)"; sub = "Your coins: "+money(this.cash); this.rankLine(); }
+      else { happy = w==="class"; txt = happy ? "Goal reached!" : "So close!"; col = happy ? "var(--go)" : "var(--orange)"; sub = "You earned "+money(this.earned)+" for the class"; }
+      $("pWin").textContent=txt; $("pWin").style.color=col; $("pWinSub").textContent=sub;
+      $("pEndAv").innerHTML= happy ? ART.img("trophy") : ART.avatar(this.av);
+      $("pEndCash").textContent=money(gm==="class"?this.earned:this.cash); $("pEndRight").textContent=this.right;
+      try{ navigator.vibrate && navigator.vibrate(happy?[80,60,80,60,200]:200); }catch(e){}
+    }
+  },
+  // Solo: "You came 3rd of 25"
+  async rankLine(){
+    try{ const all=(await this.ref.child("players").get()).val()||{};
+      const l=Object.entries(all).filter(([id,p])=>p&&p.name).sort((a,b)=>(b[1].cash||0)-(a[1].cash||0)), i=l.findIndex(([id])=>id===this.pid);
+      if (i>=0){ const n=i+1, ord = n%10===1&&n%100!==11?"st":n%10===2&&n%100!==12?"nd":n%10===3&&n%100!==13?"rd":"th"; $("pWinSub").textContent="You came "+n+ord+" of "+l.length+" · "+money(this.cash); }
+    }catch(e){}
+  },
+
+  nextQ(){ GB.renderQuestion(this); },
+
+  toast(txt,bad){ const d=document.createElement("div"); d.className="toast"+(bad?" bad":""); d.innerHTML=txt; document.body.appendChild(d); setTimeout(()=>d.remove(),950); },
+  alert(html,cls){ document.querySelectorAll(".palert").forEach(e=>e.remove()); const d=document.createElement("div"); d.className="palert "+(cls||"n"); d.innerHTML=html; document.body.appendChild(d); setTimeout(()=>d.remove(),2800); },
+
+  answer(k,btn){
+    const t=now();
+    if (this.locked || this.meta.state!=="play" || t<this.meta.startAt || t<this.frozenUntil) return;
+    this.locked=true;
+    if (k===this.q.answer){
+      btn.classList.add("ok");
+      this.streak++; this.best=Math.max(this.best,this.streak); this.right++;
+      const g=perRight(this.up, this.streak-1, t<this.rushUntil);
+      this.cash+=g; this.earned+=g; this.save(); this.setBar();
+      this.toast("+"+money(g)); beep(880,.08,"triangle",.15); beep(1320,.12,"triangle",.12,.07);
+      setTimeout(()=>{ this.locked=false; this.nextQ(); },450);
+    } else {
+      this.streak=0; this.wrong++;
+      const loss=Math.min(this.cash, lossOf(this.up)); this.cash-=loss; this.save(); this.setBar();
+      btn.classList.add("no");
+      for (const b of $("pOpts").children) if(+b.dataset.k===this.q.answer) b.classList.add("ans"); GB.showWhy(this.q);
+      this.toast(loss>0 ? "−"+money(loss) : "Oops!", true); beep(160,.25,"sawtooth",.12);
+      try{ navigator.vibrate && navigator.vibrate(150); }catch(e){}
+      setTimeout(()=>{ this.locked=false; this.nextQ(); },GB.wrongMs(this.q));
+    }
+  },
+
+  // the strip: what the next right answer is worth + running power-ups; the shop button glows when an upgrade is affordable
+  drawStat(){
+    if (!$("pStat")) return;
+    const t=now(), b=[];
+    if (this.shieldUntil>t) b.push(`<span class="badge sh">${ART.icon("shield")} ${Math.ceil((this.shieldUntil-t)/1000)}s</span>`);
+    if (this.rushUntil>t) b.push(`<span class="badge ru">${ART.icon("up")} ×2 ${Math.ceil((this.rushUntil-t)/1000)}s</span>`);
+    if (this.discUntil>t) b.push(`<span class="badge di">${ART.icon("tag")} −25% ${Math.ceil((this.discUntil-t)/1000)}s</span>`);
+    if (this.streak>=2) b.push(`<span class="badge st">${ART.icon("flame")} ${this.streak}</span>`);
+    const html = b.length ? b.join("") : `<span style="font-weight:800;color:var(--sub);font-size:15px">Buy upgrades to earn faster</span>`;
+    if ($("pStat").innerHTML!==html) $("pStat").innerHTML=html;
+    const rate=ART.icon("coin")+" +"+money(perRight(this.up, this.streak, t<this.rushUntil))+" next"; if ($("pRate").innerHTML!==rate) $("pRate").innerHTML=rate;
+    $("pShopBtn").classList.toggle("can", UPS.some(k=>(this.up[k]||0)<9 && this.upPrice(k)<=this.cash));
+  },
+  tickFx(){
+    if (!this.joined || this.meta.state!=="play") return;
+    const t=now();
+    const fr=this.frozenUntil>t; show($("pFrz"), fr); if (fr) $("pFrzN").textContent=Math.ceil((this.frozenUntil-t)/1000);
+    $("pPlay").classList.toggle("blurred", this.blurUntil>t);
+    if (fr && !$("pShop").classList.contains("hidden")) this.closeShop();
+    this.drawStat();
+    if (!$("pShop").classList.contains("hidden")) this.renderShop(true);
+  },
+
+  /* ---- the shop ---- */
+  upPrice(k){ const lv=this.up[k]||0; if (lv>=9) return Infinity; const c=UP[k].cost[lv+1]; return now()<this.discUntil ? Math.ceil(c*.75) : c; },
+  openShop(){ if (now()<this.frozenUntil || this.meta.state!=="play" || now()<this.meta.startAt) return; show($("pShop"),true); this.renderShop(); },
+  closeShop(){ show($("pShop"),false); show($("pPick"),false); },
+  renderShop(soft){
+    $("pShopCash").textContent=money(this.cash);
+    const powersOn=this.meta.powers!==false;
+    show($("pTabs"), powersOn); if (!powersOn) this.tab="up";
+    for (const b of $("pTabs").children) b.classList.toggle("on", b.dataset.tab===this.tab);
+    let html="";
+    if (this.tab==="up"){
+      html = UPS.map(k=>{ const U=UP[k], lv=this.up[k]||0, max=lv>=9, price=this.upPrice(k), base=max?0:U.cost[lv+1];
+        const dots='<div class="dots">'+U.vals.map((v,i)=>`<i class="${i<=lv?"on":""}"></i>`).join("")+'</div>';
+        return `<div class="card"><div class="hd"><span class="ic ${U.c}">${ART.icon(U.icon)}</span><div class="tx"><b>${U.name}</b><small>${U.desc}</small>
+          <div class="now">Lv ${lv+1}: ${U.fmt(U.vals[lv])}${max?"":` → <em>${U.fmt(U.vals[lv+1])}</em>`}</div></div>
+          <button class="buy${max?" max":""}" data-up="${k}" ${max||price>this.cash?"disabled":""}>${max?"MAX":(price<base?`<s>${money(base)}</s>`:"")+money(price)}</button></div>${dots}</div>`; }).join("");
+    } else {
+      const gm=this.meta.gm||"teams";
+      html = Object.keys(PW).filter(k=> gm!=="class" || (!PW[k].atk && k!=="shield")).map(k=>{ const P=PW[k], price=pwPrice(k,this.up);
+        const busy = (k==="shield"&&this.shieldUntil>now()) || (k==="rush"&&this.rushUntil>now()) || (k==="disc"&&this.discUntil>now());
+        return `<div class="card"><div class="hd"><span class="ic k-${k}">${ART.icon(P.icon)}</span><div class="tx"><b>${P.name}</b><small>${P.desc}</small></div>
+          <button class="buy" data-pw="${k}" ${busy||price>this.cash?"disabled":""}>${busy?"On":money(price)}</button></div></div>`; }).join("");
+    }
+    if (soft && $("pList").dataset.k===this.tab+":"+html.length && $("pList").innerHTML===html) return;
+    $("pList").dataset.k=this.tab+":"+html.length; $("pList").innerHTML=html;
+    for (const b of $("pList").querySelectorAll("[data-up]")) b.onclick=()=>this.buyUp(b.dataset.up);
+    for (const b of $("pList").querySelectorAll("[data-pw]")) b.onclick=()=>this.buyPower(b.dataset.pw);
+  },
+  buyUp(k){
+    const price=this.upPrice(k); if (price>this.cash || this.meta.state!=="play") return;
+    this.cash-=price; this.up[k]=(this.up[k]||0)+1; this.save(); this.setBar(); this.renderShop();
+    this.ref.child("fx").push({ k:"buy", what:k, lv:this.up[k]+1, from:this.pid, round:this.meta.round });
+    beep(660,.08,"triangle",.14); beep(990,.12,"triangle",.12,.08); this.toast(UP[k].name.split(" ")[0]+" Lv "+(this.up[k]+1));
+  },
+  async buyPower(k){
+    const P=PW[k], price=pwPrice(k,this.up); if (price>this.cash || this.meta.state!=="play") return;
+    if (!P.atk){
+      this.cash-=price; const t=now();
+      if (k==="shield"){ this.shieldUntil=t+SHIELD_MS; this.save({shieldUntil:this.shieldUntil}); } else this.save();
+      if (k==="rush") this.rushUntil=t+RUSH_MS;
+      if (k==="disc") this.discUntil=t+DISC_MS;
+      this.ref.child("fx").push({ k, from:this.pid, round:this.meta.round });
+      this.setBar(); this.renderShop(); beep(520,.3,"sine",.12,0,900); return;
+    }
+    // attacks: pick who (the other team in Teams mode, anybody else in Solo)
+    let all={}; try{ all=(await this.ref.child("players").get()).val()||{}; }catch(e){}
+    const gm=this.meta.gm||"teams", t=now();
+    const l=Object.entries(all).filter(([id,p])=>p&&p.name&&id!==this.pid&&p.online!==false&&(gm!=="teams"||(p.team&&p.team!==this.team))).sort((a,b)=>(b[1].cash||0)-(a[1].cash||0));
+    $("pPickH").innerHTML=ART.icon(P.icon)+" "+P.name+": who?";
+    $("pPickList").innerHTML = l.length ? l.slice(0,30).map(([id,p])=>`<button data-pid="${id}"><span class="av">${ART.avatar(p.av||"a0","",true)}</span><span class="nm">${esc(p.name)}</span>${(p.shieldUntil||0)>t?ART.icon("shield"):""}<span class="cash">${money(p.cash)}</span></button>`).join("")
+      : `<div class="hint">Nobody to pick yet.</div>`;
+    for (const b of $("pPickList").querySelectorAll("[data-pid]")) b.onclick=()=>{
+      show($("pPick"),false); const pr=pwPrice(k,this.up); if (pr>this.cash || this.meta.state!=="play") return;
+      this.cash-=pr; this.save(); this.setBar(); this.renderShop();
+      this.ref.child("fx").push({ k, from:this.pid, target:b.dataset.pid, round:this.meta.round });
+      beep(400,.25,"sine",.12,0,1200);
+    };
+    show($("pPick"),true);
+  },
+  onHit(h){
+    if (!h || !this.joined || h.round!==this.meta.round || this.meta.state!=="play" || now()-h.at>8000) return;
+    const P=PW[h.k]; if (!P) return;
+    if (h.target===this.pid){
+      if (h.blocked){ this.alert(ART.icon("shield")+" Your shield blocked "+esc(h.fn)+"'s "+P.name+"!","ok"); return; }
+      try{ navigator.vibrate && navigator.vibrate([120,60,120]); }catch(e){}
+      if (h.k==="freeze"){ this.frozenUntil=now()+FREEZE_MS; this.closeShop(); this.alert(ART.icon("snow")+" "+esc(h.fn)+" froze you!","r"); beep(1800,.08,"triangle",.1); }
+      if (h.k==="blur"){ this.blurUntil=now()+BLUR_MS; this.alert(ART.icon("eyeoff")+" "+esc(h.fn)+" blurred your screen!","r"); }
+      if (h.k==="steal"){ const a=Math.min(this.cash, h.amount||0); this.cash-=a; this.save(); this.setBar(); this.alert(ART.icon("magnet")+" "+esc(h.fn)+" stole "+money(a)+" from you!","r"); beep(200,.3,"sawtooth",.12); }
+      this.tickFx(); return;
+    }
+    if (h.from===this.pid){
+      if (h.blocked){ this.alert(ART.icon("shield")+" "+esc(h.tn)+"'s shield blocked your "+P.name+"!","n"); return; }
+      if (h.k==="steal"){ this.cash+=h.amount||0; this.save(); this.setBar(); this.alert(ART.icon("magnet")+" You stole "+money(h.amount)+" from "+esc(h.tn)+"!","ok"); }
+      else this.alert(ART.icon(P.icon)+" "+(h.k==="freeze"?"You froze ":"You blurred ")+esc(h.tn)+"!","ok");
+    }
+  }
+};
+
+boot();
+</script>
+</body>
+</html>

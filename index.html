@@ -156,7 +156,7 @@ footer{text-align:center;font-weight:700;font-size:14px;color:var(--on-bg-sub)}
   <footer>English GameBox · works on any phone browser · students need no app or account</footer>
 </main>
 
-<script src="gb-art.js?v=8ea790e1"></script>
+<script src="gb-art.js?v=834292ea"></script>
 <script>
 "use strict";
 const DB = "https://fun-english-abd9b-default-rtdb.asia-southeast1.firebasedatabase.app";
@@ -175,10 +175,14 @@ const GAMES = [
     chips:[["clock","Duration","5–10 min"],["users","Teams","Red vs Blue"],["heart","Lives","Last team standing"]],
     rules:["Your team has the bomb? Answer 3–6 right together to throw it to the other side.","The other team fights back: each right answer makes you need +1 more.","The fuse is secret. If it blows up in your hands, you lose a life!"],
     cover:"cover-potato" },
-  { id:"crew", name:"Crew Race", icon:"users", tagline:"Random crews of 3–4. The answers are split over your phones: talk it out!", isNew:true,
+  { id:"crew", name:"Crew Race", icon:"users", tagline:"Random crews of 3–4. The answers are split over your phones: talk it out!",
     chips:[["clock","Duration","5–10 min"],["users","Teams","Crews of 3–4"],["flag","Goal","First to the flag"]],
     rules:["The teacher presses Make crews: everyone is put in a random crew of 3–4. Find your crew and sit together.","Every crew member sees the same question, but the right answer is on only ONE phone. Talk, then tap!","Right answer = one step forward. Wrong answer = the whole crew goes 5 steps back. First crew to the flag wins!"],
-    cover:"cover-crew" }
+    cover:"cover-crew" },
+  { id:"market", name:"Monster Market", icon:"store", tagline:"Answer to earn coins. Upgrade your stall. Get rich!", isNew:true,
+    chips:[["clock","Duration","5–10 min"],["users","Modes","3 modes"],["cart","Twist","Shop & power-ups"]],
+    rules:["Right answer = coins. Wrong answer = you lose a few (Insurance helps).","Spend coins in the Shop: Money per Question, Streak Bonus, Multiplier, Insurance. Power-ups: freeze, blur or steal from others, or shield, rush and discount for you.","Three modes: Teams (richest team per player wins), Solo (richest monster wins), Class goal (earn the target together)."],
+    cover:"cover-market" }
 ];
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
