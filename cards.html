@@ -151,7 +151,7 @@ body{background:var(--cream)}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="gb-art.js?v=8ea790e1"></script>
-<script src="gb.js?v=85252191"></script>
+<script src="gb.js?v=a331cfa8"></script>
 <script>
 "use strict";
 const { $, show, esc, store, shuffle, params, SETS, parseWords, speak, voice, primeVoice, db, beep } = GB;
@@ -249,7 +249,8 @@ const Practice = {
   },
 
   // big words shrink until they fit on one line
-  fit(){ for (const el of document.querySelectorAll(".big")){ el.style.fontSize=""; let f=parseFloat(getComputedStyle(el).fontSize); while (el.scrollWidth>el.clientWidth+1 && f>26){ f-=3; el.style.fontSize=f+"px"; } } },
+  fit(){ for (const el of document.querySelectorAll(".big")){ el.style.fontSize=""; let f=parseFloat(getComputedStyle(el).fontSize); while (el.scrollWidth>el.clientWidth+1 && f>26){ f-=3; el.style.fontSize=f+"px"; } }
+    GB.fitWords(document.querySelectorAll(".big"), 26); GB.fitWords(document.querySelectorAll("#opts .opt")); },   // long words (and three-pointer, alley-oop) shrink instead of breaking
 
   answer(k, btn){
     if (this.locked) return; this.locked=true;

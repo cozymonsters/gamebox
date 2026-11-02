@@ -745,6 +745,23 @@ const GB = (() => {
   }
 
   // shared by every game: draw the next question on the phone (Player needs meta, recent, q, answer())
+  // shrink text until no single English word has to break across lines ("sportsmanship" on a phone button became "sportsmans/hip").
+  // Measured with a canvas (a <button> does not report overflowing text); Chinese still wraps normally; hidden elements
+  // (width 0) are skipped, so callers also run it again on the next frame.
+  let fitCtx=null;
+  function fitWords(els, min=14){
+    fitCtx = fitCtx || document.createElement("canvas").getContext("2d");
+    for (const el of els){
+      if (!el || !el.clientWidth) continue;
+      el.style.fontSize="";
+      const words=(el.textContent||"").split(/\s+/).filter(w=>w && /^[\x21-\u024f]+$/.test(w)); if (!words.length) continue;
+      const cs=getComputedStyle(el), avail=el.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight)-2;
+      const widest=f=>{ fitCtx.font=cs.fontStyle+" "+cs.fontWeight+" "+f+"px "+cs.fontFamily; return Math.max(...words.map(w=>fitCtx.measureText(w).width)); };
+      let f=parseFloat(cs.fontSize), guard=0;
+      while (widest(f)>avail && f>min && guard++<60) f-=1;
+      if (f!==parseFloat(cs.fontSize)) el.style.fontSize=f+"px";
+    }
+  }
   function renderQuestion(P){
     const W=P.meta.words||[]; if(W.length<4) return;
     const q=makeQuestion(W, P.meta.mode||"mix", P.recent);
@@ -767,6 +784,8 @@ const GB = (() => {
       $("pOpts").innerHTML = q.opts.map(k=>`<button class="opt" data-k="${k}" data-t="${esc(isEn?W[k][1]:W[k][0])}">${esc(isEn?W[k][1]:W[k][0])}</button>`).join("");
     }
     for (const b of $("pOpts").children) b.onclick=()=>P.answer(+b.dataset.k,b);
+    const fit=()=>{ fitWords($("pOpts").children); if (!q.quiz) fitWords([$("pQ")], 26); };
+    fit(); requestAnimationFrame(fit);                          // the play screen may only be shown after this
   }
   // after a wrong answer: show why (quiz items) and keep it on screen long enough to read
   function showWhy(q){
@@ -808,5 +827,5 @@ const GB = (() => {
 
   return { db, now, $, show, esc, store, rand, pick, shuffle, fmt, params, baseUrl, dirUrl, AVATARS, SETS, parseWords, account, kits, profile,
            tn, tnV, tnWin, tnPos, teamSubs, paintTeams,
-           beep, unlockAudio, fanfare, buzzer, music, speak, voice, primeVoice, confetti, host, join, makeQuestion, renderQuestion, showWhy, wrongMs, noTranslate };
+           beep, unlockAudio, fanfare, buzzer, music, speak, voice, primeVoice, confetti, host, join, makeQuestion, renderQuestion, fitWords, showWhy, wrongMs, noTranslate };
 })();
