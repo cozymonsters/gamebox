@@ -71,15 +71,63 @@
 .gbar .pct{position:absolute;right:20px;top:50%;transform:translateY(-50%);font-family:var(--display);font-weight:600;font-size:22px;color:var(--ink)}
 .cgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .cgrid .mrow{font-size:18px}
+/* teams: 3–6 teams → ranked race rows (2 teams keep the two stalls) */
+.sqlist{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+.sqrow{--tc:var(--red);--tl:var(--red-l);display:grid;grid-template-columns:40px 62px minmax(0,1.15fr) minmax(0,1fr) 150px;align-items:center;gap:14px;background:#fff;border-radius:18px;padding:7px 18px 7px 10px;
+  box-shadow:0 1px 2px rgba(29,29,31,.05),0 6px 14px -8px rgba(29,29,31,.2);will-change:transform}
+.sqrow.top1{background:#fff8e1}
+.sqrow .rk{display:flex;justify-content:center} .sqrow .rk .medal{width:36px;height:36px}
+.sqrow .ma{width:60px;height:60px;border-radius:50%;background:var(--tl);display:grid;place-items:center}
+.sqrow .ma img{height:48px;width:48px;object-fit:contain}
+.sqrow .nm{font-family:var(--display);font-weight:600;font-size:28px;line-height:1.1;color:var(--tc);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sqrow .sub{font-weight:800;font-size:15px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sqrow .bar{height:16px;border-radius:8px;background:var(--line);overflow:hidden}
+.sqrow .bar i{display:block;height:100%;width:3%;border-radius:8px;background:var(--tc);transition:width .6s}
+.sqrow .v{display:flex;flex-direction:column;align-items:flex-end;line-height:1}
+.sqrow .v .money{font-size:40px;color:var(--tc)} .sqrow .v small{font-weight:900;font-size:13px;color:var(--sub);margin-top:3px}
+.sqlist.g3 .sqrow{padding-top:20px;padding-bottom:20px} .sqlist.g4 .sqrow{padding-top:13px;padding-bottom:13px} .sqlist.g3{gap:16px} .sqlist.g3 .sqrow .v .money{font-size:48px}
+.sqlist.g5 .sqrow,.sqlist.g6 .sqrow{padding-top:5px;padding-bottom:5px} .sqlist.g6 .sqrow .ma{width:54px;height:54px} .sqlist.g6 .sqrow .ma img{width:42px;height:42px}
+/* lobby: one column per team (2–3), or a 2×2 / 3×2 grid */
+.lob-teams.sq.g3,.lob-teams.sq.g5,.lob-teams.sq.g6{grid-template-columns:repeat(3,1fr)} .lob-teams.sq.g4{grid-template-columns:1fr 1fr}
+.lob-teams.sq.g4,.lob-teams.sq.g5,.lob-teams.sq.g6{gap:14px}
+.tcol.sq .th{background:var(--tc)} .tcol.sq .names{background:linear-gradient(var(--tl),var(--paper) 60%)}
+.tcol.sq .th .ma{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:58px;height:58px;border-radius:50%;background:var(--paper);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -3px 0 rgba(0,0,0,.08)}
+.tcol.sq .th .ma img{height:46px;width:46px;object-fit:contain}
+.lob-teams.sq.g4 .th,.lob-teams.sq.g5 .th,.lob-teams.sq.g6 .th{min-height:56px;font-size:24px;padding:6px 16px 6px 70px}
+.lob-teams.sq.g4 .th .ma,.lob-teams.sq.g5 .th .ma,.lob-teams.sq.g6 .th .ma{width:46px;height:46px;left:12px} .lob-teams.sq.g4 .th .ma img,.lob-teams.sq.g5 .th .ma img,.lob-teams.sq.g6 .th .ma img{width:36px;height:36px}
+.lob-teams.sq.g4 .names,.lob-teams.sq.g5 .names,.lob-teams.sq.g6 .names{padding:12px 12px 10px;gap:7px}
+/* 5–6 teams: the move / remove buttons show when the mouse is on a name, so five names fit in two lines */
+@media (hover:hover){
+  .lob-teams.sq.g5 .pchip,.lob-teams.sq.g6 .pchip{position:relative}
+  .lob-teams.sq.g5 .pchip button,.lob-teams.sq.g6 .pchip button{display:none}
+  .lob-teams.sq.g5 .pchip:hover button,.lob-teams.sq.g6 .pchip:hover button{display:flex;position:absolute;top:50%;transform:translateY(-50%);box-shadow:0 0 0 2px #fff;background:var(--cream)}
+  .lob-teams.sq.g5 .pchip:hover [data-mv],.lob-teams.sq.g6 .pchip:hover [data-mv]{right:31px} .lob-teams.sq.g5 .pchip:hover [data-x],.lob-teams.sq.g6 .pchip:hover [data-x]{right:5px}
+  .lob-teams.sq.g5 .pchip,.lob-teams.sq.g6 .pchip{padding-right:12px}
+}
+@media (max-width:600px){ .lob-teams.sq[class]{grid-template-columns:1fr} }
+.tlist .tdot{width:12px;height:12px;border-radius:50%;flex:none}
+/* the target list scrolls inside the card, so the title and Cancel stay on screen in a big class */
+#pPick .mcard{max-height:calc(100dvh - 32px);display:flex;flex-direction:column}
+#pPick .mb{flex:1;min-height:0} #pPick .tlist{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:2px 2px 6px}
+.rank .rrow{display:flex;align-items:center;gap:10px;background:#fff;border-radius:12px;padding:3px 12px 3px 6px;font-weight:900;font-size:19px}
+.rank .rrow .medal{width:28px;height:28px;flex:none} .rank .rrow .ma{width:36px;height:36px;border-radius:50%;background:var(--tl);display:grid;place-items:center;flex:none}
+.rank .rrow .ma img{width:28px;height:28px;object-fit:contain} .rank .rrow .nm{flex:1;color:var(--tc);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank .rrow .s{font-family:var(--display);font-weight:600;font-size:20px}
+.rank{display:flex;flex-direction:column;gap:6px;padding:8px 10px 10px}
 /* news feed */
-.feed{flex:1;min-height:0;padding:22px 14px 14px;display:flex;flex-direction:column;gap:8px;overflow:hidden}
-.news{display:flex;align-items:center;gap:8px;background:#fff;border-radius:14px;padding:6px 10px 6px 6px;font-weight:800;font-size:16px;line-height:1.25;animation:gb-pop .35s;border-left:6px solid var(--line-d)}
-.news .av{width:34px;height:34px;flex:none;display:inline-block}
-.news .gi{width:20px;height:20px;flex:none}
-.news.n-atk{border-left-color:var(--red)} .news.n-buy{border-left-color:var(--go)} .news.n-self{border-left-color:var(--lav)} .news.n-blk{border-left-color:var(--teal)}
-.news b{font-weight:900}
-.news .pw{display:inline-flex;align-items:center;gap:3px;border-radius:8px;padding:0 6px;color:#fff;background:var(--ink);font-size:14px}
-.news .pw .gi{width:14px;height:14px}
+.feed{flex:1;min-height:0;padding:22px 14px 14px;display:flex;flex-direction:column;gap:9px;overflow:hidden;
+  -webkit-mask-image:linear-gradient(#000 calc(100% - 120px),transparent calc(100% - 58px));mask-image:linear-gradient(#000 calc(100% - 120px),transparent calc(100% - 58px))}   /* older news fades out above End now */
+/* one piece of news: the monster in a soft colour circle with a small icon badge, then name over what happened */
+.news{--c:var(--go);--tint:#e4f2e9;display:flex;align-items:center;gap:13px;background:#fff;border-radius:16px;padding:8px 12px 8px 8px;flex:none;
+  box-shadow:0 1px 2px rgba(29,29,31,.05),0 6px 14px -8px rgba(29,29,31,.22);animation:gb-pop .35s}
+.news .who{position:relative;flex:none;width:46px;height:46px;border-radius:50%;background:var(--tint);display:grid;place-items:center}
+.news .who .av{width:38px;height:38px;display:block}
+.news .who .gi{position:absolute;right:-5px;bottom:-4px;width:23px;height:23px;padding:4px;border-radius:50%;background:var(--c);color:#fff;box-shadow:0 0 0 2.5px #fff}
+.news .tx{display:flex;flex-direction:column;gap:1px;min-width:0;line-height:1.2}
+.news .tx b{font-weight:900;font-size:16px;color:var(--ink)}
+.news .tx span{font-weight:700;font-size:14px;color:var(--sub)}
+.news .tx em{font-style:normal;font-weight:900;color:var(--c)}
+.news.n-atk{--c:var(--red);--tint:var(--red-l)} .news.n-self{--c:var(--purple);--tint:#ebe7f8} .news.n-blk{--c:#3a9e9e;--tint:#dff2f2}
 .hfoot{position:absolute;right:34px;bottom:30px;z-index:5}
 .hint0{margin:auto;text-align:center;font-weight:800;color:var(--sub);font-size:18px}
 /* result */
@@ -173,7 +221,7 @@
           <div class="tagline">Answer to earn coins. Upgrade your stall. Get rich!</div>
           <div class="chips">
             <div class="chip"><span class="i" data-i="clock"></span><div><small>Duration</small><b>5–10 min</b></div></div>
-            <div class="chip"><span class="i" data-i="users"></span><div><small>Mode</small><b id="chipMode">Red vs Blue</b></div></div>
+            <div class="chip"><span class="i" data-i="users"></span><div><small>Mode</small><b id="chipMode">Teams</b></div></div>
             <div class="chip"><span class="i" data-i="cart"></span><div><small>Twist</small><b>Shop &amp; power-ups</b></div></div>
           </div>
           <div class="act"><button class="go" id="toLobby">Continue <i data-i="play"></i></button></div>
@@ -185,8 +233,8 @@
             <div class="ctl"><select class="sel" id="sSet"></select></div></div>
           <div class="setrow"><span class="emo" data-i="help"></span><div class="txt"><h4>Question Type</h4><p>Show English and pick 中文, or the other way</p></div>
             <div class="ctl"><select class="sel" id="sMode"><option value="mix">Mixed</option><option value="en2zh">English → 中文</option><option value="zh2en">中文 → English</option></select></div></div>
-          <div class="setrow"><span class="emo" data-i="users"></span><div class="txt"><h4>Game Mode</h4><p id="gmDesc">Two teams. The richer team (average per player) wins</p></div>
-            <div class="ctl"><select class="sel" id="sGame"><option value="teams" selected>Teams · Red vs Blue</option><option value="solo">Solo · everyone for themselves</option><option value="class">Class goal · all together</option></select></div></div>
+          <div class="setrow"><span class="emo" data-i="users"></span><div class="txt"><h4>Game Mode</h4><p id="gmDesc">Teams of about 5, made from the class size (2–6 teams). The richest team per player wins</p></div>
+            <div class="ctl"><select class="sel" id="sGame"><option value="teams" selected>Teams · about 5 per team</option><option value="solo">Solo · everyone for themselves</option><option value="class">Class goal · all together</option></select></div></div>
           <div class="setrow" id="goalRow"><span class="emo" data-i="flag"></span><div class="txt"><h4>Class Goal</h4><p>Coins the class must earn together, per player</p></div>
             <div class="ctl"><select class="sel" id="sGoal"><option value="500">Easy · $500 each</option><option value="1500" selected>Normal · $1,500 each</option><option value="4000">Hard · $4,000 each</option></select></div></div>
           <div class="setrow"><span class="emo" data-i="timer"></span><div class="txt"><h4>Time Limit</h4><p>When time runs out, the richest wins</p></div>
@@ -216,6 +264,7 @@
       <div class="tcol red"><div class="th"><span data-art="red"></span><span data-tn="red">Red Team</span> <span class="n" id="rN">0</span></div><div class="names" id="rNames"></div></div>
       <div class="tcol blue"><div class="th"><span data-art="blue"></span><span data-tn="blue">Blue Team</span> <span class="n" id="bN">0</span></div><div class="names" id="bNames"></div></div>
     </div>
+    <div class="lob-teams sq hidden" id="sqTeams"></div>
     <div class="lob-hint" id="startHint">Need at least 2 players.</div>
   </div>
 
@@ -238,6 +287,8 @@
           <div class="avg"><span class="money" id="bAvg">$0</span><span>per player</span></div>
           <div class="rows2" id="bTop"></div></div></div>
       </div>
+      <!-- teams: 3 or more → one ranked race board -->
+      <div class="box hidden" id="vSquads"><div class="awn"><b><i data-i="store"></i> Team race</b></div><div class="inner"><div class="sqlist" id="sqList"></div></div></div>
       <!-- solo -->
       <div class="box hidden" id="vSolo"><div class="awn"><b><i data-i="trophy"></i> Richest monsters</b></div><div class="inner"><div class="lb" id="soloList"></div></div></div>
       <!-- class goal -->
@@ -334,7 +385,7 @@
 <script>
 "use strict";
 const GAME="market";
-const { $, show, esc, store, rand, pick, fmt, beep } = GB;
+const { $, show, esc, store, rand, pick, shuffle, fmt, beep } = GB;
 const now = GB.now;
 
 /* NOTE: never use data-t for anything but the shown text: GB.noTranslate treats a [data-t] whose text differs as a translated page
@@ -363,7 +414,25 @@ const PW = {
 };
 const FREEZE_MS=10000, BLUR_MS=12000, SHIELD_MS=60000, RUSH_MS=30000, DISC_MS=60000, STEAL_PCT=.10;
 const MODE_TAG = { teams:"Teams · Red vs Blue", solo:"Solo · everyone for themselves", class:"Class goal · all together" };
-const MODE_DESC = { teams:"Two teams. The richer team (average per player) wins", solo:"Everyone for themselves. The richest player wins", class:"Everyone works together to reach the class goal" };
+const MODE_DESC = { teams:"Teams of about 5, made from the class size (2–6 teams). The richest team per player wins", solo:"Everyone for themselves. The richest player wins", class:"Everyone works together to reach the class goal" };
+/* ---- Teams mode: 2–6 teams of about 5, depending on how many players are here (8 → 2 teams, 18 → 4, 30 → 6).
+   Red and Blue use the room's team names and mascots; the others get a name from their list when the teams are made.
+   meta/squads = { teamId: name } for the teams of this deal; players/{id}/team = teamId. ---- */
+const SQ = {
+  red:   { hex:"#e0533d", l:"#fbe3dc", art:"red" },
+  blue:  { hex:"#3a78c9", l:"#dfe9f7", art:"blue" },
+  gold:  { hex:"#cc8c0c", l:"#fbefcf", art:"a12", names:["Sunbeams","Goldies","Sparklers","Nuggets","Buzzers","Twinklers"] },
+  green: { hex:"#4c9a68", l:"#e1f1e6", art:"a0",  names:["Sprouts","Pickles","Leapers","Croakers","Jumpers","Hoppers"] },
+  purple:{ hex:"#7d6cc7", l:"#ebe7f8", art:"a20", names:["Wizards","Dreamers","Moonies","Jellies","Twirlers","Grapes"] },
+  pink:  { hex:"#d4537e", l:"#fae2ea", art:"a6",  names:["Blossoms","Cupcakes","Fluffies","Snugglers","Sweeties","Puffballs"] }
+};
+const SQ_IDS = Object.keys(SQ), TEAM_SIZE = 5;
+const sqCount = n => Math.max(2, Math.min(SQ_IDS.length, Math.ceil(n/TEAM_SIZE)));
+const sqIds = m => { const s=(m||{}).squads, ids = s ? SQ_IDS.filter(k=>s[k]) : []; return ids.length>=2 ? ids : ["red","blue"]; };
+const sqName = (id, m) => id==="red"||id==="blue" ? GB.tn(id) : String((((m||{}).squads)||{})[id] || id);
+const sqWin = (id, m) => id==="red"||id==="blue" ? GB.tnWin(id)+"!" : sqName(id,m)+(/s$/i.test(sqName(id,m))?" win!":" wins!");
+const sqArt = (id, cls="") => id==="red"||id==="blue" ? ART.mascot(id, cls) : ART.avatar((SQ[id]||SQ.red).art, cls);
+const sqSizes = (n, G) => { const a=Math.floor(n/G); return n%G ? a+"–"+(a+1) : String(a); };
 const money = n => { n=Math.floor(n||0); return n>=1e7 ? "$"+(n/1e6).toFixed(1).replace(/\.0$/,"")+"M" : "$"+n.toLocaleString("en-US"); };
 const upVal = (lv,k) => UP[k].vals[Math.min(9,lv[k]||0)];
 const perRight = (lv, streak, rush) => Math.round((upVal(lv,"mpq") + upVal(lv,"streak")*Math.min(Math.max(streak,0),STREAK_CAP)) * upVal(lv,"mult") * (rush?2:1));
@@ -389,19 +458,19 @@ const Host = {
     this.ref = GB.db.ref("rooms/"+this.code);
     $("hCode").textContent=this.code; $("hCode2").textContent=this.code;
     GB.host.drawQR(GB.baseUrl+"?r="+this.code, $("qr"));
-    ART.preload(["trophy","team-red","team-blue"]);
+    ART.preload(["trophy","team-red","team-blue", ...SQ_IDS.slice(2).map(k=>"m/"+SQ[k].art)]);
     if (existing && String(existing).replace(/\D/g,"")===this.code) this.view="lobby";
-    const gmUi=()=>{ const g=$("sGame").value; $("gmDesc").textContent=MODE_DESC[g]; show($("goalRow"), g==="class"); $("chipMode").textContent = g==="teams"?"Red vs Blue":g==="solo"?"Solo":"Class goal"; };
+    const gmUi=()=>{ const g=$("sGame").value; $("gmDesc").textContent=MODE_DESC[g]; show($("goalRow"), g==="class"); $("chipMode").textContent = g==="teams"?"Teams":g==="solo"?"Solo":"Class goal"; };
     gmUi();
     $("sGame").addEventListener("change", ()=>{ gmUi(); if ((this.meta.state||"lobby")==="lobby") this.setMode(); });
     $("toLobby").onclick=()=>{ this.view="lobby"; this.setMode(); this.render(); };
     $("toSetup").onclick=()=>{ this.view="setup"; this.render(); };
-    $("startBtn").onclick=()=> this.gm()==="teams" && !this.meta.dealt ? GB.host.pool.deal(this) : this.startRound();
-    $("newTeams").onclick=()=>GB.host.pool.deal(this);
+    $("startBtn").onclick=()=> this.gm()==="teams" && !this.meta.dealt ? this.dealSquads() : this.startRound();
+    $("newTeams").onclick=()=>this.dealSquads();
     $("stopBtn").onclick=()=>this.finish("stop");
     $("againBtn").onclick=()=>this.startRound();
-    $("newTeams2").onclick=()=>{ this.view="lobby"; GB.host.pool.deal(this, {"meta/state":"lobby","meta/winner":null}); };
-    $("lobbyBtn").onclick=()=>{ this.view="lobby"; GB.host.pool.clear(this, {"meta/state":"lobby","meta/winner":null}); };
+    $("newTeams2").onclick=()=>{ this.view="lobby"; this.dealSquads({"meta/state":"lobby","meta/winner":null,"meta/final":null}); };
+    $("lobbyBtn").onclick=()=>{ this.view="lobby"; this.clearSquads({"meta/state":"lobby","meta/winner":null,"meta/final":null}); };
     this.ref.child("meta").on("value",s=>{ this.meta=s.val()||{}; this.render(); });
     this.ref.child("players").on("value",s=>this.onPlayers(s.val()||{}));
     this.ref.child("fx").on("child_added",s=>this.onFx(s));
@@ -411,27 +480,91 @@ const Host = {
   // the lobby tells the phones which mode is coming (their waiting card); leaving Teams puts everyone back into one pool
   setMode(){
     const g=this.gm(), upd={"meta/gm":g};
-    if (g!=="teams" && this.meta.dealt){ GB.host.pool.clear(this, upd); return; }
+    if (g!=="teams" && this.meta.dealt){ this.clearSquads(upd); return; }
     this.ref.update(upd);
   },
 
   onPlayers(p){
     this.players=p;
     const st=this.meta.state||"lobby", g = st==="lobby" ? this.gm() : (this.meta.gm||"teams");
-    if (g==="teams") GB.host.pool.fill(this);                                     // late joiners → the smaller team
+    if (g==="teams") this.fillSquads();                                           // late joiners → the smallest team
     if (st==="lobby") this.renderLobby();
     else this.draw(st!=="play");                                                  // during play the loop redraws 4× a second
   },
 
   renderLobby(){
-    if (this.gm()==="teams"){ GB.host.pool.render(this); return; }
+    if (this.gm()==="teams"){ this.renderSquads(); return; }
+    show($("sqTeams"),false);
     GB.host.pool.render({ players:this.players, ref:this.ref, meta:{} });          // solo / class: just the pool, no teams
     const n=GB.host.pool.online(this.players).length, sb=$("startBtn");
     sb.innerHTML=sb.dataset.go; sb.disabled = n<1;
     $("startHint").textContent = n<1 ? "Waiting for players…" : "Press Open shop when everyone is in.";
   },
 
-  list(){ return Object.entries(this.players).filter(([id,p])=>p&&p.name).map(([id,p])=>Object.assign({id},p)); },
+  list(P){ return Object.entries(P||this.players).filter(([id,p])=>p&&p.name).map(([id,p])=>Object.assign({id},p)); },
+  // the numbers that count: during play the live ones; after the round the ones frozen at the final whistle (meta/final),
+  // so a coin a phone spends or earns a moment too late can't change the result card (big screen and phones show the same)
+  scored(fin){
+    const f = fin || (this.meta.state==="end" && this.meta.final); if (!f) return this.players;
+    const o={}; for (const id in f){ const s=f[id]; o[id]=Object.assign({}, this.players[id]||{}, { name:s.n, av:s.a, team:s.t||null, cash:s.c, earned:s.e, right:s.r, best:s.b }); }
+    return o;
+  },
+  sList(){ return this.list(this.scored()); },
+
+  /* ---- Teams mode: the teacher makes 2–6 teams (about 5 each); late joiners go to the smallest team ---- */
+  squadIds(){ return sqIds(this.meta); },
+  dealSquads(extra){
+    const list=shuffle(GB.host.pool.online(this.players)), G=sqCount(list.length), ids=SQ_IDS.slice(0,G), names={};
+    for (const k of ids) names[k] = k==="red"||k==="blue" ? GB.tn(k) : pick(SQ[k].names);
+    const upd=Object.assign({ "meta/dealt":true, "meta/dealtAt":now(), "meta/squads":names }, extra||{});
+    for (const id in this.players) if (this.players[id] && this.players[id].name) upd["players/"+id+"/team"]=null;
+    const off=rand(G); list.forEach((p,i)=>{ upd["players/"+p.id+"/team"]=ids[(i+off)%G]; });   // even teams; who gets the odd ones is random
+    this._filling={};
+    return this.ref.update(upd);
+  },
+  clearSquads(extra){
+    const upd=Object.assign({ "meta/dealt":null, "meta/dealtAt":null, "meta/squads":null }, extra||{});
+    for (const id in this.players) if (this.players[id] && this.players[id].name) upd["players/"+id+"/team"]=null;
+    this._filling={};
+    return this.ref.update(upd);
+  },
+  fillSquads(){
+    const m=this.meta||{}, st=m.state||"lobby"; if (st==="lobby" && !m.dealt) return;
+    const ids=this.squadIds(), cnt={}, need=[], F=this._filling=this._filling||{}, T=Date.now();     // F: teams just written, until Firebase echoes them back
+    for (const k of ids) cnt[k]=0;
+    for (const id in this.players){ const p=this.players[id]; if (!p||!p.name) continue;
+      const f=F[id] && T-F[id].at<4000 ? F[id].t : null, t=p.team||f;
+      if (t && t in cnt) cnt[t]++; else if (p.online!==false) need.push(id); }
+    if (!need.length) return;
+    const upd={};
+    for (const id of shuffle(need)){ const lo=Math.min(...ids.map(k=>cnt[k])), t=pick(ids.filter(k=>cnt[k]===lo)); cnt[t]++; upd["players/"+id+"/team"]=t; F[id]={t, at:T}; }
+    this.ref.update(upd).catch(()=>{});
+  },
+  renderSquads(){
+    const m=this.meta||{}, sb=$("startBtn"); if (!sb.dataset.go) sb.dataset.go=sb.innerHTML;
+    show($("lobTeams"),false);
+    if (!m.dealt){                                                                   // one pool + "Make teams"
+      show($("sqTeams"),false);
+      GB.host.pool.render({ players:this.players, ref:this.ref, meta:{} });
+      const n=GB.host.pool.online(this.players).length, G=sqCount(n);
+      if (n>=2) $("startHint").textContent="Press Make teams: "+G+" random teams of "+sqSizes(n,G)+".";
+      return;
+    }
+    show($("pool"),false); show($("findHead"),true); show($("sqTeams"),true);
+    const ids=this.squadIds(), by={}; for (const k of ids) by[k]=[];
+    for (const p of this.list().sort((a,b)=>(a.joined||0)-(b.joined||0))) if (by[p.team]) by[p.team].push(p);
+    const most=Math.max(...ids.map(k=>by[k].length)), el=$("sqTeams");
+    el.className="lob-teams sq g"+ids.length+(ids.length>3||most>10?" dense":"")+(most>14?" denser":"");
+    const chip=p=>`<span class="pchip${p.online===false?" off":""}"><span class="av">${ART.avatar(p.av,"",true)}</span>${esc(p.name)}<button data-mv="${p.id}" title="Move to the next team">${ART.icon("swap")}</button><button data-x="${p.id}" title="Remove">${ART.icon("x")}</button></span>`;
+    el.innerHTML=ids.map(k=>`<div class="tcol sq" style="--tc:${SQ[k].hex};--tl:${SQ[k].l}"><div class="th"><span class="ma">${sqArt(k)}</span><span>${esc(sqName(k,m))}</span> <span class="n">${by[k].length}</span></div>
+      <div class="names">${by[k].length ? by[k].map(chip).join("") : `<div class="waiting">Waiting for players…</div>`}</div></div>`).join("");
+    for (const b of el.querySelectorAll("[data-mv]")) b.onclick=()=>{ const p=this.players[b.dataset.mv]; if (!p) return; const i=ids.indexOf(p.team); this.ref.child("players/"+b.dataset.mv+"/team").set(ids[(i+1)%ids.length]); };
+    for (const b of el.querySelectorAll("[data-x]")) b.onclick=()=>this.ref.child("players/"+b.dataset.x).remove();
+    const ok=ids.every(k=>by[k].length);
+    sb.innerHTML=sb.dataset.go; sb.disabled=!ok;
+    const hov = ids.length>4 && matchMedia("(hover:hover)").matches;
+    $("startHint").textContent = !ok ? "Need at least 1 player on each team." : hov ? "Point at a name: the arrows move a player to the next team, X removes." : "Use the arrows to move a player to the next team, or X to remove.";
+  },
 
   async startRound(){
     const words=await GB.host.wordsReady();
@@ -446,8 +579,8 @@ const Host = {
     }
     Object.assign(upd,{ "meta/game":GAME, "meta/state":"play", "meta/round":(this.meta.round||0)+1, "meta/startAt":startAt, "meta/endAt":startAt+dur*1000,
       "meta/words":words, "meta/mode":$("sMode").value, "meta/gm":gm, "meta/powers":$("sPower").value!=="off",
-      "meta/goal": gm==="class" ? n*(+$("sGoal").value) : null, "meta/winner":null, "meta/why":null });
-    if (gm!=="teams") upd["meta/dealt"]=null;
+      "meta/goal": gm==="class" ? n*(+$("sGoal").value) : null, "meta/winner":null, "meta/why":null, "meta/final":null });
+    if (gm!=="teams"){ upd["meta/dealt"]=null; upd["meta/squads"]=null; }
     this.ended=false; this.tickSec=-1; this.view="lobby"; this.news=[]; this.drawNews();
     await this.ref.update(upd);
   },
@@ -457,67 +590,125 @@ const Host = {
     const f=snap.val(); snap.ref.remove();
     if (!f || this.meta.state!=="play" || f.round!==this.meta.round || this.ended) return;
     const from=this.players[f.from]; if (!from || !from.name) return;
-    if (f.k==="buy"){ if (UP[f.what]) this.addNews("buy", from, `bought <b>${UP[f.what].name}</b> Lv ${f.lv}`, UP[f.what].icon); return; }
+    if (f.k==="buy"){ if (UP[f.what] && f.lv>=4) this.addNews("buy", from, `bought <em>${UP[f.what].name} Lv ${f.lv}</em>`, UP[f.what].icon); return; }   // Lv 2–3 buys are too many to show
     if (!PW[f.k]) return;
-    if (!PW[f.k].atk){ this.addNews("self", from, f.k==="shield"?"raised a <b>Shield</b>":f.k==="rush"?"started a <b>Rush</b> (double coins)":"got a <b>Discount</b>", PW[f.k].icon); return; }
+    if (!PW[f.k].atk){ this.addNews("self", from, f.k==="shield"?"raised a <em>Shield</em>":f.k==="rush"?"started a <em>Rush</em> · double coins":"got a <em>Discount</em> · −25%", PW[f.k].icon); return; }
     const to=this.players[f.target]; if (!to || !to.name || f.target===f.from) return;
     if (this.meta.gm==="class") return;                                           // nobody attacks in Class goal
     if (this.meta.gm==="teams" && to.team===from.team) return;                    // only the other team
     const blocked = (to.shieldUntil||0) > now();
     const amount = f.k==="steal" && !blocked ? Math.floor((to.cash||0)*STEAL_PCT) : 0;
     this.ref.child("hits").push({ k:f.k, from:f.from, fn:from.name, fav:from.av||"a0", target:f.target, tn:to.name, tav:to.av||"a0", blocked, amount, round:f.round, at:now() });
-    if (blocked) this.addNews("blk", to, `'s shield blocked ${esc(from.name)}'s <b>${PW[f.k].name}</b>`, "shield", true);
-    else this.addNews("atk", from, f.k==="steal" ? `stole <b>${money(amount)}</b> from ${esc(to.name)}` : f.k==="freeze" ? `froze <b>${esc(to.name)}</b>` : `blurred <b>${esc(to.name)}</b>'s screen`, PW[f.k].icon);
+    if (blocked) this.addNews("blk", to, `<em>Shield</em> blocked ${esc(from.name)}'s ${PW[f.k].name}`, "shield");
+    else this.addNews("atk", from, f.k==="steal" ? `stole <em>${money(amount)}</em> from ${esc(to.name)}` : f.k==="freeze" ? `<em>froze</em> ${esc(to.name)}` : `<em>blurred</em> ${esc(to.name)}'s screen`, PW[f.k].icon);
     beep(f.k==="freeze"?1800:f.k==="steal"?300:500,.15,"triangle",.1);
   },
-  addNews(cls, p, html, icon, poss){
-    this.news.unshift({ cls, html:`<span class="av">${ART.avatar(p.av||"a0","",true)}</span>${ART.icon(icon)}<span><b>${esc(p.name)}</b>${poss?"":" "}${html}</span>` });
+  addNews(cls, p, html, icon){
+    this.news.unshift({ cls, html:`<span class="who"><span class="av">${ART.avatar(p.av||"a0","",true)}</span>${ART.icon(icon)}</span><span class="tx"><b>${esc(p.name)}</b><span>${html}</span></span>` });
     this.news=this.news.slice(0,8); this.drawNews();
   },
   drawNews(){ $("feed").innerHTML = this.news.length ? this.news.map(n=>`<div class="news n-${n.cls}">${n.html}</div>`).join("") : `<div class="hint0">Shopping news shows up here.</div>`; },
 
   // scores for each mode
-  teamStats(){
-    const {r,b}=GB.host.teams(this.players), sum=l=>l.reduce((s,p)=>s+(p.cash||0),0);
-    return { r, b, rT:sum(r), bT:sum(b), rA:r.length?sum(r)/r.length:0, bA:b.length?sum(b)/b.length:0 };
+  // every team of this deal: its players, total cash and average per player (the score)
+  squadStats(P){
+    P=P||this.scored(); const ids=this.squadIds(), by={}; for (const k of ids) by[k]=[];
+    for (const id in P){ const p=P[id]; if (p && p.name && by[p.team]) by[p.team].push(Object.assign({id},p)); }
+    return ids.map(k=>{ const l=by[k], tot=l.reduce((s,p)=>s+(p.cash||0),0); return { id:k, list:l, total:tot, avg:l.length?tot/l.length:0 }; });
   },
-  classTotal(){ return this.list().reduce((s,p)=>s+(p.earned||0),0); },
+  teamStats(P){
+    const S=this.squadStats(P), f=k=>S.find(s=>s.id===k)||{list:[],total:0,avg:0}, R=f("red"), B=f("blue");
+    return { r:R.list, b:B.list, rT:R.total, bT:B.total, rA:R.avg, bA:B.avg };
+  },
+  classTotal(P){ return this.list(P||this.scored()).reduce((s,p)=>s+(p.earned||0),0); },
 
   draw(force){
     const st=this.meta.state; if (st!=="play" && st!=="end") return;
     const t=Date.now(); if (!force && t-this.lastDraw<250) return; this.lastDraw=t;
     const gm=this.meta.gm||"teams";
-    show($("vTeams"), gm==="teams"); show($("vSolo"), gm==="solo"); show($("vClass"), gm==="class");
-    $("modeTag").textContent=MODE_TAG[gm];
-    const row=(p,i,max,showRank)=>`<div class="mrow${i===0&&showRank?" top1":""}">${showRank?`<span class="rk">${i<3?ART.medal(i):i+1}</span>`:""}<span class="av">${ART.avatar(p.av||"a0","",true)}</span><span class="nm">${esc(p.name)}</span>`+
-      (max!=null?`<span class="bar"><i style="width:${max>0?Math.max(3,Math.round((p.cash||0)/max*100)):3}%"></i></span>`:"")+`<span class="c">${money(gm==="class"?p.earned:p.cash)}</span></div>`;
-    if (gm==="teams"){
+    const many = gm==="teams" && this.squadIds().length>2;
+    show($("vTeams"), gm==="teams" && !many); show($("vSquads"), many); show($("vSolo"), gm==="solo"); show($("vClass"), gm==="class");
+    $("modeTag").textContent = many ? "Teams · "+this.squadIds().length+" teams" : MODE_TAG[gm];
+    const opt={ val:p=>gm==="class"?p.earned:p.cash };
+    if (many) this.drawSquads();
+    else if (gm==="teams"){
       const s=this.teamStats(), top=l=>l.slice().sort((x,y)=>(y.cash||0)-(x.cash||0)).slice(0,6);
       $("rAvg").textContent=money(s.rA); $("bAvg").textContent=money(s.bA);
       $("rSub").textContent=s.r.length+" players · "+money(s.rT)+" in total"; $("bSub").textContent=s.b.length+" players · "+money(s.bT)+" in total";
-      $("rTop").innerHTML=top(s.r).map((p,i)=>row(p,i,null,false)).join(""); $("bTop").innerHTML=top(s.b).map((p,i)=>row(p,i,null,false)).join("");
+      this.rows($("rTop"), top(s.r), opt); this.rows($("bTop"), top(s.b), opt);
     } else if (gm==="solo"){
-      const l=this.list().sort((x,y)=>(y.cash||0)-(x.cash||0)), max=l.length?(l[0].cash||0):0;
-      $("soloList").innerHTML = l.length ? l.slice(0,12).map((p,i)=>row(p,i,max,true)).join("") : `<div class="hint0">No players yet.</div>`;
+      const l=this.sList().sort((x,y)=>(y.cash||0)-(x.cash||0)), max=l.length?(l[0].cash||0):0;
+      this.rows($("soloList"), l.slice(0,12), { val:p=>p.cash, rank:true, max });
     } else {
       const tot=this.classTotal(), goal=this.meta.goal||1, pc=Math.min(100, tot/goal*100);
       $("cTot").textContent=money(tot); $("cGoal").textContent="/ "+money(goal); $("cPct").textContent=Math.floor(pc)+"%";
       $("cBar").style.width=pc+"%"; $("cRun").style.left=Math.max(4,pc)+"%";
       if (!$("cRun").innerHTML) $("cRun").innerHTML=ART.avatar("a5");
-      const l=this.list().sort((x,y)=>(y.earned||0)-(x.earned||0));
-      $("cTop").innerHTML=l.slice(0,8).map((p,i)=>row(p,i,null,false)).join("");
+      const l=this.sList().sort((x,y)=>(y.earned||0)-(x.earned||0));
+      this.rows($("cTop"), l.slice(0,8), opt);
       if (st==="play" && tot>=goal && !this.ended && now()>=this.meta.startAt) this.finish("goal");
     }
   },
 
+  // 3–6 teams: one row per team, best average on top; rows slide to their new place when the order changes
+  drawSquads(){
+    const S=this.squadStats(), el=$("sqList"), m=this.meta, lead=Math.max(1, ...S.map(s=>s.avg));
+    el.className="sqlist g"+S.length;
+    const order=S.slice().sort((a,b)=>b.avg-a.avg);
+    const before=new Map([...el.children].map(r=>[r.dataset.id, r.getBoundingClientRect().top]));
+    order.forEach((s,i)=>{
+      let r=el.querySelector(`.sqrow[data-id="${s.id}"]`);
+      if (!r){ const t=document.createElement("div");
+        t.innerHTML=`<div class="sqrow" data-id="${s.id}" style="--tc:${SQ[s.id].hex};--tl:${SQ[s.id].l}"><span class="rk"></span><span class="ma">${sqArt(s.id)}</span>
+          <div><div class="nm"></div><div class="sub"></div></div><div class="bar"><i></i></div><div class="v"><span class="money"></span><small>per player</small></div></div>`;
+        r=t.firstElementChild; }
+      const nm=sqName(s.id,m); if (r.querySelector(".nm").textContent!==nm) r.querySelector(".nm").textContent=nm;
+      const best=s.list.slice().sort((a,b)=>(b.cash||0)-(a.cash||0))[0];
+      const sub=s.list.length+(s.list.length===1?" player":" players")+(best && (best.cash||0)>0 ? " · Top: "+best.name+" "+money(best.cash) : "");
+      if (r.querySelector(".sub").textContent!==sub) r.querySelector(".sub").textContent=sub;
+      const v=money(s.avg); if (r.querySelector(".money").textContent!==v) r.querySelector(".money").textContent=v;
+      r.querySelector(".bar i").style.width=Math.max(3, Math.round(s.avg/lead*100))+"%";
+      const k=r.querySelector(".rk"), want=String(i); if (k.dataset.i!==want){ k.dataset.i=want; k.innerHTML=ART.medal(i); }
+      r.classList.toggle("top1", i===0 && s.avg>0);
+      if (el.children[i]!==r) el.insertBefore(r, el.children[i]||null);
+    });
+    [...el.children].forEach(r=>{ if (!S.some(s=>s.id===r.dataset.id)) r.remove(); });
+    for (const r of el.children){ const b=before.get(r.dataset.id); if (b==null) continue; const d=b-r.getBoundingClientRect().top;
+      if (Math.abs(d)>1){ r.style.transition="none"; r.style.transform=`translateY(${d}px)`; requestAnimationFrame(()=>requestAnimationFrame(()=>{ r.style.transition="transform .5s cubic-bezier(.2,.8,.2,1)"; r.style.transform=""; })); } }
+  },
+
+  // player rows on the big screen: keep each row (and its monster picture) and only move it / change its numbers.
+  // Rebuilding the rows 4 times a second made the pictures blink or stay blank while they decoded.
+  rows(el, list, o){
+    const have=new Map(); for (const r of [...el.children]) if (r.dataset.id) have.set(r.dataset.id, r); else r.remove();
+    if (!list.length){ el.innerHTML=`<div class="hint0">No players yet.</div>`; return; }
+    list.forEach((p,i)=>{
+      let r=have.get(p.id);
+      if (!r){ const t=document.createElement("div");
+        t.innerHTML=`<div class="mrow" data-id="${esc(p.id)}">${o.rank?`<span class="rk"></span>`:""}<span class="av">${ART.avatar(p.av||"a0","",true)}</span><span class="nm">${esc(p.name)}</span>${o.max!=null?`<span class="bar"><i></i></span>`:""}<span class="c"></span></div>`;
+        r=t.firstElementChild; } else have.delete(p.id);
+      const v=money(o.val(p)), c=r.querySelector(".c"); if (c.textContent!==v) c.textContent=v;
+      if (o.rank){ const k=r.querySelector(".rk"), want=String(i); if (k.dataset.i!==want){ k.dataset.i=want; k.innerHTML=i<3?ART.medal(i):String(i+1); } r.classList.toggle("top1", i===0); }
+      if (o.max!=null){ r.querySelector(".bar i").style.width=(o.max>0?Math.max(3,Math.round((p.cash||0)/o.max*100)):3)+"%"; }
+      if (el.children[i]!==r) el.insertBefore(r, el.children[i]||null);
+    });
+    have.forEach(r=>r.remove());
+  },
+
+  // the round ends: freeze everybody's numbers (meta/final) and work out the winner from them.
+  // At time-up the phones stop by themselves; wait a moment so their last answers (sent just before 0:00) are in.
   finish(why){
     if (this.ended || this.meta.state!=="play") return;
     this.ended=true;
-    const gm=this.meta.gm||"teams"; let winner="tie";
-    if (gm==="teams"){ const s=this.teamStats(); winner = s.rA>s.bA ? "red" : s.bA>s.rA ? "blue" : "tie"; }
-    else if (gm==="solo"){ const l=this.list().sort((x,y)=>(y.cash||0)-(x.cash||0)); winner = l.length && (!l[1] || (l[0].cash||0)>(l[1].cash||0)) ? l[0].id : "tie"; }
-    else winner = this.classTotal() >= (this.meta.goal||1) ? "class" : "none";
-    this.ref.child("meta").update({ state:"end", winner, why: why==="goal"?"goal":"time", endedAt:now() });
+    const go=()=>{
+      const fin={}; for (const p of this.list()) fin[p.id]={ n:p.name, a:p.av||"a0", t:p.team||null, c:Math.floor(p.cash||0), e:Math.floor(p.earned||0), r:p.right||0, b:p.best||0 };
+      const P=this.scored(fin), gm=this.meta.gm||"teams"; let winner="tie";
+      if (gm==="teams"){ const S=this.squadStats(P).filter(s=>s.list.length).sort((a,b)=>b.avg-a.avg); winner = S.length && (!S[1] || S[0].avg>S[1].avg) ? S[0].id : "tie"; }
+      else if (gm==="solo"){ const l=this.list(P).sort((x,y)=>(y.cash||0)-(x.cash||0)); winner = l.length && (!l[1] || (l[0].cash||0)>(l[1].cash||0)) ? l[0].id : "tie"; }
+      else winner = this.classTotal(P) >= (this.meta.goal||1) ? "class" : "none";
+      this.ref.child("meta").update({ state:"end", winner, why: why==="goal"?"goal":"time", endedAt:now(), final:fin });
+    };
+    if (why==="time") setTimeout(go, 900); else go();
   },
 
   render(){
@@ -563,11 +754,21 @@ const Host = {
   },
 
   showResult(){
-    const m=this.meta, gm=m.gm||"teams", w=m.winner, L=this.list();
+    const m=this.meta, gm=m.gm||"teams", w=m.winner, L=this.sList();
     const rows=(l,f,cap)=>l.map((p,i)=>`<div class="row">${ART.medal(i)} <span class="av">${ART.avatar(p.av||"a0","",true)}</span> ${esc(p.name)} <span class="s">${f(p)}</span></div>`).join("")||"<div class='row'>—</div>";
     const byCash=l=>l.slice().sort((x,y)=>(y.cash||0)-(x.cash||0)), byRight=l=>l.slice().sort((x,y)=>(y.right||0)-(x.right||0));
     let win="", why="", mascot="", body="";
-    if (gm==="teams"){
+    $("winTxt").style.color="";
+    if (gm==="teams" && this.squadIds().length>2){
+      const S=this.squadStats().sort((a,b)=>b.avg-a.avg), won=SQ[w]?w:null;
+      win = won ? esc(sqWin(won,m)) : "It's a tie!"; mascot = won ? sqArt(won,"wm") : "";
+      $("winTxt").className="win t"; if (won) $("winTxt").style.color=SQ[won].hex;
+      why = "Average per player: "+(S[0] ? money(S[0].avg) : "$0")+" for the top team";
+      const rk=S.map((s,i)=>`<div class="rrow" style="--tc:${SQ[s.id].hex};--tl:${SQ[s.id].l}">${ART.medal(i)}<span class="ma">${sqArt(s.id)}</span><span class="nm">${esc(sqName(s.id,m))}</span><span class="s">${money(s.avg)}</span></div>`).join("");
+      const rich=byCash(L).slice(0,3).map((p,i)=>`<div class="row">${ART.medal(i)} <span class="av">${ART.avatar(p.av||"a0","",true)}</span> <span style="color:${(SQ[p.team]||{}).hex||"inherit"}">${esc(p.name)}</span> <span class="s">${money(p.cash)}</span></div>`).join("")||"<div class='row'>—</div>";
+      body = `<div class="mvps"><div class="mvp y"><h3>${ART.icon("trophy")} Team ranking</h3><div class="rank">${rk}</div></div>
+        <div class="mvp y"><h3>${ART.icon("coin")} Richest monsters</h3><div class="rows">${rich}</div></div></div>`;
+    } else if (gm==="teams"){
       const s=this.teamStats();
       win = w==="red"||w==="blue" ? GB.tnWin(w)+"!" : "It's a tie!"; mascot = w==="red"||w==="blue" ? ART.mascot(w,"wm") : "";
       $("winTxt").className="win "+(w==="red"?"r":w==="blue"?"b":"t");
@@ -638,11 +839,19 @@ const Player = {
   setBar(){
     const P=$("player"), gm=this.meta.gm||"teams", tm = gm==="teams" ? this.team : null;
     P.classList.toggle("red",tm==="red"&&this.joined); P.classList.toggle("blue",tm==="blue"&&this.joined);
+    if (tm && SQ[tm] && this.joined) P.style.setProperty("--tc", SQ[tm].hex); else P.style.removeProperty("--tc");
     $("pMe").textContent=this.joined ? this.name : "Cozy Monsters";
     $("pSc").innerHTML=ART.icon("coin")+" "+money(this.cash); show($("pSc"),this.joined);
-    $("pTeamBig").innerHTML=this.team==="blue"?ART.mascot("blue")+`<span data-tn="blue">${GB.esc(GB.tn("blue"))}</span>`:ART.mascot("red")+`<span data-tn="red">${GB.esc(GB.tn("red"))}</span>`;
+    const t0 = SQ[this.team] ? this.team : "red";
+    $("pTeamBig").innerHTML = sqArt(t0) + (t0==="red"||t0==="blue" ? `<span data-tn="${t0}">${GB.esc(GB.tn(t0))}</span>` : `<span>${GB.esc(sqName(t0,this.meta))}</span>`);
     this.showAv();
     GB.join.waitCard(this);
+    // the shared waiting card only knows Red and Blue: the same "Find your team!" for the other teams
+    if (gm==="teams" && this.meta.dealt && SQ[this.team] && this.team!=="red" && this.team!=="blue"){
+      const w=$("pWait"), msg=w.querySelector(".msg"); w.querySelector("h2").textContent="Find your team!"; show($("pTeamBig"),true);
+      if (msg) msg.textContent="Sit with your team."; w.querySelector(".sub").textContent="The game starts soon. Keep your screen on!";
+      const key=this.team+"@"+(this.meta.dealtAt||""); if ((this.meta.state||"lobby")==="lobby" && this._sqKey && key!==this._sqKey){ try{ navigator.vibrate && navigator.vibrate(60); }catch(e){} } this._sqKey=key;
+    }
     if (gm!=="teams"){ const w=$("pWait"); show($("pTeamBig"),false); w.querySelector("h2").textContent="You're in!"; w.querySelector(".sub").textContent = gm==="class" ? "Class goal: earn coins together!" : "Solo: earn more coins than everyone!"; }
     this.drawStat();
   },
@@ -680,11 +889,12 @@ const Player = {
     if (st==="end"){
       this.closeShop(); show($("pPick"),false); show($("pFrz"),false); $("pPlay").classList.remove("blurred");
       show($("pCount"),false); show($("pPlay"),false); show($("pWait"),false); show($("pEnd"),true);
+      const fin=(m.final||{})[this.pid]; if (fin){ this.cash=fin.c||0; this.earned=fin.e||0; this.right=fin.r||0; this.setBar(); }   // the same numbers as the big screen
       const w=m.winner, gm=m.gm||"teams"; let txt="", sub="", col="var(--ink)", happy=false;
-      if (gm==="teams"){ happy = w===this.team; txt = w==="tie" ? "It's a tie!" : happy ? "You win!" : GB.tnWin(w)+"!"; col = w==="red"?"var(--red)":w==="blue"?"var(--blue)":"var(--orange)"; sub = happy ? "Great teamwork!" : w==="tie" ? "What a market!" : "So close! Next time!"; }
-      else if (gm==="solo"){ happy = w===this.pid; txt = happy ? "You win!" : "Time's up!"; col = happy ? "var(--go)" : "var(--orange)"; sub = "Your coins: "+money(this.cash); this.rankLine(); }
+      if (gm==="teams"){ const won=SQ[w]?w:null; happy = !!won && w===this.team; txt = !won ? "It's a tie!" : happy ? "You win!" : sqWin(won,m); col = won ? SQ[won].hex : "var(--orange)"; sub = happy ? "Great teamwork!" : !won ? "What a market!" : "So close! Next time!"; }
+      else if (gm==="solo"){ happy = w===this.pid; txt = happy ? "You win!" : "Time's up!"; col = happy ? "var(--go)" : "var(--orange)"; sub = "Your coins: "+money(this.cash); }
       else { happy = w==="class"; txt = happy ? "Goal reached!" : "So close!"; col = happy ? "var(--go)" : "var(--orange)"; sub = "You earned "+money(this.earned)+" for the class"; }
-      $("pWin").textContent=txt; $("pWin").style.color=col; $("pWinSub").textContent=sub;
+      $("pWin").textContent=txt; $("pWin").style.color=col; $("pWinSub").textContent=sub; if (gm==="solo") this.rankLine();
       $("pEndAv").innerHTML= happy ? ART.img("trophy") : ART.avatar(this.av);
       $("pEndCash").textContent=money(gm==="class"?this.earned:this.cash); $("pEndRight").textContent=this.right;
       try{ navigator.vibrate && navigator.vibrate(happy?[80,60,80,60,200]:200); }catch(e){}
@@ -692,7 +902,7 @@ const Player = {
   },
   // Solo: "You came 3rd of 25"
   async rankLine(){
-    try{ const all=(await this.ref.child("players").get()).val()||{};
+    try{ const f=this.meta.final, all = f ? Object.fromEntries(Object.entries(f).map(([id,s])=>[id,{name:s.n, cash:s.c}])) : ((await this.ref.child("players").get()).val()||{});
       const l=Object.entries(all).filter(([id,p])=>p&&p.name).sort((a,b)=>(b[1].cash||0)-(a[1].cash||0)), i=l.findIndex(([id])=>id===this.pid);
       if (i>=0){ const n=i+1, ord = n%10===1&&n%100!==11?"st":n%10===2&&n%100!==12?"nd":n%10===3&&n%100!==13?"rd":"th"; $("pWinSub").textContent="You came "+n+ord+" of "+l.length+" · "+money(this.cash); }
     }catch(e){}
@@ -705,7 +915,7 @@ const Player = {
 
   answer(k,btn){
     const t=now();
-    if (this.locked || this.meta.state!=="play" || t<this.meta.startAt || t<this.frozenUntil) return;
+    if (this.locked || !this.open() || t<this.frozenUntil) return;
     this.locked=true;
     if (k===this.q.answer){
       btn.classList.add("ok");
@@ -738,9 +948,12 @@ const Player = {
     const rate=ART.icon("coin")+" +"+money(perRight(this.up, this.streak, t<this.rushUntil))+" next"; if ($("pRate").innerHTML!==rate) $("pRate").innerHTML=rate;
     $("pShopBtn").classList.toggle("can", UPS.some(k=>(this.up[k]||0)<9 && this.upPrice(k)<=this.cash));
   },
+  // the market is open: the round is on and the clock hasn't hit 0:00 (the big screen needs a moment to call time; nothing counts after 0:00)
+  open(){ const m=this.meta, t=now(); return m.state==="play" && t>=m.startAt && t<m.endAt; },
   tickFx(){
     if (!this.joined || this.meta.state!=="play") return;
     const t=now();
+    if (t>=this.meta.endAt){ if (!$("pShop").classList.contains("hidden") || !$("pPick").classList.contains("hidden")) this.closeShop(); show($("pFrz"),false); $("pPlay").classList.remove("blurred"); return; }
     const fr=this.frozenUntil>t; show($("pFrz"), fr); if (fr) $("pFrzN").textContent=Math.ceil((this.frozenUntil-t)/1000);
     $("pPlay").classList.toggle("blurred", this.blurUntil>t);
     if (fr && !$("pShop").classList.contains("hidden")) this.closeShop();
@@ -750,7 +963,7 @@ const Player = {
 
   /* ---- the shop ---- */
   upPrice(k){ const lv=this.up[k]||0; if (lv>=9) return Infinity; const c=UP[k].cost[lv+1]; return now()<this.discUntil ? Math.ceil(c*.75) : c; },
-  openShop(){ if (now()<this.frozenUntil || this.meta.state!=="play" || now()<this.meta.startAt) return; show($("pShop"),true); this.renderShop(); },
+  openShop(){ if (now()<this.frozenUntil || !this.open()) return; show($("pShop"),true); this.renderShop(); },
   closeShop(){ show($("pShop"),false); show($("pPick"),false); },
   renderShop(soft){
     $("pShopCash").textContent=money(this.cash);
@@ -777,13 +990,13 @@ const Player = {
     for (const b of $("pList").querySelectorAll("[data-pw]")) b.onclick=()=>this.buyPower(b.dataset.pw);
   },
   buyUp(k){
-    const price=this.upPrice(k); if (price>this.cash || this.meta.state!=="play") return;
+    const price=this.upPrice(k); if (price>this.cash || !this.open()) return;
     this.cash-=price; this.up[k]=(this.up[k]||0)+1; this.save(); this.setBar(); this.renderShop();
     this.ref.child("fx").push({ k:"buy", what:k, lv:this.up[k]+1, from:this.pid, round:this.meta.round });
     beep(660,.08,"triangle",.14); beep(990,.12,"triangle",.12,.08); this.toast(UP[k].name.split(" ")[0]+" Lv "+(this.up[k]+1));
   },
   async buyPower(k){
-    const P=PW[k], price=pwPrice(k,this.up); if (price>this.cash || this.meta.state!=="play") return;
+    const P=PW[k], price=pwPrice(k,this.up); if (price>this.cash || !this.open()) return;
     if (!P.atk){
       this.cash-=price; const t=now();
       if (k==="shield"){ this.shieldUntil=t+SHIELD_MS; this.save({shieldUntil:this.shieldUntil}); } else this.save();
@@ -797,10 +1010,10 @@ const Player = {
     const gm=this.meta.gm||"teams", t=now();
     const l=Object.entries(all).filter(([id,p])=>p&&p.name&&id!==this.pid&&p.online!==false&&(gm!=="teams"||(p.team&&p.team!==this.team))).sort((a,b)=>(b[1].cash||0)-(a[1].cash||0));
     $("pPickH").innerHTML=ART.icon(P.icon)+" "+P.name+": who?";
-    $("pPickList").innerHTML = l.length ? l.slice(0,30).map(([id,p])=>`<button data-pid="${id}"><span class="av">${ART.avatar(p.av||"a0","",true)}</span><span class="nm">${esc(p.name)}</span>${(p.shieldUntil||0)>t?ART.icon("shield"):""}<span class="cash">${money(p.cash)}</span></button>`).join("")
+    $("pPickList").innerHTML = l.length ? l.slice(0,30).map(([id,p])=>`<button data-pid="${id}"><span class="av">${ART.avatar(p.av||"a0","",true)}</span>${gm==="teams"&&SQ[p.team]?`<i class="tdot" style="background:${SQ[p.team].hex}"></i>`:""}<span class="nm">${esc(p.name)}</span>${(p.shieldUntil||0)>t?ART.icon("shield"):""}<span class="cash">${money(p.cash)}</span></button>`).join("")
       : `<div class="hint">Nobody to pick yet.</div>`;
     for (const b of $("pPickList").querySelectorAll("[data-pid]")) b.onclick=()=>{
-      show($("pPick"),false); const pr=pwPrice(k,this.up); if (pr>this.cash || this.meta.state!=="play") return;
+      show($("pPick"),false); const pr=pwPrice(k,this.up); if (pr>this.cash || !this.open()) return;
       this.cash-=pr; this.save(); this.setBar(); this.renderShop();
       this.ref.child("fx").push({ k, from:this.pid, target:b.dataset.pid, round:this.meta.round });
       beep(400,.25,"sine",.12,0,1200);
